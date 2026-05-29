@@ -3,19 +3,56 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+// Route imports
+const authRoutes = require('./routes/auth');
+const candidateRoutes = require('./routes/candidates');
+const jobRoutes = require('./routes/jobs');
+const aiRoutes = require('./routes/ai');
+
+// Middleware imports
+const errorHandler = require('./middleware/errorHandler');
+const notFound = require('./middleware/notFound');
+
 const app = express();
 
-// Middleware
+// Core middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Test route
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
+// Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'AI Resume Platform API is running' });
+  res.json({ 
+    success: true,
+    message: 'AI Resume Platform API is running',
+    version: '1.0.0'
+  });
 });
 
-// Start server
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/candidates', candidateRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/ai', aiRoutes);
+
+// Error handlers (must be last)
+app.use(notFound);
+app.use(errorHandler);
+
+// MongoDB + Server start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  });
