@@ -24,7 +24,14 @@ export default function Jobs() {
         </div>
         <Button variant="primary" onClick={() => setShowModal(true)}>+ Create Job</Button>
       </div>
-
+{dummyJobs.length === 0 && (
+  <div className="flex flex-col items-center justify-center py-20 text-center">
+    <p className="text-5xl mb-4">💼</p>
+    <h3 className="text-white font-semibold text-lg mb-2">No jobs posted yet</h3>
+    <p className="text-gray-400 text-sm mb-6">Create your first job position to start receiving applications</p>
+    <Button variant="primary" onClick={() => setShowModal(true)}>+ Create First Job</Button>
+  </div>
+)}
       {/* Jobs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {dummyJobs.map((job) => (

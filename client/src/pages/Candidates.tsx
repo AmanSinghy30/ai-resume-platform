@@ -63,7 +63,14 @@ export default function Candidates() {
           <Button variant="primary">+ Upload Resume</Button>
         </div>
       </div>
-
+{dummyCandidates.length === 0 && (
+  <div className="flex flex-col items-center justify-center py-20 text-center">
+    <p className="text-5xl mb-4">📄</p>
+    <h3 className="text-white font-semibold text-lg mb-2">No candidates yet</h3>
+    <p className="text-gray-400 text-sm mb-6">Upload resumes to start screening candidates</p>
+    <Button variant="primary">+ Upload First Resume</Button>
+  </div>
+)}
       {/* Grid View */}
       {view === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
