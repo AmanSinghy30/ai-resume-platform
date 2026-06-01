@@ -11,7 +11,7 @@ export default function Rankings() {
       <Card>
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-5xl mb-4">🏆</p>
-          <h3 className="text-white font-semibold text-lg mb-2">Rankings coming in Week 4</h3>
+          <h3 className="text-white font-semibold text-lg mb-2">Wait till Week 4</h3>
           <p className="text-gray-400 text-sm">AI integration will rank candidates automatically</p>
         </div>
       </Card>

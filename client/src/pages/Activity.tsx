@@ -11,7 +11,7 @@ export default function Activity() {
       <Card>
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <p className="text-5xl mb-4">📋</p>
-          <h3 className="text-white font-semibold text-lg mb-2">Activity logs coming in Week 3</h3>
+          <h3 className="text-white font-semibold text-lg mb-2">Wait till Week 3</h3>
           <p className="text-gray-400 text-sm">Every action will be tracked here automatically</p>
         </div>
       </Card>

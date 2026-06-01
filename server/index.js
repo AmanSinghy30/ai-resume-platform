@@ -32,11 +32,13 @@ app.get('/', (req, res) => {
   });
 });
 
+const { protect } = require('./middleware/auth');
+
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/candidates', candidateRoutes);
-app.use('/api/jobs', jobRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/candidates', protect, candidateRoutes);
+app.use('/api/jobs', protect, jobRoutes);
+app.use('/api/ai', protect, aiRoutes);
 
 // Error handlers (must be last)
 app.use(notFound);
