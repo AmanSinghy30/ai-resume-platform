@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDebounce } from 'use-debounce';
 import Layout from '../components/Layout';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Spinner from '../components/Spinner';
+import SearchBar from '../components/SearchBar';
+import FilterPanel from '../components/FilterPanel';
 import { getCandidates } from '../services/candidateService';
 import toast from 'react-hot-toast';
 
@@ -12,7 +15,6 @@ type Candidate = {
   _id: string;
   name: string;
   email: string;
-  phone: string;
   jobId: { _id: string; title: string } | null;
   aiScore: number | null;
   status: 'new' | 'reviewed' | 'shortlisted' | 'rejected';
@@ -28,44 +30,39 @@ const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> 
   rejected: 'red',
 };
 
-function ScoreText({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-gray-500 text-sm font-medium">Not scored</span>;
-  const color = score >= 80 ? 'text-green-400' : score >= 60 ? 'text-yellow-400' : 'text-red-400';
-  return <span className={`font-bold text-sm ${color}`}>Score: {score}/100</span>;
-}
+const EMPTY_FILTERS = {
+  status: '', jobId: '', minScore: '', maxScore: '', sortBy: '', order: 'desc'
+};
 
 export default function Candidates() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [debouncedSearch] = useDebounce(search, 300);
   const navigate = useNavigate();
 
-  const fetchCandidates = () => {
+  useEffect(() => {
     setLoading(true);
     const params: Record<string, string> = {};
-    if (search) params.search = search;
-    if (statusFilter) params.status = statusFilter;
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (filters.status) params.status = filters.status;
+    if (filters.jobId) params.jobId = filters.jobId;
+    if (filters.minScore) params.minScore = filters.minScore;
+    if (filters.maxScore) params.maxScore = filters.maxScore;
+    if (filters.sortBy) params.sortBy = filters.sortBy;
+    if (filters.order) params.order = filters.order;
 
     getCandidates(params)
       .then(data => setCandidates(data.candidates))
       .catch(() => toast.error('Failed to load candidates'))
       .finally(() => setLoading(false));
-  };
+  }, [debouncedSearch, filters]);
 
-  // Fetch on mount
-  useEffect(() => {
-    fetchCandidates();
-  }, []);
-
-  // Refetch when filters change
-  useEffect(() => {
-    const timeout = setTimeout(fetchCandidates, 300);
-    return () => clearTimeout(timeout);
-  }, [search, statusFilter]);
-
-  if (loading) return <Layout title="Candidates"><Spinner /></Layout>;
+  const hasActiveFilters = search || Object.values(filters).some(
+    (v, i) => v !== '' && i !== 5
+  );
 
   return (
     <Layout title="Candidates">
@@ -74,27 +71,24 @@ export default function Candidates() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-white">All Candidates</h2>
-          <p className="text-sm text-gray-400 mt-1">{candidates.length} total candidates</p>
+          <p className="text-sm text-gray-400 mt-1">
+            {loading ? 'Loading...' : `${candidates.length} candidates found`}
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          {/* View Toggle */}
           <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
             <button
               onClick={() => setView('grid')}
               className={`px-3 py-1.5 rounded text-sm transition-colors ${
                 view === 'grid' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
               }`}
-            >
-              Grid
-            </button>
+            >Grid</button>
             <button
               onClick={() => setView('list')}
               className={`px-3 py-1.5 rounded text-sm transition-colors ${
                 view === 'list' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
               }`}
-            >
-              List
-            </button>
+            >List</button>
           </div>
           <Button variant="primary" onClick={() => navigate('/upload')}>
             + Upload Resume
@@ -104,44 +98,62 @@ export default function Candidates() {
 
       {/* Search + Filter Bar */}
       <div className="flex gap-3 mb-6">
-        <input
+        <SearchBar
           value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search by name..."
-          className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary placeholder-gray-500"
+          onChange={setSearch}
+          placeholder="Search candidates by name..."
         />
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
-        >
-          <option value="">All Statuses</option>
-          <option value="new">New</option>
-          <option value="reviewed">Reviewed</option>
-          <option value="shortlisted">Shortlisted</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        {(search || statusFilter) && (
-          <Button
-            variant="ghost"
-            onClick={() => { setSearch(''); setStatusFilter(''); }}
-          >
-            Clear
-          </Button>
-        )}
+        <FilterPanel
+          filters={filters}
+          onChange={setFilters}
+          onClear={() => setFilters(EMPTY_FILTERS)}
+        />
       </div>
 
+      {/* Active Filter Tags */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {search && (
+            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+              Search: "{search}"
+              <button onClick={() => setSearch('')} className="text-gray-400 hover:text-white ml-1">✕</button>
+            </span>
+          )}
+          {filters.status && (
+            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+              Status: {filters.status}
+              <button onClick={() => setFilters(f => ({ ...f, status: '' }))} className="text-gray-400 hover:text-white ml-1">✕</button>
+            </span>
+          )}
+          {filters.jobId && (
+            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+              Job filtered
+              <button onClick={() => setFilters(f => ({ ...f, jobId: '' }))} className="text-gray-400 hover:text-white ml-1">✕</button>
+            </span>
+          )}
+          {(filters.minScore || filters.maxScore) && (
+            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+              Score: {filters.minScore || '0'}–{filters.maxScore || '100'}
+              <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-gray-400 hover:text-white ml-1">✕</button>
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && <Spinner />}
+
       {/* Empty State */}
-      {candidates.length === 0 && (
+      {!loading && candidates.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-5xl mb-4">📄</p>
           <h3 className="text-white font-semibold text-lg mb-2">No candidates found</h3>
           <p className="text-gray-400 text-sm mb-6">
-            {search || statusFilter
+            {hasActiveFilters
               ? 'Try adjusting your search or filters'
-              : 'Upload resumes to start screening candidates'}
+              : 'Upload resumes to start screening'}
           </p>
-          {!search && !statusFilter && (
+          {!hasActiveFilters && (
             <Button variant="primary" onClick={() => navigate('/upload')}>
               + Upload First Resume
             </Button>
@@ -150,9 +162,9 @@ export default function Candidates() {
       )}
 
       {/* Grid View */}
-      {view === 'grid' && candidates.length > 0 && (
+      {!loading && view === 'grid' && candidates.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {candidates.map((c) => (
+          {candidates.map(c => (
             <Card key={c._id} className="hover:border-gray-500 transition-colors cursor-pointer">
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -161,31 +173,31 @@ export default function Candidates() {
                 </div>
                 <Badge label={c.status} color={statusColor[c.status]} />
               </div>
-
               <p className="text-gray-300 text-sm mb-3">
-                💼 {c.jobId?.title || 'No job assigned'} • {c.experience} yrs
+                💼 {c.jobId?.title || 'No job'} • {c.experience} yrs
               </p>
-
               <div className="flex flex-wrap gap-1 mb-4">
                 {c.skills.length > 0
-                  ? c.skills.slice(0, 4).map(skill => (
-                      <span key={skill} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                        {skill}
-                      </span>
+                  ? c.skills.slice(0, 4).map(s => (
+                      <span key={s} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">{s}</span>
                     ))
-                  : <span className="text-xs text-gray-500">No skills extracted yet</span>
+                  : <span className="text-xs text-gray-500">No skills yet</span>
                 }
               </div>
-
               <div className="flex items-center justify-between">
-                <ScoreText score={c.aiScore} />
+                <span className={`font-bold text-sm ${
+                  c.aiScore === null ? 'text-gray-500'
+                  : c.aiScore >= 80 ? 'text-green-400'
+                  : c.aiScore >= 60 ? 'text-yellow-400'
+                  : 'text-red-400'
+                }`}>
+                  {c.aiScore !== null ? `${c.aiScore}/100` : 'Not scored'}
+                </span>
                 <Button
                   variant="ghost"
                   className="text-xs py-1 px-3"
                   onClick={() => navigate(`/candidates/${c._id}`)}
-                >
-                  View
-                </Button>
+                >View</Button>
               </div>
             </Card>
           ))}
@@ -193,9 +205,9 @@ export default function Candidates() {
       )}
 
       {/* List View */}
-      {view === 'list' && candidates.length > 0 && (
+      {!loading && view === 'list' && candidates.length > 0 && (
         <div className="flex flex-col gap-3">
-          {candidates.map((c) => (
+          {candidates.map(c => (
             <Card key={c._id} className="hover:border-gray-500 transition-colors">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -204,18 +216,13 @@ export default function Candidates() {
                   </div>
                   <div>
                     <h3 className="text-white font-medium">{c.name}</h3>
-                    <p className="text-gray-400 text-xs">
-                      {c.email} • {c.jobId?.title || 'No job assigned'}
-                    </p>
+                    <p className="text-gray-400 text-xs">{c.email} • {c.jobId?.title || 'No job'}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-4">
-                  <div className="hidden md:flex gap-1 flex-wrap max-w-xs">
-                    {c.skills.slice(0, 3).map(skill => (
-                      <span key={skill} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
-                        {skill}
-                      </span>
+                  <div className="hidden md:flex gap-1">
+                    {c.skills.slice(0, 3).map(s => (
+                      <span key={s} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">{s}</span>
                     ))}
                   </div>
                   <Badge label={c.status} color={statusColor[c.status]} />
@@ -231,9 +238,7 @@ export default function Candidates() {
                     variant="ghost"
                     className="text-xs py-1 px-3"
                     onClick={() => navigate(`/candidates/${c._id}`)}
-                  >
-                    View
-                  </Button>
+                  >View</Button>
                 </div>
               </div>
             </Card>

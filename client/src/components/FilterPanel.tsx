@@ -1,0 +1,155 @@
+import { useState, useEffect } from 'react';
+import { getJobs } from '../services/jobService';
+
+type Filters = {
+  status: string;
+  jobId: string;
+  minScore: string;
+  maxScore: string;
+  sortBy: string;
+  order: string;
+};
+
+type FilterPanelProps = {
+  filters: Filters;
+  onChange: (filters: Filters) => void;
+  onClear: () => void;
+};
+
+export default function FilterPanel({ filters, onChange, onClear }: FilterPanelProps) {
+  const [jobs, setJobs] = useState<{ _id: string; title: string }[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    getJobs().then(d => setJobs(d.jobs)).catch(() => {});
+  }, []);
+
+  const update = (key: keyof Filters, value: string) => {
+    onChange({ ...filters, [key]: value });
+  };
+
+  const hasFilters = Object.values(filters).some(v => v !== '');
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm transition-colors ${
+          hasFilters
+            ? 'border-primary bg-primary/10 text-primary'
+            : 'border-gray-700 bg-gray-800 text-gray-400 hover:text-white'
+        }`}
+      >
+        <span>⚙️</span>
+        Filters
+        {hasFilters && (
+          <span className="bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {Object.values(filters).filter(v => v !== '').length}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-12 z-20 bg-gray-800 border border-gray-700 rounded-xl p-5 w-72 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white font-semibold text-sm">Filter Candidates</h3>
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-white">✕</button>
+          </div>
+
+          <div className="flex flex-col gap-4">
+
+            {/* Status */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Status</label>
+              <select
+                value={filters.status}
+                onChange={e => update('status', e.target.value)}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">All Statuses</option>
+                <option value="new">New</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="shortlisted">Shortlisted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            {/* Job */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Job Position</label>
+              <select
+                value={filters.jobId}
+                onChange={e => update('jobId', e.target.value)}
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">All Jobs</option>
+                {jobs.map(j => (
+                  <option key={j._id} value={j._id}>{j.title}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Score Range */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Score Range</label>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="number"
+                  value={filters.minScore}
+                  onChange={e => update('minScore', e.target.value)}
+                  placeholder="Min"
+                  min="0" max="100"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                />
+                <span className="text-gray-500 text-sm">–</span>
+                <input
+                  type="number"
+                  value={filters.maxScore}
+                  onChange={e => update('maxScore', e.target.value)}
+                  placeholder="Max"
+                  min="0" max="100"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+
+            {/* Sort */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Sort By</label>
+              <div className="flex gap-2">
+                <select
+                  value={filters.sortBy}
+                  onChange={e => update('sortBy', e.target.value)}
+                  className="flex-1 bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="">Date Added</option>
+                  <option value="aiScore">AI Score</option>
+                  <option value="name">Name</option>
+                  <option value="experience">Experience</option>
+                </select>
+                <select
+                  value={filters.order}
+                  onChange={e => update('order', e.target.value)}
+                  className="w-24 bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value="desc">Desc</option>
+                  <option value="asc">Asc</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Clear */}
+            {hasFilters && (
+              <button
+                onClick={() => { onClear(); setOpen(false); }}
+                className="text-sm text-red-400 hover:text-red-300 text-center mt-1"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
