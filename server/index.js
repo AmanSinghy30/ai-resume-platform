@@ -33,12 +33,14 @@ app.get('/', (req, res) => {
 });
 
 const { protect } = require('./middleware/auth');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/candidates', protect, candidateRoutes);
 app.use('/api/jobs', protect, jobRoutes);
 app.use('/api/ai', protect, aiRoutes);
+app.use('/api/dashboard', protect, dashboardRoutes);
 
 // Error handlers (must be last)
 app.use(notFound);

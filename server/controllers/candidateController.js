@@ -1,7 +1,18 @@
 const Candidate = require('../models/Candidate');
 const Job = require('../models/Job');
-const { validationResult } = require('express-validator');
+const ActivityLog = require('../models/ActivityLog');
 const fs = require('fs');
+const { extractTextFromPDF } = require('../utils/pdfParser');
+const { extractSkills, extractExperience, extractEducation } = require('../utils/skillExtractor');
+
+// Helper to log activity
+const log = async (action, userId, candidateId = null, jobId = null, description = '') => {
+  try {
+    await ActivityLog.create({ action, performedBy: userId, candidateId, jobId, description });
+  } catch (err) {
+    console.error('Activity log failed:', err.message);
+  }
+};
 
 // @route POST /api/candidates/upload
 const uploadResume = async (req, res) => {
@@ -13,12 +24,10 @@ const uploadResume = async (req, res) => {
     const { name, email, phone, jobId } = req.body;
 
     if (!name || !email) {
-      // Delete uploaded file if validation fails
       fs.unlinkSync(req.file.path);
       return res.status(400).json({ success: false, message: 'Name and email are required' });
     }
 
-    // Check if job exists (if jobId provided)
     if (jobId) {
       const job = await Job.findById(jobId);
       if (!job) {
@@ -28,29 +37,40 @@ const uploadResume = async (req, res) => {
     }
 
     const candidate = await Candidate.create({
-      name,
-      email,
-      phone: phone || '',
-      resumeUrl: req.file.path,
-      jobId: jobId || null,
-      status: 'new',
-    });
+  name,
+  email,
+  phone: phone || '',
+  resumeUrl: req.file.path,
+  jobId: jobId || null,
+  status: 'new',
+   });
 
-    // Add candidate to job's candidates array
+   // Auto-parse PDF text
+const parsed = await extractTextFromPDF(req.file.path);
+if (parsed.success && parsed.text) {
+  candidate.rawText = parsed.text;
+
+  // Auto-extract data from text
+  candidate.skills = extractSkills(parsed.text);
+  candidate.experience = extractExperience(parsed.text);
+  candidate.education = extractEducation(parsed.text);
+
+  await candidate.save();
+  console.log(`✅ Extracted — Skills: ${candidate.skills.length}, Experience: ${candidate.experience} yrs`);
+} else {
+  console.warn(`⚠️ PDF parsing failed for ${name}`);
+}
+
     if (jobId) {
-      await Job.findByIdAndUpdate(jobId, {
-        $push: { candidates: candidate._id }
-      });
+      await Job.findByIdAndUpdate(jobId, { $push: { candidates: candidate._id } });
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Resume uploaded successfully',
-      candidate,
-    });
+    await log('resume_uploaded', req.user.id, candidate._id, jobId || null,
+      `Resume uploaded for ${name}`);
+
+    res.status(201).json({ success: true, message: 'Resume uploaded successfully', candidate });
   } catch (err) {
-    // Clean up file if DB save fails
-    if (req.file) fs.unlinkSync(req.file.path);
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -58,12 +78,17 @@ const uploadResume = async (req, res) => {
 // @route GET /api/candidates
 const getCandidates = async (req, res) => {
   try {
-    const { status, jobId, search, sortBy, order } = req.query;
+    const { status, jobId, search, sortBy, order, minScore, maxScore } = req.query;
     const query = {};
 
     if (status) query.status = status;
     if (jobId) query.jobId = jobId;
     if (search) query.name = { $regex: search, $options: 'i' };
+    if (minScore || maxScore) {
+      query.aiScore = {};
+      if (minScore) query.aiScore.$gte = Number(minScore);
+      if (maxScore) query.aiScore.$lte = Number(maxScore);
+    }
 
     const sort = {};
     sort[sortBy || 'createdAt'] = order === 'asc' ? 1 : -1;
@@ -81,7 +106,8 @@ const getCandidates = async (req, res) => {
 // @route GET /api/candidates/:id
 const getCandidateById = async (req, res) => {
   try {
-    const candidate = await Candidate.findById(req.params.id).populate('jobId', 'title description');
+    const candidate = await Candidate.findById(req.params.id)
+      .populate('jobId', 'title description requiredSkills');
     if (!candidate) {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
     }
@@ -110,6 +136,17 @@ const updateCandidateStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
     }
 
+    const actionMap = {
+      shortlisted: 'candidate_shortlisted',
+      rejected: 'candidate_rejected',
+      reviewed: 'candidate_reviewed',
+    };
+
+    if (actionMap[status]) {
+      await log(actionMap[status], req.user.id, candidate._id, candidate.jobId,
+        `${candidate.name} marked as ${status}`);
+    }
+
     res.json({ success: true, candidate });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -124,13 +161,58 @@ const deleteCandidate = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
     }
 
-    // Delete resume file from disk
     if (candidate.resumeUrl && fs.existsSync(candidate.resumeUrl)) {
       fs.unlinkSync(candidate.resumeUrl);
     }
 
+    await log('candidate_deleted', req.user.id, candidate._id, candidate.jobId,
+      `${candidate.name} deleted`);
+
     await candidate.deleteOne();
-    res.json({ success: true, message: 'Candidate deleted' });
+    res.json({ success: true, message: 'Candidate deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @route POST /api/candidates/bulk-status
+const bulkUpdateStatus = async (req, res) => {
+  try {
+    const { candidateIds, status } = req.body;
+    const validStatuses = ['new', 'reviewed', 'shortlisted', 'rejected'];
+
+    if (!candidateIds || !Array.isArray(candidateIds) || candidateIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'candidateIds array required' });
+    }
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
+    await Candidate.updateMany(
+      { _id: { $in: candidateIds } },
+      { status }
+    );
+
+    res.json({ success: true, message: `${candidateIds.length} candidates updated to ${status}` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @route GET /api/candidates/stats/summary
+const getCandidateStats = async (req, res) => {
+  try {
+    const total = await Candidate.countDocuments();
+    const shortlisted = await Candidate.countDocuments({ status: 'shortlisted' });
+    const pending = await Candidate.countDocuments({ status: 'new' });
+    const rejected = await Candidate.countDocuments({ status: 'rejected' });
+    const reviewed = await Candidate.countDocuments({ status: 'reviewed' });
+    const totalJobs = await Job.countDocuments();
+
+    res.json({
+      success: true,
+      stats: { total, shortlisted, pending, rejected, reviewed, totalJobs }
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -142,4 +224,6 @@ module.exports = {
   getCandidateById,
   updateCandidateStatus,
   deleteCandidate,
+  bulkUpdateStatus,
+  getCandidateStats,
 };

@@ -5,6 +5,8 @@ import Button from '../components/Button';
 import { uploadResume } from '../services/candidateService';
 import { getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
+import { useFormValidation } from '../hooks/useFormValidation';
+import FormError from '../components/FormError';
 
 type Job = { _id: string; title: string };
 
@@ -19,6 +21,13 @@ export default function UploadResume() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  // ✅ Fix 1: Add useFormValidation hook
+  const { errors, validate, clearError } = useFormValidation({
+    name:  { required: true, minLength: 2 },
+    email: { required: true, isEmail: true },
+    phone: { isPhone: true },
+  });
 
   useEffect(() => {
     getJobs().then(data => setJobs(data.jobs)).catch(() => {});
@@ -43,9 +52,17 @@ export default function UploadResume() {
     if (dropped) handleFile(dropped);
   };
 
+  // ✅ Fix 2: Single clean handleSubmit - no duplicates, no orphaned code
   const handleSubmit = async () => {
-    if (!name || !email) { toast.error('Name and email are required'); return; }
-    if (!file) { toast.error('Please select a PDF resume'); return; }
+    const isValid = validate({ name, email, phone });
+    if (!isValid) { 
+      toast.error('Please fix the form errors'); 
+      return; 
+    }
+    if (!file) { 
+      toast.error('Please select a PDF resume'); 
+      return; 
+    }
 
     const formData = new FormData();
     formData.append('name', name);
@@ -60,7 +77,12 @@ export default function UploadResume() {
       toast.success('Resume uploaded successfully!');
       navigate('/candidates');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Upload failed');
+      const serverErrors = err.response?.data?.errors;
+      if (serverErrors) {
+        serverErrors.forEach((e: any) => toast.error(e.msg));
+      } else {
+        toast.error(err.response?.data?.message || 'Upload failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -78,24 +100,29 @@ export default function UploadResume() {
 
           {/* Name + Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* ✅ Fix 3: FormError is BELOW input, not inside it */}
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Full Name *</label>
               <input
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={e => { setName(e.target.value); clearError('name'); }}
                 placeholder="Candidate name"
                 className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
               />
+              <FormError message={errors.name} /> {/* ✅ Correct position */}
             </div>
+
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Email *</label>
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => { setEmail(e.target.value); clearError('email'); }} // ✅ Fix 4: Added clearError
                 placeholder="candidate@example.com"
                 className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
               />
+              <FormError message={errors.email} /> {/* ✅ Added */}
             </div>
           </div>
 
@@ -105,11 +132,13 @@ export default function UploadResume() {
               <label className="text-sm text-gray-400 mb-1 block">Phone</label>
               <input
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={e => { setPhone(e.target.value); clearError('phone'); }} // ✅ Fix 5: Added clearError
                 placeholder="Phone number"
                 className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
               />
+              <FormError message={errors.phone} /> {/* ✅ Added */}
             </div>
+
             <div>
               <label className="text-sm text-gray-400 mb-1 block">Job Position</label>
               <select
@@ -148,7 +177,9 @@ export default function UploadResume() {
                 <div>
                   <p className="text-2xl mb-2">📄</p>
                   <p className="text-white font-medium">{file.name}</p>
-                  <p className="text-gray-400 text-sm mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
                   <p className="text-primary text-xs mt-2">Click to change file</p>
                 </div>
               ) : (
@@ -164,7 +195,11 @@ export default function UploadResume() {
 
           {/* Submit */}
           <div className="flex gap-3">
-            <Button variant="ghost" onClick={() => navigate('/candidates')} className="flex-1">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/candidates')} 
+              className="flex-1"
+            >
               Cancel
             </Button>
             <Button
@@ -176,6 +211,7 @@ export default function UploadResume() {
               {loading ? 'Uploading...' : 'Upload Resume'}
             </Button>
           </div>
+
         </div>
       </div>
     </Layout>

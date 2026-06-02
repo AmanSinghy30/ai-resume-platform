@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "express-validator": "^7.3.2",
     "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
