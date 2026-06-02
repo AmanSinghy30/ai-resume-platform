@@ -6,7 +6,7 @@ AI Resume Screening Platform is a full-stack web application that helps recruite
 
 The platform automates resume processing by extracting candidate details such as skills, experience, and education from uploaded PDF resumes.
 
-**Current Status:** Development In Progress (Day 17 / 35)
+**Current Status:** Development In Progress (Day 09 / 15)
 
 ---
 
