@@ -1,2 +1,170 @@
-# ai-resume-platform
-AI resume screening and candidate shortlisting help organizations automate recruitment by analyzing resumes, matching candidates with job requirements, and ranking applicants efficiently.  It improves hiring speed, reduces manual effort, and helps recruiters manage large numbers of applications. 
+# AI Resume Screening Platform
+
+## Overview
+
+AI Resume Screening Platform is a full-stack web application that helps recruiters manage job applications, upload resumes, extract candidate information, and streamline the hiring process.
+
+The platform automates resume processing by extracting candidate details such as skills, experience, and education from uploaded PDF resumes.
+
+**Current Status:** Development In Progress (Day 17 / 35)
+
+---
+
+## Features Implemented
+
+### Authentication
+
+* Recruiter Registration
+* Recruiter Login
+* JWT Authentication
+* Protected Routes
+
+### Resume Management
+
+* PDF Resume Upload
+* Resume Storage
+* Candidate Profile Creation
+* Candidate CRUD Operations
+
+### Resume Parsing
+
+* Automatic PDF Text Extraction
+* Skills Extraction
+* Experience Extraction
+
+### Dashboard
+
+* Real-time Candidate Statistics
+* Recent Candidates Display
+* Activity Tracking
+
+### Validation
+
+* Frontend Form Validation
+* Backend Validation
+* Error Handling
+* Toast Notifications
+
+---
+
+## Tech Stack
+
+### Frontend
+
+* React.js
+* TypeScript
+* Tailwind CSS
+* React Router
+* Axios
+
+### Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+
+### Authentication
+
+* JWT
+* bcryptjs
+
+### File Processing
+
+* Multer
+* pdf-parse
+
+---
+
+## Project Structure
+
+```text
+ai-resume-platform/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── context/
+│   │   └── utils/
+│
+├── server/
+│   ├── controllers/
+│   ├── routes/
+│   ├── models/
+│   ├── middleware/
+│   └── utils/
+│
+└── README.md
+```
+
+---
+
+## Setup Instructions
+
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd ai-resume-platform
+```
+
+### Frontend Setup
+
+```bash
+cd client
+npm install
+npm start
+```
+
+### Backend Setup
+
+```bash
+cd server
+npm install
+npm run dev
+```
+
+### Environment Variables
+
+Create a `.env` file inside the server folder:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+```
+
+---
+
+## Current Progress
+
+* [x] Project Setup
+* [x] UI Components
+* [x] Dashboard UI
+* [x] Authentication System
+* [x] Resume Upload System
+* [x] Candidate CRUD APIs
+* [x] PDF Parsing
+* [x] Skill Extraction
+* [x] Experience Extraction
+* [x] Dashboard Integration
+
+### Upcoming Features
+
+* AI Resume Analysis
+* Candidate Scoring
+* Job Matching
+* Candidate Ranking
+* Automated Shortlisting
+* Deployment
+
+---
+
+## Author
+
+Aman Kumar Singh
+
+## License
+
+This project is being developed for learning and portfolio purposes.
