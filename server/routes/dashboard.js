@@ -6,22 +6,36 @@ const ActivityLog = require('../models/ActivityLog');
 
 router.get('/stats', async (req, res) => {
   try {
-    const [total, shortlisted, pending, rejected, totalJobs, recentCandidates, recentActivity] =
-      await Promise.all([
-        Candidate.countDocuments(),
-        Candidate.countDocuments({ status: 'shortlisted' }),
-        Candidate.countDocuments({ status: 'new' }),
-        Candidate.countDocuments({ status: 'rejected' }),
-        Job.countDocuments(),
-        Candidate.find().sort({ createdAt: -1 }).limit(5).populate('jobId', 'title'),
-        ActivityLog.find().sort({ createdAt: -1 }).limit(10)
-          .populate('candidateId', 'name')
-          .populate('performedBy', 'name'),
-      ]);
+    const [
+      total,
+      shortlisted,
+      pending,
+      rejected,
+      reviewed,
+      totalJobs,
+      recentCandidates,
+      recentActivity,
+    ] = await Promise.all([
+      Candidate.countDocuments(),
+      Candidate.countDocuments({ status: 'shortlisted' }),
+      Candidate.countDocuments({ status: 'new' }),
+      Candidate.countDocuments({ status: 'rejected' }),
+      Candidate.countDocuments({ status: 'reviewed' }),
+      Job.countDocuments(),
+      Candidate.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('jobId', 'title'),
+      ActivityLog.find()
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate('candidateId', 'name')
+        .populate('performedBy', 'name'),
+    ]);
 
     res.json({
       success: true,
-      stats: { total, shortlisted, pending, rejected, totalJobs },
+      stats: { total, shortlisted, pending, rejected, reviewed, totalJobs },
       recentCandidates,
       recentActivity,
     });

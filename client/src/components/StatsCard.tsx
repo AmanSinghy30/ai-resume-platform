@@ -1,34 +1,38 @@
 type StatsCardProps = {
   title: string;
-  value: number | string;
+  value: number;
   icon: string;
-  color: 'blue' | 'green' | 'yellow' | 'purple';
+  color: 'blue' | 'green' | 'yellow' | 'purple' | 'red';
   subtitle?: string;
-}
+};
 
-const colors = {
-  blue: 'border-blue-500 bg-blue-500/10',
-  green: 'border-green-500 bg-green-500/10',
-  yellow: 'border-yellow-500 bg-yellow-500/10',
-  purple: 'border-purple-500 bg-purple-500/10',
-}
+const colorMap = {
+  blue:   'text-blue-400   bg-blue-400/10   border-blue-400/20',
+  green:  'text-green-400  bg-green-400/10  border-green-400/20',
+  yellow: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
+  purple: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
+  red:    'text-red-400    bg-red-400/10    border-red-400/20',
+};
 
-const iconColors = {
-  blue: 'text-blue-400',
-  green: 'text-green-400',
-  yellow: 'text-yellow-400',
-  purple: 'text-purple-400',
-}
-
-export default function StatsCard({ title, value, icon, color, subtitle }: StatsCardProps) {
+export default function StatsCard({
+  title,
+  value,
+  icon,
+  color,
+  subtitle,
+}: StatsCardProps) {
   return (
-    <div className={`rounded-xl border-l-4 bg-gray-800 p-5 shadow-md ${colors[color]}`}>
+    <div className={`rounded-xl border p-4 md:p-5 ${colorMap[color]}`}>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-gray-400 font-medium">{title}</p>
-        <span className={`text-2xl ${iconColors[color]}`}>{icon}</span>
+        <span className="text-xl md:text-2xl">{icon}</span>
+        <span className={`text-2xl md:text-3xl font-bold ${colorMap[color].split(' ')[0]}`}>
+          {value}
+        </span>
       </div>
-      <p className="text-3xl font-bold text-white">{value}</p>
-      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+      <p className="text-white font-medium text-sm md:text-base">{title}</p>
+      {subtitle && (
+        <p className="text-xs mt-0.5 opacity-70">{subtitle}</p>
+      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ const ActivityLog = require('../models/ActivityLog');
 const fs = require('fs');
 const { extractTextFromPDF } = require('../utils/pdfParser');
 const { extractSkills, extractExperience, extractEducation } = require('../utils/skillExtractor');
+const { logActivity } = require('../utils/activityLogger');
 
 // Helper to log activity
 const log = async (action, userId, candidateId = null, jobId = null, description = '') => {
