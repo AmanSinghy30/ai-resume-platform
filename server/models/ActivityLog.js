@@ -17,10 +17,11 @@ const activityLogSchema = new mongoose.Schema({
     ],
   },
   performedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null,
-  },
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+  index: true,
+},
   candidateId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Candidate',

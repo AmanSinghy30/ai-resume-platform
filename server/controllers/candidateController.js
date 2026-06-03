@@ -5,6 +5,7 @@ const fs = require('fs');
 const { extractTextFromPDF } = require('../utils/pdfParser');
 const { extractSkills, extractExperience, extractEducation } = require('../utils/skillExtractor');
 const { logActivity } = require('../utils/activityLogger');
+const { extractName, extractEmail, extractPhone } = require('../utils/contactExtractor');
 
 // Helper to log activity
 const log = async (action, userId, candidateId = null, jobId = null, description = '') => {
@@ -16,62 +17,90 @@ const log = async (action, userId, candidateId = null, jobId = null, description
 };
 
 // @route POST /api/candidates/upload
+// @route POST /api/candidates/upload
 const uploadResume = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No PDF file uploaded' });
-    }
-
-    const { name, email, phone, jobId } = req.body;
+    const { name, email, phone, jobId, tempFilePath } = req.body;
 
     if (!name || !email) {
-      fs.unlinkSync(req.file.path);
-      return res.status(400).json({ success: false, message: 'Name and email are required' });
+      if (req.file) fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        message: 'Name and email are required'
+      });
     }
 
+    // Use either freshly uploaded file OR pre-parsed temp file from /parse-resume
+    let filePath = req.file?.path || tempFilePath;
+
+    if (!filePath || !fs.existsSync(filePath)) {
+      return res.status(400).json({
+        success: false,
+        message: 'No PDF file found'
+      });
+    }
+
+    // Validate job if provided
     if (jobId) {
-      const job = await Job.findById(jobId);
+      const job = await Job.findOne({ _id: jobId, createdBy: req.user.id });
       if (!job) {
-        fs.unlinkSync(req.file.path);
-        return res.status(404).json({ success: false, message: 'Job not found' });
+        if (req.file) fs.unlinkSync(req.file.path);
+        return res.status(404).json({
+          success: false,
+          message: 'Job not found'
+        });
       }
     }
 
+    // Parse PDF for raw text + extra info
+    const parsed = await extractTextFromPDF(filePath);
+
+    // Create candidate
+    const cleanedPhone = phone ? String(phone).replace(/\D/g, '') : '';
     const candidate = await Candidate.create({
-  name,
-  email,
-  phone: phone || '',
-  resumeUrl: req.file.path,
-  jobId: jobId || null,
-  status: 'new',
-   });
+      name,
+      email,
+      phone: cleanedPhone,
+      resumeUrl: filePath,
+      jobId: jobId || null,
+      status: 'new',
+      userId: req.user.id,
+    });
 
-   // Auto-parse PDF text
-const parsed = await extractTextFromPDF(req.file.path);
-if (parsed.success && parsed.text) {
-  candidate.rawText = parsed.text;
+    // Save extracted data if PDF parsed successfully
+    if (parsed.success && parsed.text) {
+      candidate.rawText = parsed.text;
+      candidate.skills = extractSkills(parsed.text);
+      candidate.experience = extractExperience(parsed.text);
+      candidate.education = extractEducation(parsed.text);
+      await candidate.save();
+      console.log(`✅ Saved — ${name} | ${candidate.skills.length} skills extracted`);
+    } else {
+      console.warn(`⚠️ PDF parsing failed for ${name}`);
+    }
 
-  // Auto-extract data from text
-  candidate.skills = extractSkills(parsed.text);
-  candidate.experience = extractExperience(parsed.text);
-  candidate.education = extractEducation(parsed.text);
-
-  await candidate.save();
-  console.log(`✅ Extracted — Skills: ${candidate.skills.length}, Experience: ${candidate.experience} yrs`);
-} else {
-  console.warn(`⚠️ PDF parsing failed for ${name}`);
-}
-
+    // Add candidate to job's candidates array
     if (jobId) {
       await Job.findByIdAndUpdate(jobId, { $push: { candidates: candidate._id } });
     }
 
-    await log('resume_uploaded', req.user.id, candidate._id, jobId || null,
-      `Resume uploaded for ${name}`);
+    // Activity log
+    await log(
+      'resume_uploaded',
+      req.user.id,
+      candidate._id,
+      jobId || null,
+      `Resume uploaded for ${name}`
+    );
 
-    res.status(201).json({ success: true, message: 'Resume uploaded successfully', candidate });
+    res.status(201).json({
+      success: true,
+      message: 'Resume uploaded successfully',
+      candidate
+    });
   } catch (err) {
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    console.error('Upload error:', err.message);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -80,8 +109,7 @@ if (parsed.success && parsed.text) {
 const getCandidates = async (req, res) => {
   try {
     const { status, jobId, search, sortBy, order, minScore, maxScore } = req.query;
-    const query = {};
-
+const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
     if (status) query.status = status;
     if (jobId) query.jobId = jobId;
     if (search) query.name = { $regex: search, $options: 'i' };
@@ -107,8 +135,10 @@ const getCandidates = async (req, res) => {
 // @route GET /api/candidates/:id
 const getCandidateById = async (req, res) => {
   try {
-    const candidate = await Candidate.findById(req.params.id)
-      .populate('jobId', 'title description requiredSkills');
+    const candidate = await Candidate.findOne({
+  _id: req.params.id,
+  userId: req.user.id,   // ✅ Only own candidates
+}).populate('jobId', 'title description requiredSkills');
     if (!candidate) {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
     }
@@ -127,11 +157,11 @@ const updateCandidateStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid status value' });
     }
 
-    const candidate = await Candidate.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+const candidate = await Candidate.findOneAndUpdate(
+  { _id: req.params.id, userId: req.user.id },
+  { status },
+  { new: true }
+);
 
     if (!candidate) {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
@@ -157,7 +187,10 @@ const updateCandidateStatus = async (req, res) => {
 // @route DELETE /api/candidates/:id
 const deleteCandidate = async (req, res) => {
   try {
-    const candidate = await Candidate.findById(req.params.id);
+    const candidate = await Candidate.findOne({
+  _id: req.params.id,
+  userId: req.user.id,
+});
     if (!candidate) {
       return res.status(404).json({ success: false, message: 'Candidate not found' });
     }
@@ -179,22 +212,42 @@ const deleteCandidate = async (req, res) => {
 // @route POST /api/candidates/bulk-status
 const bulkUpdateStatus = async (req, res) => {
   try {
-    const { candidateIds, status } = req.body;
+    const { candidateIds, status, minScore } = req.body;
     const validStatuses = ['new', 'reviewed', 'shortlisted', 'rejected'];
 
-    if (!candidateIds || !Array.isArray(candidateIds) || candidateIds.length === 0) {
-      return res.status(400).json({ success: false, message: 'candidateIds array required' });
-    }
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
 
-    await Candidate.updateMany(
-      { _id: { $in: candidateIds } },
-      { status }
+    let query = {};
+
+    if (candidateIds === 'auto') {
+  if (minScore === undefined || minScore === null) {
+    return res.status(400).json({ success: false, message: 'minScore required for auto mode' });
+  }
+  query = { aiScore: { $gte: Number(minScore) }, userId: req.user.id };  // ✅
+} else {
+  if (!Array.isArray(candidateIds) || candidateIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'candidateIds array required' });
+  }
+  query = { _id: { $in: candidateIds }, userId: req.user.id };  // ✅
+}
+
+    const result = await Candidate.updateMany(query, { status });
+
+    await logActivity(
+      'candidate_shortlisted',
+      req.user.id,
+      null,
+      null,
+      `Bulk update: ${result.modifiedCount} candidates set to ${status}`
     );
 
-    res.json({ success: true, message: `${candidateIds.length} candidates updated to ${status}` });
+    res.json({
+      success: true,
+      message: `${result.modifiedCount} candidates updated to ${status}`,
+      modifiedCount: result.modifiedCount,
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -203,12 +256,13 @@ const bulkUpdateStatus = async (req, res) => {
 // @route GET /api/candidates/stats/summary
 const getCandidateStats = async (req, res) => {
   try {
-    const total = await Candidate.countDocuments();
-    const shortlisted = await Candidate.countDocuments({ status: 'shortlisted' });
-    const pending = await Candidate.countDocuments({ status: 'new' });
-    const rejected = await Candidate.countDocuments({ status: 'rejected' });
-    const reviewed = await Candidate.countDocuments({ status: 'reviewed' });
-    const totalJobs = await Job.countDocuments();
+    const uid = req.user.id;
+const total = await Candidate.countDocuments({ userId: uid });
+const shortlisted = await Candidate.countDocuments({ userId: uid, status: 'shortlisted' });
+const pending = await Candidate.countDocuments({ userId: uid, status: 'new' });
+const rejected = await Candidate.countDocuments({ userId: uid, status: 'rejected' });
+const reviewed = await Candidate.countDocuments({ userId: uid, status: 'reviewed' });
+const totalJobs = await Job.countDocuments({ createdBy: uid });
 
     res.json({
       success: true,
@@ -218,13 +272,105 @@ const getCandidateStats = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+// @route POST /api/candidates/parse-resume
+// Parses PDF and returns extracted info WITHOUT saving to DB
+const parseResume = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No PDF file uploaded' });
+    }
+
+    const parsed = await extractTextFromPDF(req.file.path);
+
+    if (!parsed.success || !parsed.text) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({
+        success: false,
+        message: 'Could not extract text from PDF',
+      });
+    }
+    /*console.log('🔍 First 500 chars of PDF:', parsed.text.slice(0, 500));
+    console.log('🔍 Extracted email:', extractEmail(parsed.text));
+    console.log('🔍 Extracted name:', extractName(parsed.text));    
+    console.log('🔍 Extracted phone:', extractPhone(parsed.text));*/
+    const extracted = {
+      name: extractName(parsed.text) || '',
+      email: extractEmail(parsed.text) || '',
+      phone: extractPhone(parsed.text) || '',
+      skills: extractSkills(parsed.text),
+      experience: extractExperience(parsed.text),
+      education: extractEducation(parsed.text),
+      rawText: parsed.text,
+      tempFilePath: req.file.path, // keep file for actual upload later
+      fileName: req.file.originalname,
+    };
+
+    console.log(`📄 Parsed: ${extracted.name || 'Unknown'} | ${extracted.email || 'No email'} | ${extracted.skills.length} skills`);
+
+    res.json({ success: true, extracted });
+  } catch (err) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @route POST /api/candidates/bulk-delete
+const bulkDeleteCandidates = async (req, res) => {
+  try {
+    const { candidateIds } = req.body;
+
+    if (!Array.isArray(candidateIds) || candidateIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'candidateIds array required',
+      });
+    }
+
+    // Find candidates first (to delete their files)
+    const candidates = await Candidate.find({
+      _id: { $in: candidateIds },
+      userId: req.user.id,
+    });
+
+    // Delete PDF files from disk
+    candidates.forEach(c => {
+      if (c.resumeUrl && fs.existsSync(c.resumeUrl)) {
+        try { fs.unlinkSync(c.resumeUrl); } catch (e) { /* ignore */ }
+      }
+    });
+
+    // Delete from DB
+    const result = await Candidate.deleteMany({
+      _id: { $in: candidateIds },
+      userId: req.user.id,
+    });
+
+    await log(
+      'candidate_deleted',
+      req.user.id,
+      null,
+      null,
+      `Bulk deleted ${result.deletedCount} candidates`
+    );
+
+    res.json({
+      success: true,
+      message: `${result.deletedCount} candidates deleted`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 module.exports = {
   uploadResume,
+  parseResume,
   getCandidates,
   getCandidateById,
   updateCandidateStatus,
   deleteCandidate,
+  bulkDeleteCandidates,
   bulkUpdateStatus,
   getCandidateStats,
 };

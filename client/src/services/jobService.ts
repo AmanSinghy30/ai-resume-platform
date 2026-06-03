@@ -5,12 +5,36 @@ export const getJobs = async () => {
   return res.data;
 };
 
+export const getJobById = async (id: string) => {
+  const res = await api.get(`/jobs/${id}`);
+  return res.data;
+};
+
 export const createJob = async (data: {
   title: string;
   description: string;
-  requiredSkills: string;
+  requiredSkills: string [];
   experienceRequired: number;
 }) => {
   const res = await api.post('/jobs', data);
+  return res.data;
+};
+
+export const deleteJob = async (id: string) => {
+  const res = await api.delete(`/jobs/${id}`);
+  return res.data;
+};
+
+export const matchCandidates = async (jobId: string) => {
+  const res = await api.post('/ai/match', { jobId });
+  return res.data;
+};
+
+export const scoreAllForJob = async (jobId: string, candidateIds?: string[]) => {
+  const body: any = { jobId };
+  if (candidateIds && candidateIds.length > 0) {
+    body.candidateIds = candidateIds;
+  }
+  const res = await api.post('/ai/score-all', body);
   return res.data;
 };

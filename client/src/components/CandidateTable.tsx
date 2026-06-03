@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import Badge from './Badge';
 import Button from './Button';
+import ScoreBar from './ScoreBar';
+import { Eye } from 'lucide-react';
 
 type Candidate = {
   id: string;
@@ -8,127 +10,83 @@ type Candidate = {
   email: string;
   jobTitle: string;
   score: number | null;
-  status: string;
+  status: 'new' | 'reviewed' | 'shortlisted' | 'rejected';
   uploadedAt: string;
 };
 
-const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
-  shortlisted: 'green',
-  reviewed:    'blue',
-  new:         'yellow',
-  rejected:    'red',
+type CandidateTableProps = {
+  candidates: Candidate[];
 };
 
-export default function CandidateTable({
-  candidates,
-}: {
-  candidates: Candidate[];
-}) {
+const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> = {
+  shortlisted: 'green',
+  reviewed: 'blue',
+  new: 'yellow',
+  rejected: 'red',
+};
+
+export default function CandidateTable({ candidates }: CandidateTableProps) {
   const navigate = useNavigate();
 
-  if (candidates.length === 0) {
-    return (
-      <div className="text-center py-10 text-gray-500 text-sm">
-        No candidates to show
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-700 text-left">
-              <th className="px-4 py-3 text-gray-400 font-medium">Name</th>
-              {/* Hide on mobile */}
-              <th className="px-4 py-3 text-gray-400 font-medium hidden md:table-cell">
-                Job
-              </th>
-              <th className="px-4 py-3 text-gray-400 font-medium">Score</th>
-              <th className="px-4 py-3 text-gray-400 font-medium">Status</th>
-              {/* Hide on mobile */}
-              <th className="px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">
-                Date
-              </th>
-              <th className="px-4 py-3 text-gray-400 font-medium text-right">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700/50">
-            {candidates.map((c) => (
-              <tr
-                key={c.id}
-                className="hover:bg-gray-700/30 transition-colors"
-              >
-                {/* Name — always visible */}
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-white font-medium truncate max-w-[120px] md:max-w-none">
-                        {c.name}
-                      </p>
-                      <p className="text-gray-500 text-xs truncate hidden sm:block">
-                        {c.email}
-                      </p>
-                    </div>
+    <div className="overflow-x-auto rounded-xl border border-gray-700">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-800 border-b border-gray-700">
+          <tr>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium">Name</th>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium">Job</th>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium w-36">AI Score</th>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium">Uploaded</th>
+            <th className="text-left px-4 py-3 text-gray-400 font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-700 bg-gray-900">
+          {candidates.map((c) => (
+            <tr key={c.id} className="hover:bg-gray-800 transition-colors">
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                    {c.name.charAt(0).toUpperCase()}
                   </div>
-                </td>
-
-                {/* Job — hidden on mobile */}
-                <td className="px-4 py-3 text-gray-300 hidden md:table-cell">
-                  <span className="truncate block max-w-[140px]">{c.jobTitle}</span>
-                </td>
-
-                {/* Score — always visible */}
-                <td className="px-4 py-3">
-                  <span
-                    className={`font-bold ${
-                      c.score === null
-                        ? 'text-gray-500'
-                        : c.score >= 80
-                        ? 'text-green-400'
-                        : c.score >= 60
-                        ? 'text-yellow-400'
-                        : 'text-red-400'
-                    }`}
-                  >
-                    {c.score !== null ? `${c.score}` : '—'}
-                  </span>
-                </td>
-
-                {/* Status — always visible */}
-                <td className="px-4 py-3">
-                  <Badge
-                    label={c.status}
-                    color={statusColor[c.status] || 'gray'}
-                  />
-                </td>
-
-                {/* Date — hidden on mobile & tablet */}
-                <td className="px-4 py-3 text-gray-400 hidden lg:table-cell">
-                  {c.uploadedAt}
-                </td>
-
-                {/* Action — always visible */}
-                <td className="px-4 py-3 text-right">
-                  <Button
-                    variant="ghost"
-                    className="text-xs py-1 px-3"
-                    onClick={() => navigate(`/candidates/${c.id}`)}
-                  >
-                    View
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                  <div>
+                    <p className="text-white font-medium">{c.name}</p>
+                    <p className="text-gray-500 text-xs">{c.email}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-gray-300 text-sm">{c.jobTitle}</td>
+              <td className="px-4 py-3 w-36">
+                {c.score !== null ? (
+                  <ScoreBar score={c.score} showLabel={false} />
+                ) : (
+                  <span className="text-gray-500 text-xs">Not scored</span>
+                )}
+              </td>
+              <td className="px-4 py-3">
+                <Badge label={c.status} color={statusColor[c.status]} />
+              </td>
+              <td className="px-4 py-3 text-gray-400 text-xs">{c.uploadedAt}</td>
+              <td className="px-4 py-3">
+                <Button
+                  variant="ghost"
+                  className="text-xs py-1 px-2 flex items-center gap-1"
+                  onClick={() => navigate(`/candidates/${c.id}`)}
+                >
+                  <Eye size={12} /> View
+                </Button>
+              </td>
+            </tr>
+          ))}
+          {candidates.length === 0 && (
+            <tr>
+              <td colSpan={6} className="px-4 py-10 text-center text-gray-500">
+                No candidates found.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

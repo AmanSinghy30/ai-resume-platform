@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/auth');
 const ActivityLog = require('../models/ActivityLog');
+
+router.use(protect);
 
 // GET /api/activity — get all activity logs with pagination
 router.get('/', async (req, res) => {
   try {
     const { limit = 20, page = 1, action } = req.query;
-    const query = {};
+    const query = { performedBy: req.user.id }; // ✅ Filter by user
     if (action) query.action = action;
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -34,10 +37,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// DELETE /api/activity — clear all logs (admin use)
+// DELETE /api/activity/clear — clear ONLY this user's logs
 router.delete('/clear', async (req, res) => {
   try {
-    await ActivityLog.deleteMany({});
+    await ActivityLog.deleteMany({ performedBy: req.user.id }); // ✅
     res.json({ success: true, message: 'Activity logs cleared' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

@@ -19,9 +19,11 @@ const jobSchema = new mongoose.Schema({
     default: 0,
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+  index: true,
+},
   candidates: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Candidate',

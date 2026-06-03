@@ -1,7 +1,9 @@
+import type { LucideIcon } from 'lucide-react';
+
 type StatsCardProps = {
   title: string;
   value: number;
-  icon: string;
+  icon: LucideIcon;        // ✅ accepts Lucide icon component
   color: 'blue' | 'green' | 'yellow' | 'purple' | 'red';
   subtitle?: string;
 };
@@ -17,15 +19,19 @@ const colorMap = {
 export default function StatsCard({
   title,
   value,
-  icon,
+  icon: Icon,            // ✅ rename to capitalized — required for JSX components
   color,
   subtitle,
 }: StatsCardProps) {
+  const textColor = colorMap[color].split(' ')[0];
+
   return (
     <div className={`rounded-xl border p-4 md:p-5 ${colorMap[color]}`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xl md:text-2xl">{icon}</span>
-        <span className={`text-2xl md:text-3xl font-bold ${colorMap[color].split(' ')[0]}`}>
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorMap[color]}`}>
+          <Icon size={20} className={textColor} />
+        </div>
+        <span className={`text-2xl md:text-3xl font-bold ${textColor}`}>
           {value}
         </span>
       </div>

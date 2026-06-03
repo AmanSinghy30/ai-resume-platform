@@ -28,8 +28,12 @@ export function useFormValidation(rules: FieldRules) {
         newErrors[field] = `Maximum ${rule.maxLength} characters allowed`;
       } else if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
         newErrors[field] = 'Enter a valid email address';
-      } else if (rule.isPhone && value && !/^[0-9]{10}$/.test(value)) {
-        newErrors[field] = 'Enter a valid 10-digit phone number';
+      } else if (rule.isPhone && value) {
+        // ✅ Strip all non-digit characters before counting
+        const digits = value.replace(/\D/g, '');
+        if (digits.length < 10 || digits.length > 15) {
+          newErrors[field] = 'Enter a valid phone number (10-15 digits)';
+        }
       }
     });
 

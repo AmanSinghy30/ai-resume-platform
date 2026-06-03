@@ -94,16 +94,34 @@ function extractExperience(rawText) {
 function extractEducation(rawText) {
   if (!rawText) return '';
 
-  const patterns = [
-    /(b\.?tech|b\.?e\.?|bachelor(?:'s)?(?:\s+of)?\s+(?:engineering|technology|science|arts|commerce))[^\n]*/i,
-    /(m\.?tech|m\.?e\.?|master(?:'s)?(?:\s+of)?\s+(?:engineering|technology|science|arts|commerce))[^\n]*/i,
-    /(b\.?sc\.?|m\.?sc\.?|b\.?a\.?|m\.?a\.?|ph\.?d\.?|mba)[^\n]*/i,
-    /(bachelor|master|doctorate|diploma)[^\n]*/i,
+  const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Strong degree patterns — must appear at start or clearly in a line
+  const degreePatterns = [
+    /\b(b\.?\s*tech|bachelor\s+of\s+technology)\b/i,
+    /\b(b\.?\s*e\.?|bachelor\s+of\s+engineering)\b/i,
+    /\b(b\.?\s*sc\.?|bachelor\s+of\s+science)\b/i,
+    /\b(b\.?\s*a\.?|bachelor\s+of\s+arts)\b/i,
+    /\b(b\.?\s*com\.?|bachelor\s+of\s+commerce)\b/i,
+    /\b(m\.?\s*tech|master\s+of\s+technology)\b/i,
+    /\b(m\.?\s*e\.?|master\s+of\s+engineering)\b/i,
+    /\b(m\.?\s*sc\.?|master\s+of\s+science)\b/i,
+    /\b(m\.?\s*b\.?\s*a\.?|master\s+of\s+business)\b/i,
+    /\b(ph\.?\s*d\.?|doctorate)\b/i,
+    /\b(diploma\s+in)\b/i,
+    /\b(high\s+school|secondary\s+school|12th|10th)\b/i,
   ];
 
-  for (const pattern of patterns) {
-    const match = rawText.match(pattern);
-    if (match) return match[0].trim().slice(0, 100); // cap length
+  // Check each line strictly
+  for (const line of lines) {
+    for (const pattern of degreePatterns) {
+      if (pattern.test(line)) {
+        // Make sure it's not too short or too long
+        if (line.length > 5 && line.length < 150) {
+          return line.slice(0, 120);
+        }
+      }
+    }
   }
 
   return '';

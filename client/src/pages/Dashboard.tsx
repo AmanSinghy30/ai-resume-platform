@@ -8,6 +8,14 @@ import Spinner from '../components/Spinner';
 import Card from '../components/Card';
 import { getDashboardStats } from '../services/dashboardService';
 import toast from 'react-hot-toast';
+import {
+  Users,
+  CheckCircle2,
+  Clock,
+  Briefcase,
+  FileText,
+  ArrowRight,
+} from 'lucide-react';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -53,28 +61,28 @@ export default function Dashboard() {
         <StatsCard
           title="Total Candidates"
           value={stats.total}
-          icon="👤"
+          icon={Users}
           color="blue"
           subtitle="All time"
         />
         <StatsCard
           title="Shortlisted"
           value={stats.shortlisted}
-          icon="✅"
+          icon={CheckCircle2}
           color="green"
           subtitle="Ready for interview"
         />
         <StatsCard
           title="Pending Review"
           value={stats.pending}
-          icon="⏳"
+          icon={Clock}
           color="yellow"
           subtitle="Needs attention"
         />
         <StatsCard
           title="Active Jobs"
           value={stats.totalJobs}
-          icon="💼"
+          icon={Briefcase}
           color="purple"
           subtitle="Open positions"
         />
@@ -83,31 +91,31 @@ export default function Dashboard() {
       {/* Main Content — Two Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Recent Candidates — takes 2/3 width */}
+        {/* Recent Candidates */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Recent Candidates</h2>
             <button
               onClick={() => navigate('/candidates')}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              View all →
+              View all <ArrowRight size={14} />
             </button>
           </div>
 
           {recentCandidates.length === 0 ? (
             <Card>
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <p className="text-4xl mb-3">📄</p>
+                <FileText size={48} className="text-gray-500 mb-3" />
                 <p className="text-white font-medium mb-1">No candidates yet</p>
                 <p className="text-gray-400 text-sm mb-4">
                   Upload resumes to start screening
                 </p>
                 <button
                   onClick={() => navigate('/upload')}
-                  className="text-primary text-sm hover:underline"
+                  className="text-primary text-sm hover:underline flex items-center gap-1"
                 >
-                  Upload first resume →
+                  Upload first resume <ArrowRight size={14} />
                 </button>
               </div>
             </Card>
@@ -116,15 +124,15 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Activity Feed — takes 1/3 width */}
+        {/* Activity Feed */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
             <button
               onClick={() => navigate('/activity')}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-primary hover:underline flex items-center gap-1"
             >
-              View all →
+              View all <ArrowRight size={14} />
             </button>
           </div>
           <Card>

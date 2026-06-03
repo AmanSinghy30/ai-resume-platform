@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
+const { protect } = require('../middleware/auth');  // ✅ ADDED
+
 const {
   createJob,
   getJobs,
@@ -8,6 +10,9 @@ const {
   updateJob,
   deleteJob,
 } = require('../controllers/jobController');
+
+// ✅ All job routes require auth
+router.use(protect);
 
 const jobValidation = [
   body('title')

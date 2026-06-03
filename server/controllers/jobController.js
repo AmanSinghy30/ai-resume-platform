@@ -31,7 +31,7 @@ const createJob = async (req, res) => {
 
 const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ createdAt: -1 });
+    const jobs = await Job.find({ createdBy: req.user.id }).sort({ createdAt: -1 });  // ✅
     res.json({ success: true, jobs });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -40,7 +40,10 @@ const getJobs = async (req, res) => {
 
 const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id).populate('candidates');
+    const job = await Job.findOne({
+      _id: req.params.id,
+      createdBy: req.user.id,  // ✅
+    }).populate('candidates');
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
     res.json({ success: true, job });
   } catch (err) {
@@ -50,7 +53,11 @@ const getJobById = async (req, res) => {
 
 const updateJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const job = await Job.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.user.id },  // ✅
+      req.body,
+      { new: true }
+    );
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
 
     await logActivity('job_updated', req.user.id, null, job._id, `Job updated: ${job.title}`);
@@ -63,7 +70,10 @@ const updateJob = async (req, res) => {
 
 const deleteJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
+    const job = await Job.findOneAndDelete({
+      _id: req.params.id,
+      createdBy: req.user.id,  // ✅
+    });
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
 
     await logActivity('job_deleted', req.user.id, null, req.params.id, `Job deleted: ${job.title}`);

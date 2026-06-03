@@ -12,6 +12,12 @@ const candidateSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
+  userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true,
+  index: true,
+  },
   phone: {
     type: String,
     default: '',
@@ -46,6 +52,18 @@ const candidateSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  aiStrengths: {
+  type: [String],
+  default: [],
+ },
+  aiWeaknesses: {
+  type: [String],
+  default: [],
+ },
+  aiReasoning: {
+  type: String,
+  default: '',
+ },
   aiRecommendation: {
     type: String,
     enum: ['shortlist', 'review', 'reject', null],
