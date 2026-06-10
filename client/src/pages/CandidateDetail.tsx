@@ -11,7 +11,6 @@ import { analyzeCandidate } from '../services/candidateService';
 import ScoreCircle from '../components/ScoreCircle';
 import ScoreBar from '../components/ScoreBar';
 
-
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
   shortlisted: 'green',
   reviewed: 'blue',
@@ -34,28 +33,29 @@ export default function CandidateDetail() {
       .catch(() => toast.error('Failed to load candidate'))
       .finally(() => setLoading(false));
   }, [id]);
-const handleAnalyze = async () => {
-  if (!id) return;
 
-  // Warn if already analyzed
-  if (candidate.aiScore) {
-    const confirm = window.confirm(
-      `This candidate already has a score of ${candidate.aiScore}/100. Re-analyze and overwrite?`
-    );
-    if (!confirm) return;
-  }
+  const handleAnalyze = async () => {
+    if (!id) return;
 
-  setAnalyzing(true);
-  try {
-    const data = await analyzeCandidate(id);
-    setCandidate(data.candidate);
-    toast.success(`Analysis complete — Score: ${data.candidate.aiScore}/100`);
-  } catch (err: any) {
-    toast.error(err.response?.data?.message || 'Analysis failed');
-  } finally {
-    setAnalyzing(false);
-  }
-};
+    // Warn if already analyzed
+    if (candidate.aiScore) {
+      const confirm = window.confirm(
+        `This candidate already has a score of ${candidate.aiScore}/100. Re-analyze and overwrite?`
+      );
+      if (!confirm) return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const data = await analyzeCandidate(id);
+      setCandidate(data.candidate);
+      toast.success(`Analysis complete — Score: ${data.candidate.aiScore}/100`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Analysis failed');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   const handleStatusUpdate = async (status: string) => {
     if (!id) return;
@@ -113,65 +113,83 @@ const handleAnalyze = async () => {
             </div>
           </Card>
 
-          {/* AI Analysis */}
-<Card>
-  <h3 className="text-white font-semibold mb-3">AI Analysis</h3>
-  {candidate.aiAnalysis ? (
-    <p className="text-gray-300 text-sm leading-relaxed">{candidate.aiAnalysis}</p>
-  ) : (
-    <div className="text-center py-6">
-      <p className="text-4xl mb-2">🤖</p>
-      <p className="text-gray-400 text-sm">AI analysis not run yet</p>
-      <p className="text-gray-500 text-xs mt-1">Click "Run AI Analysis" to begin</p>
-    </div>
-  )}
-</Card>
+          {/* Dynamic Analysis Card: AI Analysis or Match Reason */}
+          <Card>
+            <h3 className="text-white font-semibold mb-3">
+              {candidate.aiAnalysis ? 'AI Analysis' : 'Job Match Reason'}
+            </h3>
+            
+            {candidate.aiAnalysis ? (
+              // 1. Show detailed AI Analysis if it has been generated
+              <p className="text-gray-300 text-sm leading-relaxed">
+                {candidate.aiAnalysis}
+              </p>
+            ) : candidate.reason ? (
+              // 2. Fall back to basic Match Reason before AI Analysis is run
+              <div>
+                <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                  {candidate.reason}
+                </p>
+                <div className="flex items-center justify-center gap-2 text-gray-500 text-xs mt-4 pt-4 border-t border-gray-800">
+                  <span>🤖</span>
+                  <span>Click "Run AI Analysis" for a deeper evaluation</span>
+                </div>
+              </div>
+            ) : (
+              // 3. Fall back to default empty state if neither exists
+              <div className="text-center py-6">
+                <p className="text-4xl mb-2">🤖</p>
+                <p className="text-gray-400 text-sm">No analysis available</p>
+                <p className="text-gray-500 text-xs mt-1">Click "Run AI Analysis" to begin</p>
+              </div>
+            )}
+          </Card>
 
-{/* ✅ Strengths */}
-{candidate.aiStrengths?.length > 0 && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-green-400">💪</span> Strengths
-    </h3>
-    <ul className="flex flex-col gap-2">
-      {candidate.aiStrengths.map((s: string, i: number) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-          <span className="text-green-400 mt-0.5">✓</span>
-          <span className="leading-relaxed">{s}</span>
-        </li>
-      ))}
-    </ul>
-  </Card>
-)}
+          {/* ✅ Strengths */}
+          {candidate.aiStrengths?.length > 0 && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <span className="text-green-400">💪</span> Strengths
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {candidate.aiStrengths.map((s: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span className="leading-relaxed">{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
-{/* ✅ Weaknesses */}
-{candidate.aiWeaknesses?.length > 0 && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-red-400">⚠️</span> Areas of Concern
-    </h3>
-    <ul className="flex flex-col gap-2">
-      {candidate.aiWeaknesses.map((w: string, i: number) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-          <span className="text-red-400 mt-0.5">✗</span>
-          <span className="leading-relaxed">{w}</span>
-        </li>
-      ))}
-    </ul>
-  </Card>
-)}
+          {/* ✅ Weaknesses */}
+          {candidate.aiWeaknesses?.length > 0 && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <span className="text-red-400">⚠️</span> Areas of Concern
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {candidate.aiWeaknesses.map((w: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-red-400 mt-0.5">✗</span>
+                    <span className="leading-relaxed">{w}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
-{/* ✅ AI Reasoning */}
-{candidate.aiReasoning && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-blue-400">🧠</span> AI Reasoning
-    </h3>
-    <p className="text-gray-300 text-sm leading-relaxed italic border-l-2 border-primary/50 pl-3">
-      {candidate.aiReasoning}
-    </p>
-  </Card>
-)}
+          {/* ✅ AI Reasoning */}
+          {candidate.aiReasoning && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <span className="text-blue-400">🧠</span> AI Reasoning
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed italic border-l-2 border-primary/50 pl-3">
+                {candidate.aiReasoning}
+              </p>
+            </Card>
+          )}
 
           {/* Education */}
           {candidate.education && (
@@ -199,30 +217,45 @@ const handleAnalyze = async () => {
         {/* Right — Score + Skills + Actions */}
         <div className="flex flex-col gap-5">
 
-          {/* AI Score */}
-         <Card>
-  <h3 className="text-white font-semibold mb-4">AI Score</h3>
-  {candidate.aiScore !== null ? (
-    <>
-      <div className="flex items-center justify-center mb-4">
-        <ScoreCircle score={candidate.aiScore} size="lg" />
-      </div>
-      <ScoreBar score={candidate.aiScore} />
-      <p className={`text-center text-sm font-medium mt-3 ${
-        candidate.aiScore >= 80 ? 'text-green-400'
-        : candidate.aiScore >= 60 ? 'text-yellow-400'
-        : 'text-red-400'
-      }`}>
-        Recommendation: {candidate.aiRecommendation || 'None'}
-      </p>
-    </>
-  ) : (
-    <div className="text-center py-4">
-      <ScoreCircle score={null} size="md" />
-      <p className="text-gray-500 text-sm mt-3">Not scored yet</p>
-    </div>
-  )}
-</Card>
+          {/* Dynamic Score Card: AI Score or Match Score */}
+          <Card>
+            <h3 className="text-white font-semibold mb-4">
+              {candidate.aiScore != null ? 'AI Score' : 'Match Score'}
+            </h3>
+            
+            {candidate.aiScore != null ? (
+              // 1. Show AI Score if it has been generated
+              <>
+                <div className="flex items-center justify-center mb-4">
+                  <ScoreCircle score={candidate.aiScore} size="lg" />
+                </div>
+                <ScoreBar score={candidate.aiScore} />
+                <p className={`text-center text-sm font-medium mt-3 ${
+                  candidate.aiScore >= 80 ? 'text-green-400'
+                  : candidate.aiScore >= 60 ? 'text-yellow-400'
+                  : 'text-red-400'
+                }`}>
+                  Recommendation: {candidate.aiRecommendation || 'None'}
+                </p>
+              </>
+            ) : candidate.match_score != null ? (
+              // 2. Fall back to Match Score before AI Analysis is run
+              <div className="text-center py-4">
+                 <div className="flex items-center justify-center mb-4">
+                  <ScoreCircle score={candidate.match_score} size="lg" />
+                </div>
+                <p className="text-gray-400 text-sm mt-3">Basic match (AI Analysis pending)</p>
+              </div>
+            ) : (
+              // 3. Fall back to "Not Scored" if neither exists
+              <div className="text-center py-4">
+                <div className="flex items-center justify-center mb-4">
+                  <ScoreCircle score={null} size="md" />
+                </div>
+                <p className="text-gray-500 text-sm mt-3">Not scored yet</p>
+              </div>
+            )}
+          </Card>
 
           {/* Skills */}
           <Card>
@@ -253,16 +286,16 @@ const handleAnalyze = async () => {
             <h3 className="text-white font-semibold mb-3">Actions</h3>
             <div className="flex flex-col gap-2">
               <Button
-  variant="secondary"
-  className="w-full justify-center"
-  disabled={analyzing || !!candidate.aiScore}
-  onClick={handleAnalyze}
->
-  {analyzing ? '🤖 Analyzing...'
-  : !candidate.rawText ? '⚠️ No Resume Text'
-  : candidate.aiScore ? '✅ Already Analyzed'
-  : '🤖 Run AI Analysis'}
-</Button>
+                variant="secondary"
+                className="w-full justify-center"
+                disabled={analyzing || !!candidate.aiScore}
+                onClick={handleAnalyze}
+              >
+                {analyzing ? '🤖 Analyzing...'
+                : !candidate.rawText ? '⚠️ No Resume Text'
+                : candidate.aiScore ? '✅ Already Analyzed'
+                : '🤖 Run AI Analysis'}
+              </Button>
               <Button
                 variant="primary"
                 className="w-full justify-center"

@@ -8,6 +8,8 @@ import toast from 'react-hot-toast';
 import { useFormValidation } from '../hooks/useFormValidation';
 import FormError from '../components/FormError';
 
+const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook-test/upload-resume';
+
 type Job = { _id: string; title: string };
 type Mode = 'single' | 'bulk';
 
@@ -104,6 +106,7 @@ export default function UploadResume() {
 
     const formData = new FormData();
     formData.append('name', name);
+    //formData.append('resume',file);
     formData.append('email', email);
     formData.append('phone', phone);
     formData.append('jobId', jobId);
@@ -115,6 +118,11 @@ export default function UploadResume() {
 
     setLoading(true);
     try {
+      /*await fetch(N8N_WEBHOOK_URL, {
+  method: 'POST',
+  body: formData
+  // do NOT set Content-Type header — browser sets it automatically
+});*/
       await uploadResume(formData);
       toast.success('Resume uploaded successfully!');
       navigate('/candidates');
