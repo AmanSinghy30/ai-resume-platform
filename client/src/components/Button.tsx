@@ -1,17 +1,17 @@
 type ButtonProps = {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   disabled?: boolean;
   type?: 'button' | 'submit';
   className?: string;
 }
 
 const variants = {
-  primary: 'bg-primary hover:bg-blue-700 text-white',
-  secondary: 'bg-secondary hover:bg-purple-700 text-white',
-  danger: 'bg-red-600 hover:bg-red-700 text-white',
-  ghost: 'bg-transparent border border-gray-600 hover:border-gray-400 text-gray-300',
+  primary: 'gradient-primary hover:shadow-glow-sm text-white hover:-translate-y-0.5',
+  secondary: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:shadow-glow-purple text-white hover:-translate-y-0.5',
+  danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:shadow-glow-red text-white hover:-translate-y-0.5',
+  ghost: 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-slate-300',
 }
 
 export default function Button({ children, variant = 'primary', onClick, disabled, type = 'button', className = '' }: ButtonProps) {
@@ -20,7 +20,7 @@ export default function Button({ children, variant = 'primary', onClick, disable
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none ${variants[variant]} ${className}`}
     >
       {children}
     </button>

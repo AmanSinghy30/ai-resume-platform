@@ -29,51 +29,54 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen auth-bg flex items-center justify-center px-4">
+      <div className="w-full max-w-md animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">RecruitAI</h1>
-          <p className="text-gray-400 mt-2">AI-Powered Resume Screening</p>
+          <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center text-white font-bold text-xl mx-auto mb-4 shadow-glow-md">
+            AI
+          </div>
+          <h1 className="text-3xl font-bold gradient-text">RecruitAI</h1>
+          <p className="text-slate-500 mt-2 text-sm">AI-Powered Resume Screening</p>
         </div>
 
         {/* Card */}
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-8">
-          <h2 className="text-xl font-semibold text-white mb-6">Sign In</h2>
+        <div className="glass-strong rounded-2xl p-8 shadow-glass-lg">
+          <h2 className="text-xl font-semibold text-white mb-6 tracking-tight">Sign In</h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="text-sm text-gray-400 mb-1 block">Email</label>
+              <label className="text-sm text-slate-400 mb-1.5 block font-medium">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+                className="w-full input-glass text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-500"
               />
             </div>
             <div>
-              <label className="text-sm text-gray-400 mb-1 block">Password</label>
+              <label className="text-sm text-slate-400 mb-1.5 block font-medium">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+                className="w-full input-glass text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-500"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors mt-2"
+              className="w-full gradient-primary hover:shadow-glow-md disabled:opacity-40 text-white font-medium py-2.5 rounded-xl transition-all duration-200 mt-2 hover:-translate-y-0.5"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-gray-400 text-sm mt-6">
+          <p className="text-center text-slate-500 text-sm mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-primary hover:underline">Register</Link>
+            <Link to="/register" className="text-primary hover:text-primary-dark transition-colors font-medium">Register</Link>
           </p>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   Briefcase,
   FileText,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -56,6 +57,24 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
 
+      {/* Welcome Banner */}
+      <div className="relative overflow-hidden rounded-2xl p-6 mb-8 animate-fade-in" style={{
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 50%, rgba(16,185,129,0.08) 100%)',
+        border: '1px solid rgba(99,102,241,0.15)',
+      }}>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles size={18} className="text-primary" />
+            <span className="text-primary text-sm font-semibold">AI-Powered Dashboard</span>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Welcome back! 👋</h2>
+          <p className="text-slate-400 text-sm">
+            You have <span className="text-white font-semibold">{stats.pending}</span> candidates pending review and <span className="text-white font-semibold">{stats.totalJobs}</span> active job positions.
+          </p>
+        </div>
+      </div>
+
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard
@@ -94,10 +113,10 @@ export default function Dashboard() {
         {/* Recent Candidates */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">Recent Candidates</h2>
+            <h2 className="text-lg font-semibold text-white tracking-tight">Recent Candidates</h2>
             <button
               onClick={() => navigate('/candidates')}
-              className="text-sm text-primary hover:underline flex items-center gap-1"
+              className="text-sm text-primary hover:text-primary-dark flex items-center gap-1 transition-colors font-medium"
             >
               View all <ArrowRight size={14} />
             </button>
@@ -106,14 +125,16 @@ export default function Dashboard() {
           {recentCandidates.length === 0 ? (
             <Card>
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <FileText size={48} className="text-gray-500 mb-3" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-4 border border-white/5">
+                  <FileText size={28} className="text-slate-500" />
+                </div>
                 <p className="text-white font-medium mb-1">No candidates yet</p>
-                <p className="text-gray-400 text-sm mb-4">
+                <p className="text-slate-500 text-sm mb-4">
                   Upload resumes to start screening
                 </p>
                 <button
                   onClick={() => navigate('/upload')}
-                  className="text-primary text-sm hover:underline flex items-center gap-1"
+                  className="text-primary text-sm hover:text-primary-dark flex items-center gap-1 transition-colors font-medium"
                 >
                   Upload first resume <ArrowRight size={14} />
                 </button>
@@ -127,10 +148,10 @@ export default function Dashboard() {
         {/* Activity Feed */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-white tracking-tight">Recent Activity</h2>
             <button
               onClick={() => navigate('/activity')}
-              className="text-sm text-primary hover:underline flex items-center gap-1"
+              className="text-sm text-primary hover:text-primary-dark flex items-center gap-1 transition-colors font-medium"
             >
               View all <ArrowRight size={14} />
             </button>
@@ -145,7 +166,7 @@ export default function Dashboard() {
       {/* Quick Stats Row */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
-          <p className="text-gray-400 text-sm mb-1">Rejection Rate</p>
+          <p className="text-slate-500 text-sm mb-1">Rejection Rate</p>
           <p className="text-2xl font-bold text-red-400">
             {stats.total > 0
               ? `${Math.round((stats.rejected / stats.total) * 100)}%`
@@ -153,16 +174,16 @@ export default function Dashboard() {
           </p>
         </Card>
         <Card>
-          <p className="text-gray-400 text-sm mb-1">Shortlist Rate</p>
-          <p className="text-2xl font-bold text-green-400">
+          <p className="text-slate-500 text-sm mb-1">Shortlist Rate</p>
+          <p className="text-2xl font-bold text-emerald-400">
             {stats.total > 0
               ? `${Math.round((stats.shortlisted / stats.total) * 100)}%`
               : '—'}
           </p>
         </Card>
         <Card>
-          <p className="text-gray-400 text-sm mb-1">Pending Review</p>
-          <p className="text-2xl font-bold text-yellow-400">{stats.pending}</p>
+          <p className="text-slate-500 text-sm mb-1">Pending Review</p>
+          <p className="text-2xl font-bold text-amber-400">{stats.pending}</p>
         </Card>
       </div>
 

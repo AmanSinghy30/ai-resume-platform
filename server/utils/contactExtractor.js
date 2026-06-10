@@ -6,10 +6,12 @@ function extractName(text) {
     'LinkedIn', 'GitHub', 'Twitter', 'Portfolio', 'Website',
     'Resume', 'CV', 'Curriculum', 'Contact', 'Profile', 'Summary',
     'Objective', 'About', 'Education', 'Experience', 'Skills',
-    'http', 'https', 'www', '@'
+    'Data Analyst', 'Data Scientist', 'Developer', 'Engineer', 'Manager', 
+    'Designer', 'Software', 'Frontend', 'Backend', 'Fullstack', 'Full Stack',
+    'Project', 'Product', 'QA', 'Lead', 'Consultant', 'Architect', 'Data', 'Analyst'
   ];
 
-  const stopRegex = new RegExp(`(${stopWords.join('|')})`, 'i');
+  const stopRegex = new RegExp(`\\b(${stopWords.join('|')})\\b|@|https?:|www\\.`, 'i');
 
   const cleanName = (str) => {
     return str.split(stopRegex)[0].trim().replace(/\s+/g, ' ');

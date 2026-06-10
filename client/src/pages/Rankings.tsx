@@ -10,6 +10,7 @@ import ScoreCircle from '../components/ScoreCircle';
 import { getRankedCandidates } from '../services/candidateService';
 import { getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
+import { Trophy, X, Eye, Scale, Medal, Crown } from 'lucide-react';
 
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> = {
   shortlisted: 'green',
@@ -19,9 +20,9 @@ const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> 
 };
 
 const medalColors = [
-  'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-  'bg-gray-400/20 text-gray-300 border border-gray-400/30',
-  'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+  'bg-gradient-to-br from-yellow-300 to-amber-600 text-white border border-yellow-300/30 shadow-glow-yellow', // Gold
+  'bg-gradient-to-br from-slate-300 to-slate-500 text-white border border-slate-300/30', // Silver
+  'bg-gradient-to-br from-orange-400 to-red-600 text-white border border-orange-400/30', // Bronze
 ];
 
 export default function Rankings() {
@@ -65,10 +66,10 @@ export default function Rankings() {
     <Layout title="Rankings">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 animate-fade-in">
         <div>
-          <h2 className="text-xl font-bold text-white">Candidate Rankings</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-xl font-bold text-white tracking-tight">Candidate Rankings</h2>
+          <p className="text-sm text-slate-500 mt-1">
             {candidates.length} scored candidates
             {candidates.length === 0 && ' — run AI analysis to see rankings'}
           </p>
@@ -78,14 +79,15 @@ export default function Rankings() {
             <Button
               variant="secondary"
               onClick={() => setShowCompare(true)}
+              className="flex items-center gap-2"
             >
-              Compare {compareIds.length} Candidates
+              <Scale size={16} /> Compare {compareIds.length} Candidates
             </Button>
           )}
           <select
             value={selectedJob}
             onChange={e => setSelectedJob(e.target.value)}
-            className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+            className="input-glass text-white rounded-xl px-3.5 py-2.5 text-sm"
           >
             <option value="">All Jobs</option>
             {jobs.map(j => (
@@ -99,11 +101,13 @@ export default function Rankings() {
 
       {/* Empty State */}
       {!loading && candidates.length === 0 && (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-5xl mb-4">🏆</p>
+        <Card className="animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-5 border border-amber-500/20 shadow-glow-yellow">
+              <Trophy size={36} className="text-amber-400" />
+            </div>
             <h3 className="text-white font-semibold text-lg mb-2">No ranked candidates yet</h3>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-slate-500 text-sm mb-6">
               Run AI analysis on candidates to see their scores here
             </p>
             <Button variant="primary" onClick={() => navigate('/candidates')}>
@@ -115,15 +119,16 @@ export default function Rankings() {
 
       {/* Rankings Leaderboard */}
       {!loading && candidates.length > 0 && (
-        <>
+        <div className="animate-fade-in">
           {compareIds.length > 0 && (
-            <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/10 border border-secondary/30 rounded-xl">
-              <p className="text-secondary text-sm font-medium">
+            <div className="flex items-center gap-3 mb-4 p-4 bg-gradient-to-r from-violet-500/10 to-purple-500/5 border border-violet-500/20 rounded-xl shadow-inner-glow">
+              <Scale size={16} className="text-violet-400" />
+              <p className="text-violet-400 text-sm font-medium">
                 {compareIds.length} selected for comparison
               </p>
               <button
                 onClick={() => setCompareIds([])}
-                className="text-gray-400 hover:text-white text-sm ml-auto"
+                className="text-slate-400 hover:text-white text-sm ml-auto transition-colors"
               >
                 Clear
               </button>
@@ -134,41 +139,46 @@ export default function Rankings() {
             {candidates.map((c, index) => (
               <Card
                 key={c._id}
-                className={`hover:border-gray-500 transition-colors ${
-                  compareIds.includes(c._id) ? 'border-secondary/50' : ''
+                className={`transition-all duration-300 relative overflow-hidden group ${
+                  compareIds.includes(c._id) ? 'border-violet-500/50 shadow-glow-purple bg-violet-500/5' : 'hover:border-white/20'
                 }`}
               >
-                <div className="flex items-center gap-4">
+                {/* Subtle rank gradient background for top 3 */}
+                {index < 3 && (
+                  <div className={`absolute top-0 right-0 bottom-0 w-1/3 bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                )}
+
+                <div className="flex items-center gap-4 relative z-10">
 
                   {/* Rank */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                    index < 3 ? medalColors[index] : 'bg-gray-700 text-gray-400'
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${
+                    index < 3 ? medalColors[index] : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-400 border border-white/5'
                   }`}>
-                    {index < 3 ? ['🥇', '🥈', '🥉'][index] : `#${index + 1}`}
+                    {index === 0 ? <Crown size={20} /> : index < 3 ? <Medal size={20} /> : `#${index + 1}`}
                   </div>
 
                   {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0 border border-indigo-500/20">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-white font-semibold">{c.name}</h3>
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <h3 className="text-white font-medium text-lg truncate">{c.name}</h3>
                       <Badge label={c.status} color={statusColor[c.status]} />
                     </div>
-                    <p className="text-gray-400 text-xs mb-2">
+                    <p className="text-slate-400 text-xs mb-2">
                       {c.jobId?.title || 'No job'} • {c.experience} yrs exp
                     </p>
                     <div className="max-w-xs">
                       <ScoreBar score={c.aiScore} showLabel={false} height="h-1.5" />
                     </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
                       {c.skills?.slice(0, 4).map((s: string) => (
                         <span
                           key={s}
-                          className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full"
+                          className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5"
                         >
                           {s}
                         </span>
@@ -180,20 +190,20 @@ export default function Rankings() {
                   <ScoreCircle score={c.aiScore} size="sm" />
 
                   {/* Actions */}
-                  <div className="flex flex-col gap-2 flex-shrink-0">
+                  <div className="flex flex-col gap-2 flex-shrink-0 ml-2">
                     <Button
                       variant="ghost"
-                      className="text-xs py-1 px-2"
+                      className="text-xs py-1.5 px-3 flex items-center gap-1.5"
                       onClick={() => navigate(`/candidates/${c._id}`)}
                     >
-                      View
+                      <Eye size={14} /> View
                     </Button>
                     <button
                       onClick={() => toggleCompare(c._id)}
-                      className={`text-xs px-2 py-1 rounded border transition-colors ${
+                      className={`text-xs px-3 py-1.5 rounded-xl border transition-all duration-200 ${
                         compareIds.includes(c._id)
-                          ? 'border-secondary text-secondary'
-                          : 'border-gray-600 text-gray-400 hover:border-gray-400'
+                          ? 'border-violet-500 bg-violet-500/20 text-violet-300 shadow-glow-sm'
+                          : 'border-white/10 text-slate-400 hover:border-white/30 hover:text-white bg-white/5'
                       }`}
                     >
                       {compareIds.includes(c._id) ? '✓ Added' : 'Compare'}
@@ -204,108 +214,115 @@ export default function Rankings() {
               </Card>
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {/* Compare Modal */}
       {showCompare && compareList.length >= 2 && (
-        <div className="fixed inset-0 bg-black/70 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto animate-fade-in">
           <div className="flex items-start justify-center min-h-screen py-8 px-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl w-full max-w-4xl mx-4">
-            <div className="flex items-center justify-between p-5 border-b border-gray-700">
-              <h3 className="text-white font-semibold text-lg">
-                Candidate Comparison
-              </h3>
-              <button
-                onClick={() => setShowCompare(false)}
-                className="text-gray-400 hover:text-white"
-              >✕</button>
-            </div>
+            <div className="glass-strong border border-white/10 rounded-2xl w-full max-w-5xl mx-4 shadow-glass-lg animate-scale-in">
+              <div className="flex items-center justify-between p-6 border-b border-white/5">
+                <h3 className="text-white font-semibold text-lg tracking-tight flex items-center gap-2">
+                  <Scale size={18} className="text-violet-400" /> Candidate Comparison
+                </h3>
+                <button
+                  onClick={() => setShowCompare(false)}
+                  className="text-slate-400 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-            <div className={`grid gap-px bg-gray-700 ${
-              compareList.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
-            }`}>
-              {compareList.map((c, i) => (
-                <div key={c._id} className="bg-gray-800 p-5">
+              <div className={`grid gap-px bg-white/5 ${
+                compareList.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+              }`}>
+                {compareList.map((c, i) => (
+                  <div key={c._id} className="bg-slate-900/60 p-6 flex flex-col h-full">
 
-                  {/* Header */}
-                  <div className="text-center mb-4">
-                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl mx-auto mb-2">
-                      {c.name.charAt(0).toUpperCase()}
+                    {/* Header */}
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center text-primary font-bold text-2xl mx-auto mb-3 border border-indigo-500/20 shadow-inner">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <h4 className="text-white font-medium text-lg mb-0.5">{c.name}</h4>
+                      <p className="text-slate-500 text-xs mb-2">{c.email}</p>
+                      <Badge label={c.status} color={statusColor[c.status]} />
                     </div>
-                    <h4 className="text-white font-semibold">{c.name}</h4>
-                    <p className="text-gray-400 text-xs">{c.email}</p>
-                    <Badge label={c.status} color={statusColor[c.status]} />
-                  </div>
 
-                  {/* Score */}
-                  <div className="text-center mb-4">
-                    <ScoreCircle score={c.aiScore} size="md" />
-                    <p className="text-gray-400 text-xs mt-2">AI Score</p>
-                  </div>
+                    {/* Score */}
+                    <div className="text-center mb-6 p-4 bg-white/5 rounded-2xl border border-white/5 shadow-inner">
+                      <div className="flex justify-center mb-2">
+                        <ScoreCircle score={c.aiScore} size="md" />
+                      </div>
+                      <p className="text-slate-400 text-xs font-medium tracking-wide uppercase">AI Score</p>
+                    </div>
 
-                  {/* Stats */}
-                  <div className="flex flex-col gap-2 text-sm mb-4">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Experience</span>
-                      <span className="text-white">{c.experience} yrs</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Job</span>
-                      <span className="text-white text-xs">{c.jobId?.title || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Recommendation</span>
-                      <span className={`text-xs font-medium ${
-                        c.aiRecommendation === 'shortlist' ? 'text-green-400'
-                        : c.aiRecommendation === 'reject' ? 'text-red-400'
-                        : 'text-yellow-400'
-                      }`}>
-                        {c.aiRecommendation || 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Skills */}
-                  <div>
-                    <p className="text-gray-400 text-xs mb-2 font-medium">SKILLS</p>
-                    <div className="flex flex-wrap gap-1">
-                      {c.skills?.slice(0, 8).map((s: string) => (
-                        <span
-                          key={s}
-                          className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full"
-                        >
-                          {s}
+                    {/* Stats */}
+                    <div className="flex flex-col gap-3 text-sm mb-6 flex-1">
+                      <div className="flex justify-between items-center py-1 border-b border-white/5">
+                        <span className="text-slate-500">Experience</span>
+                        <span className="text-slate-300 font-medium">{c.experience} yrs</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-white/5">
+                        <span className="text-slate-500">Job</span>
+                        <span className="text-slate-300 text-xs text-right max-w-[120px] truncate">{c.jobId?.title || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <span className="text-slate-500">Recommendation</span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${
+                          c.aiRecommendation === 'shortlist' ? 'bg-emerald-500/10 text-emerald-400'
+                          : c.aiRecommendation === 'reject' ? 'bg-red-500/10 text-red-400'
+                          : 'bg-amber-500/10 text-amber-400'
+                        }`}>
+                          {c.aiRecommendation || 'N/A'}
                         </span>
-                      ))}
+                      </div>
                     </div>
+
+                    {/* Skills */}
+                    <div className="mb-6">
+                      <p className="text-slate-500 text-xs mb-2 font-medium tracking-wide uppercase">Skills</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {c.skills?.slice(0, 8).map((s: string) => (
+                          <span
+                            key={s}
+                            className="text-xs bg-black/20 text-slate-300 px-2 py-1 rounded-lg border border-white/5"
+                          >
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* AI Analysis */}
+                    {c.aiAnalysis && (
+                      <div className="mb-6">
+                        <p className="text-slate-500 text-xs mb-2 font-medium tracking-wide uppercase">AI Summary</p>
+                        <p className="text-slate-300 text-xs leading-relaxed line-clamp-4 bg-white/5 p-3 rounded-xl border border-white/5">
+                          {c.aiAnalysis}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-auto">
+                      <Button
+                        variant="primary"
+                        className="w-full justify-center text-xs flex items-center gap-1.5"
+                        onClick={() => {
+                          setShowCompare(false);
+                          navigate(`/candidates/${c._id}`);
+                        }}
+                      >
+                        <Eye size={14} /> View Full Profile
+                      </Button>
+                    </div>
+
                   </div>
-
-                  {/* AI Analysis */}
-                  {c.aiAnalysis && (
-                    <div className="mt-4">
-                      <p className="text-gray-400 text-xs mb-1 font-medium">AI SUMMARY</p>
-                      <p className="text-gray-300 text-xs leading-relaxed line-clamp-4">
-                        {c.aiAnalysis}
-                      </p>
-                    </div>
-                  )}
-
-                  <Button
-                    variant="primary"
-                    className="w-full justify-center mt-4 text-xs"
-                    onClick={() => {
-                      setShowCompare(false);
-                      navigate(`/candidates/${c._id}`);
-                    }}
-                  >
-                    View Full Profile
-                  </Button>
-
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div></div>
+          </div>
         </div>
       )}
 

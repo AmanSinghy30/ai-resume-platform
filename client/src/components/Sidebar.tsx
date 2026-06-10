@@ -56,20 +56,23 @@ export default function Sidebar() {
     <div className="flex flex-col h-full">
 
       {/* Logo */}
-      <div className={`py-5 border-b border-gray-700/50 flex items-center ${
+      <div className={`py-5 border-b border-white/5 flex items-center ${
         isCollapsed ? 'px-3 justify-center' : 'px-6 justify-between'
       }`}>
         {!isCollapsed ? (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-glow-sm">
               AI
             </div>
-            <span className="text-white font-semibold text-sm whitespace-nowrap">
-              ResumeScreen
-            </span>
+            <div>
+              <span className="text-white font-bold text-sm whitespace-nowrap tracking-tight">
+                ResumeScreen
+              </span>
+              <p className="text-[10px] text-slate-500 font-medium tracking-wider uppercase">Smart Hiring</p>
+            </div>
           </div>
         ) : (
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">
+          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-white font-bold text-sm shadow-glow-sm">
             AI
           </div>
         )}
@@ -88,21 +91,29 @@ export default function Sidebar() {
               className={({ isActive }) =>
                 `group relative flex items-center ${
                   isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
-                } py-2.5 rounded-lg text-sm transition-colors ${
+                } py-2.5 rounded-xl text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-primary text-white font-medium'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                    ? 'bg-gradient-to-r from-primary/20 to-secondary/10 text-white font-medium border border-primary/20 shadow-inner-glow'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`
               }
             >
-              <Icon size={18} className="flex-shrink-0" />
-              {!isCollapsed && <span className="whitespace-nowrap">{link.label}</span>}
+              {({ isActive }) => (
+                <>
+                  {/* Active indicator bar */}
+                  {isActive && !isCollapsed && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 gradient-primary rounded-r-full" />
+                  )}
+                  <Icon size={18} className={`flex-shrink-0 ${isActive ? 'text-primary' : ''}`} />
+                  {!isCollapsed && <span className="whitespace-nowrap">{link.label}</span>}
 
-              {/* Hover tooltip when collapsed */}
-              {isCollapsed && (
-                <span className="absolute left-full ml-3 px-2 py-1 bg-gray-900 border border-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                  {link.label}
-                </span>
+                  {/* Hover tooltip when collapsed */}
+                  {isCollapsed && (
+                    <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
+                      {link.label}
+                    </span>
+                  )}
+                </>
               )}
             </NavLink>
           );
@@ -110,20 +121,20 @@ export default function Sidebar() {
       </nav>
 
       {/* User Info + Logout */}
-      <div className={`py-4 border-t border-gray-700/50 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+      <div className={`py-4 border-t border-white/5 ${isCollapsed ? 'px-2' : 'px-3'}`}>
         {!isCollapsed ? (
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-primary/20">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="min-w-0">
               <p className="text-white text-xs font-medium truncate">{user?.name}</p>
-              <p className="text-gray-500 text-xs truncate">{user?.email}</p>
+              <p className="text-slate-600 text-xs truncate">{user?.email}</p>
             </div>
           </div>
         ) : (
           <div className="flex justify-center mb-2" title={user?.name}>
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
@@ -134,13 +145,13 @@ export default function Sidebar() {
           title={isCollapsed ? 'Logout' : undefined}
           className={`group relative w-full flex items-center ${
             isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
-          } py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors`}
+          } py-2.5 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200`}
         >
           <LogOut size={18} className="flex-shrink-0" />
           {!isCollapsed && <span>Logout</span>}
 
           {isCollapsed && (
-            <span className="absolute left-full ml-3 px-2 py-1 bg-gray-900 border border-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+            <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
               Logout
             </span>
           )}
@@ -153,16 +164,20 @@ export default function Sidebar() {
     <>
       {/* ─── DESKTOP SIDEBAR ─── */}
       <aside
-        className={`hidden md:flex flex-col bg-gray-800 border-r border-gray-700 h-screen sticky top-0 flex-shrink-0 transition-all duration-300 ${
-          collapsed ? 'w-16' : 'w-56'
+        className={`hidden md:flex flex-col h-screen sticky top-0 flex-shrink-0 transition-all duration-300 ${
+          collapsed ? 'w-16' : 'w-60'
         }`}
+        style={{
+          background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.98) 100%)',
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+        }}
       >
         <SidebarContent isCollapsed={collapsed} />
 
         {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(prev => !prev)}
-          className="absolute -right-3 top-14 w-7 h-7 bg-gray-700 hover:bg-primary border-2 border-gray-900 rounded-full flex items-center justify-center text-white shadow-lg transition-colors z-20"
+          className="absolute -right-3 top-14 w-7 h-7 glass-strong rounded-full flex items-center justify-center text-white shadow-glass transition-all duration-200 z-20 hover:scale-110 hover:shadow-glow-sm"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -172,7 +187,7 @@ export default function Sidebar() {
       {/* ─── MOBILE HAMBURGER ─── */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center text-white shadow-lg"
+        className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 glass-strong rounded-xl flex items-center justify-center text-white shadow-glass"
       >
         <Menu size={20} />
       </button>
@@ -181,13 +196,19 @@ export default function Sidebar() {
       {mobileOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-black/60 z-40"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="md:hidden fixed left-0 top-0 h-full w-64 bg-gray-800 border-r border-gray-700 z-50 flex flex-col shadow-2xl">
+          <aside
+            className="md:hidden fixed left-0 top-0 h-full w-64 z-50 flex flex-col shadow-glass-lg animate-slide-up"
+            style={{
+              background: 'linear-gradient(180deg, rgba(15,23,42,0.98) 0%, rgba(15,23,42,1) 100%)',
+              borderRight: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white z-10"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white z-10 transition-colors"
             >
               <X size={20} />
             </button>

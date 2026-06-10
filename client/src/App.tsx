@@ -22,9 +22,14 @@ function App() {
           position="top-right"
           toastOptions={{
             style: {
-              background: '#1F2937',
-              color: '#fff',
-              border: '1px solid #374151',
+              background: 'rgba(30, 41, 59, 0.9)',
+              backdropFilter: 'blur(16px)',
+              color: '#f1f5f9',
+              border: '1px solid rgba(99, 102, 241, 0.2)',
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              fontSize: '14px',
+              fontFamily: 'Inter, system-ui, sans-serif',
             },
           }}
         />

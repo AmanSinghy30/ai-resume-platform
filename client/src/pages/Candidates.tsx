@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce } from 'use-debounce';
 import Layout from '../components/Layout';
@@ -11,7 +11,6 @@ import FilterPanel from '../components/FilterPanel';
 import { getCandidates, deleteCandidate, bulkDeleteCandidates } from '../services/candidateService';
 import toast from 'react-hot-toast';
 import {
-  Upload,
   Plus,
   X,
   FileText,
@@ -56,7 +55,7 @@ export default function Candidates() {
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
-  const loadCandidates = () => {
+  const loadCandidates = useCallback(() => {
     setLoading(true);
     const params: Record<string, string> = {};
     if (debouncedSearch) params.search = debouncedSearch;
@@ -71,12 +70,12 @@ export default function Candidates() {
       .then(data => setCandidates(data.candidates))
       .catch(() => toast.error('Failed to load candidates'))
       .finally(() => setLoading(false));
-  };
+  }, [debouncedSearch, filters]);
 
   useEffect(() => {
     loadCandidates();
     setSelected([]);
-  }, [debouncedSearch, filters]);
+  }, [debouncedSearch, filters, loadCandidates]);
 
   // ─── Selection helpers ───
   const toggleSelect = (id: string) => {
@@ -134,10 +133,10 @@ export default function Candidates() {
     <Layout title="Candidates">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 animate-fade-in">
         <div>
-          <h2 className="text-xl font-bold text-white">All Candidates</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-xl font-bold text-white tracking-tight">All Candidates</h2>
+          <p className="text-sm text-slate-500 mt-1">
             {loading
               ? 'Loading...'
               : `${candidates.length} candidates found${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
@@ -155,19 +154,19 @@ export default function Candidates() {
               {deleting ? 'Deleting...' : `Delete (${selected.length})`}
             </Button>
           )}
-          <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
+          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
             <button
               onClick={() => setView('grid')}
-              className={`px-3 py-1.5 rounded text-sm transition-colors flex items-center gap-1 ${
-                view === 'grid' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
+                view === 'grid' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
               <LayoutGrid size={14} /> Grid
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 rounded text-sm transition-colors flex items-center gap-1 ${
-                view === 'list' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
+                view === 'list' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
               }`}
             >
               <List size={14} /> List
@@ -197,33 +196,33 @@ export default function Candidates() {
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 mb-4">
           {search && (
-            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
               Search: "{search}"
-              <button onClick={() => setSearch('')} className="text-gray-400 hover:text-white ml-1">
+              <button onClick={() => setSearch('')} className="text-slate-400 hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {filters.status && (
-            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
               Status: {filters.status}
-              <button onClick={() => setFilters(f => ({ ...f, status: '' }))} className="text-gray-400 hover:text-white ml-1">
+              <button onClick={() => setFilters(f => ({ ...f, status: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {filters.jobId && (
-            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
               Job filtered
-              <button onClick={() => setFilters(f => ({ ...f, jobId: '' }))} className="text-gray-400 hover:text-white ml-1">
+              <button onClick={() => setFilters(f => ({ ...f, jobId: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {(filters.minScore || filters.maxScore) && (
-            <span className="text-xs bg-gray-700 text-gray-300 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
               Score: {filters.minScore || '0'}–{filters.maxScore || '100'}
-              <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-gray-400 hover:text-white ml-1">
+              <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
@@ -240,7 +239,7 @@ export default function Candidates() {
             onChange={toggleSelectAll}
             className="w-4 h-4 accent-primary cursor-pointer"
           />
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-slate-500">
             {allSelected ? 'Deselect all' : 'Select all'}
           </span>
         </div>
@@ -251,10 +250,12 @@ export default function Candidates() {
 
       {/* Empty */}
       {!loading && candidates.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <FileText size={56} className="text-gray-500 mb-4" />
+        <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-5 border border-white/5">
+            <FileText size={36} className="text-slate-500" />
+          </div>
           <h3 className="text-white font-semibold text-lg mb-2">No candidates found</h3>
-          <p className="text-gray-400 text-sm mb-6">
+          <p className="text-slate-500 text-sm mb-6">
             {hasActiveFilters
               ? 'Try adjusting your search or filters'
               : 'Upload resumes to start screening'}
@@ -275,12 +276,12 @@ export default function Candidates() {
             return (
               <Card
                 key={c._id}
-                className={`hover:border-gray-500 transition-colors ${
-                  isSelected ? 'border-primary' : ''
+                className={`transition-all duration-200 ${
+                  isSelected ? 'border-primary/40 shadow-glow-sm' : ''
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -289,31 +290,31 @@ export default function Candidates() {
                     />
                     <div className="min-w-0">
                       <h3 className="text-white font-semibold truncate">{c.name}</h3>
-                      <p className="text-gray-400 text-sm truncate">{c.email}</p>
+                      <p className="text-slate-500 text-sm truncate">{c.email}</p>
                     </div>
                   </div>
                   <Badge label={c.status} color={statusColor[c.status]} />
                 </div>
 
-                <p className="text-gray-300 text-sm mb-3 flex items-center gap-1.5">
-                  <Briefcase size={14} className="flex-shrink-0" />
+                <p className="text-slate-400 text-sm mb-3 flex items-center gap-1.5">
+                  <Briefcase size={14} className="flex-shrink-0 text-slate-500" />
                   {c.jobId?.title || 'No job'} • {c.experience} yrs
                 </p>
 
-                <div className="flex flex-wrap gap-1 mb-4">
+                <div className="flex flex-wrap gap-1.5 mb-4">
                   {c.skills.length > 0
                     ? c.skills.slice(0, 4).map(s => (
-                        <span key={s} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">{s}</span>
+                        <span key={s} className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5">{s}</span>
                       ))
-                    : <span className="text-xs text-gray-500">No skills yet</span>
+                    : <span className="text-xs text-slate-600">No skills yet</span>
                   }
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className={`font-bold text-sm ${
-                    c.aiScore === null ? 'text-gray-500'
-                    : c.aiScore >= 80 ? 'text-green-400'
-                    : c.aiScore >= 60 ? 'text-yellow-400'
+                    c.aiScore === null ? 'text-slate-600'
+                    : c.aiScore >= 80 ? 'text-emerald-400'
+                    : c.aiScore >= 60 ? 'text-amber-400'
                     : 'text-red-400'
                   }`}>
                     {c.aiScore !== null ? `${c.aiScore}/100` : 'Not scored'}
@@ -321,14 +322,14 @@ export default function Candidates() {
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
-                      className="text-xs py-1 px-2 flex items-center gap-1"
+                      className="text-xs py-1.5 px-2.5 flex items-center gap-1"
                       onClick={() => navigate(`/candidates/${c._id}`)}
                     >
                       <Eye size={12} /> View
                     </Button>
                     <Button
                       variant="ghost"
-                      className="text-xs py-1 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      className="text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                       onClick={() => handleDeleteOne(c._id, c.name)}
                     >
                       <Trash2 size={12} />
@@ -349,8 +350,8 @@ export default function Candidates() {
             return (
               <Card
                 key={c._id}
-                className={`hover:border-gray-500 transition-colors ${
-                  isSelected ? 'border-primary' : ''
+                className={`transition-all duration-200 ${
+                  isSelected ? 'border-primary/40 shadow-glow-sm' : ''
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -361,26 +362,26 @@ export default function Candidates() {
                       onChange={() => toggleSelect(c._id)}
                       className="w-4 h-4 accent-primary cursor-pointer flex-shrink-0"
                     />
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 border border-primary/15">
                       {c.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-white font-medium truncate">{c.name}</h3>
-                      <p className="text-gray-400 text-xs truncate">{c.email} • {c.jobId?.title || 'No job'}</p>
+                      <p className="text-slate-500 text-xs truncate">{c.email} • {c.jobId?.title || 'No job'}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="hidden md:flex gap-1">
+                    <div className="hidden md:flex gap-1.5">
                       {c.skills.slice(0, 3).map(s => (
-                        <span key={s} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">{s}</span>
+                        <span key={s} className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5">{s}</span>
                       ))}
                     </div>
                     <Badge label={c.status} color={statusColor[c.status]} />
                     <span className={`font-bold text-sm w-16 text-right ${
-                      c.aiScore === null ? 'text-gray-500'
-                      : c.aiScore >= 80 ? 'text-green-400'
-                      : c.aiScore >= 60 ? 'text-yellow-400'
+                      c.aiScore === null ? 'text-slate-600'
+                      : c.aiScore >= 80 ? 'text-emerald-400'
+                      : c.aiScore >= 60 ? 'text-amber-400'
                       : 'text-red-400'
                     }`}>
                       {c.aiScore !== null ? `${c.aiScore}/100` : '—'}
@@ -388,14 +389,14 @@ export default function Candidates() {
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
-                        className="text-xs py-1 px-2 flex items-center gap-1"
+                        className="text-xs py-1.5 px-2.5 flex items-center gap-1"
                         onClick={() => navigate(`/candidates/${c._id}`)}
                       >
                         <Eye size={12} /> View
                       </Button>
                       <Button
                         variant="ghost"
-                        className="text-xs py-1 px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         onClick={() => handleDeleteOne(c._id, c.name)}
                       >
                         <Trash2 size={12} />

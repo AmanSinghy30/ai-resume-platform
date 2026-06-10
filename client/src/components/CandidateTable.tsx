@@ -29,48 +29,48 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-700">
+    <div className="overflow-x-auto rounded-2xl glass shadow-glass">
       <table className="w-full text-sm">
-        <thead className="bg-gray-800 border-b border-gray-700">
-          <tr>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium">Name</th>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium">Job</th>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium w-36">AI Score</th>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium">Uploaded</th>
-            <th className="text-left px-4 py-3 text-gray-400 font-medium">Actions</th>
+        <thead>
+          <tr className="border-b border-white/5">
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Name</th>
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Job</th>
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider w-36">AI Score</th>
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Status</th>
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Uploaded</th>
+            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-700 bg-gray-900">
+        <tbody className="divide-y divide-white/5">
           {candidates.map((c) => (
-            <tr key={c.id} className="hover:bg-gray-800 transition-colors">
-              <td className="px-4 py-3">
+            <tr key={c.id} className="hover:bg-white/[0.03] transition-colors group">
+              <td className="px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-indigo-500/20">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-white font-medium">{c.name}</p>
-                    <p className="text-gray-500 text-xs">{c.email}</p>
+                    <p className="text-slate-500 text-xs">{c.email}</p>
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-3 text-gray-300 text-sm">{c.jobTitle}</td>
-              <td className="px-4 py-3 w-36">
+              <td className="px-5 py-4 text-slate-300 text-sm">{c.jobTitle}</td>
+              <td className="px-5 py-4 w-36">
                 {c.score !== null ? (
                   <ScoreBar score={c.score} showLabel={false} />
                 ) : (
-                  <span className="text-gray-500 text-xs">Not scored</span>
+                  <span className="text-slate-600 text-xs">Not scored</span>
                 )}
               </td>
-              <td className="px-4 py-3">
+              <td className="px-5 py-4">
                 <Badge label={c.status} color={statusColor[c.status]} />
               </td>
-              <td className="px-4 py-3 text-gray-400 text-xs">{c.uploadedAt}</td>
-              <td className="px-4 py-3">
+              <td className="px-5 py-4 text-slate-500 text-xs">{c.uploadedAt}</td>
+              <td className="px-5 py-4">
                 <Button
                   variant="ghost"
-                  className="text-xs py-1 px-2 flex items-center gap-1"
+                  className="text-xs py-1.5 px-3 flex items-center gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity"
                   onClick={() => navigate(`/candidates/${c.id}`)}
                 >
                   <Eye size={12} /> View
@@ -80,7 +80,7 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
           ))}
           {candidates.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-4 py-10 text-center text-gray-500">
+              <td colSpan={6} className="px-5 py-12 text-center text-slate-600">
                 No candidates found.
               </td>
             </tr>

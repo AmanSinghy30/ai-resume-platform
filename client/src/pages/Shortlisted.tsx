@@ -12,6 +12,7 @@ import {
   exportShortlisted,
 } from '../services/candidateService';
 import toast from 'react-hot-toast';
+import { CheckCircle2, Zap, Download, X, Eye } from 'lucide-react';
 
 export default function Shortlisted() {
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -98,10 +99,10 @@ const handleAutoShortlist = async () => {
     <Layout title="Shortlisted Candidates">
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 animate-fade-in">
         <div>
-          <h2 className="text-xl font-bold text-white">Shortlisted Candidates</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-xl font-bold text-white tracking-tight">Shortlisted Candidates</h2>
+          <p className="text-sm text-slate-500 mt-1">
             {candidates.length} candidates ready for interview
           </p>
         </div>
@@ -109,28 +110,30 @@ const handleAutoShortlist = async () => {
           <Button
             variant="ghost"
             onClick={() => setShowAutoModal(true)}
+            className="flex items-center gap-2"
           >
-            ⚡ Auto-Shortlist
+            <Zap size={16} className="text-amber-400" /> Auto-Shortlist
           </Button>
           <Button
             variant="primary"
             onClick={handleExport}
             disabled={exporting || candidates.length === 0}
+            className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-glow-green"
           >
-            {exporting ? 'Exporting...' : '📥 Export CSV'}
+            <Download size={16} /> {exporting ? 'Exporting...' : 'Export CSV'}
           </Button>
         </div>
       </div>
 
       {/* Bulk Actions Bar */}
       {selected.length > 0 && (
-        <div className="flex items-center gap-4 bg-primary/10 border border-primary/30 rounded-xl px-4 py-3 mb-4">
+        <div className="flex items-center gap-4 bg-primary/10 border border-primary/20 rounded-xl px-5 py-3 mb-4 shadow-inner-glow animate-fade-in">
           <p className="text-primary text-sm font-medium">
             {selected.length} selected
           </p>
           <Button
             variant="danger"
-            className="text-xs py-1.5"
+            className="text-xs py-1.5 px-4"
             disabled={processing}
             onClick={handleBulkReject}
           >
@@ -138,7 +141,7 @@ const handleAutoShortlist = async () => {
           </Button>
           <button
             onClick={() => setSelected([])}
-            className="text-gray-400 hover:text-white text-sm ml-auto"
+            className="text-slate-400 hover:text-white text-sm ml-auto transition-colors"
           >
             Clear selection
           </button>
@@ -147,13 +150,15 @@ const handleAutoShortlist = async () => {
 
       {/* Empty State */}
       {candidates.length === 0 && (
-        <Card>
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-5xl mb-4">✅</p>
+        <Card className="animate-fade-in">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-5 border border-emerald-500/20 shadow-glow-green">
+              <CheckCircle2 size={36} className="text-emerald-400" />
+            </div>
             <h3 className="text-white font-semibold text-lg mb-2">
               No shortlisted candidates yet
             </h3>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-slate-500 text-sm mb-6">
               Shortlist candidates from the Candidates page or use Auto-Shortlist
             </p>
             <Button variant="primary" onClick={() => navigate('/candidates')}>
@@ -165,103 +170,112 @@ const handleAutoShortlist = async () => {
 
       {/* Candidates List */}
       {candidates.length > 0 && (
-        <>
+        <div className="animate-fade-in">
           {/* Select All */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mb-4 px-2">
             <input
               type="checkbox"
               checked={selected.length === candidates.length && candidates.length > 0}
               onChange={toggleSelectAll}
               className="w-4 h-4 accent-primary cursor-pointer"
             />
-            <span className="text-gray-400 text-sm">Select all</span>
+            <span className="text-slate-400 text-sm">Select all</span>
           </div>
 
           <div className="flex flex-col gap-3">
             {candidates.map((c) => (
               <Card
                 key={c._id}
-                className={`hover:border-gray-500 transition-colors ${
-                  selected.includes(c._id) ? 'border-primary/50' : ''
+                className={`transition-all duration-200 group ${
+                  selected.includes(c._id) ? 'border-primary/50 shadow-glow-sm bg-primary/5' : 'hover:border-emerald-500/30'
                 }`}
               >
-                <div className="flex items-start gap-4">
-                  {/* Checkbox */}
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(c._id)}
-                    onChange={() => toggleSelect(c._id)}
-                    className="w-4 h-4 accent-primary cursor-pointer mt-1 flex-shrink-0"
-                  />
+                <div className="flex items-center justify-between">
+                  {/* Left Group */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0" onClick={() => toggleSelect(c._id)}>
+                    {/* Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(c._id)}
+                      onChange={() => toggleSelect(c._id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-4 h-4 accent-primary cursor-pointer flex-shrink-0"
+                    />
 
-                  {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold text-sm flex-shrink-0">
-                    {c.name.charAt(0).toUpperCase()}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-white font-semibold">{c.name}</h3>
-                        <p className="text-gray-400 text-xs">
-                          {c.email} • {c.jobId?.title || 'No job'}
-                        </p>
-                      </div>
-                      <Badge label="shortlisted" color="green" />
+                    {/* Avatar */}
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-emerald-400 font-bold text-lg flex-shrink-0 border border-emerald-500/20 shadow-inner">
+                      {c.name.charAt(0).toUpperCase()}
                     </div>
 
-                    {c.aiScore !== null && (
-                      <div className="mb-2 max-w-xs">
-                        <ScoreBar score={c.aiScore} height="h-1.5" />
-                      </div>
-                    )}
+                    {/* Info */}
+                    <div className="min-w-0">
+                      <h3 className="text-white font-medium text-base truncate">{c.name}</h3>
+                      <p className="text-slate-500 text-xs mt-0.5 truncate">
+                        {c.email} • {c.jobId?.title || 'No job'}
+                      </p>
+                    </div>
+                  </div>
 
-                    <div className="flex flex-wrap gap-1">
-                      {c.skills?.slice(0, 5).map((s: string) => (
+                  {/* Right Group */}
+                  <div className="flex items-center gap-5 flex-shrink-0">
+                    <div className="hidden lg:flex flex-col items-end w-32">
+                      {c.aiScore !== null ? (
+                        <ScoreBar score={c.aiScore} height="h-1.5" />
+                      ) : (
+                        <span className="text-slate-600 text-xs">Not scored</span>
+                      )}
+                    </div>
+                    
+                    <div className="hidden md:flex gap-1.5">
+                      {c.skills?.slice(0, 3).map((s: string) => (
                         <span
                           key={s}
-                          className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full"
+                          className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5"
                         >
                           {s}
                         </span>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Action */}
-                  <Button
-                    variant="ghost"
-                    className="text-xs py-1 px-3 flex-shrink-0"
-                    onClick={() => navigate(`/candidates/${c._id}`)}
-                  >
-                    View
-                  </Button>
+                    <Badge label="shortlisted" color="green" />
+
+                    <Button
+                      variant="ghost"
+                      className="text-xs py-1.5 px-3 flex items-center gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c._id}`); }}
+                    >
+                      <Eye size={14} /> View
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
-        </>
+        </div>
       )}
 
       {/* Auto-Shortlist Modal */}
       {showAutoModal && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in px-4">
+          <div className="glass-strong border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-glass-lg animate-scale-in">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-white font-semibold text-lg">⚡ Auto-Shortlist</h3>
+              <h3 className="text-white font-semibold text-lg tracking-tight flex items-center gap-2">
+                <Zap size={18} className="text-amber-400" /> Auto-Shortlist
+              </h3>
               <button
                 onClick={() => setShowAutoModal(false)}
-                className="text-gray-400 hover:text-white"
-              >✕</button>
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-slate-400 text-sm mb-5 leading-relaxed">
               Automatically shortlist all candidates with an AI score above your chosen threshold.
             </p>
 
-            <div className="mb-5">
-              <label className="text-sm text-gray-400 mb-1 block">
+            <div className="mb-6">
+              <label className="text-sm text-slate-400 mb-1.5 block font-medium">
                 Minimum AI Score
               </label>
               <input
@@ -270,10 +284,10 @@ const handleAutoShortlist = async () => {
                 onChange={e => setMinScore(e.target.value)}
                 min="0"
                 max="100"
-                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
+                className="w-full input-glass text-white rounded-xl px-3.5 py-2.5 text-sm"
               />
-              <p className="text-gray-500 text-xs mt-1">
-                Candidates scoring {minScore}+ will be shortlisted
+              <p className="text-emerald-400/80 text-xs mt-2 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Candidates scoring {minScore}+ will be shortlisted
               </p>
             </div>
 
@@ -287,7 +301,7 @@ const handleAutoShortlist = async () => {
               </Button>
               <Button
                 variant="primary"
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:shadow-glow-yellow"
                 disabled={processing}
                 onClick={handleAutoShortlist}
               >

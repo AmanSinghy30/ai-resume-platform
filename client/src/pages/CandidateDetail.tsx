@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { analyzeCandidate } from '../services/candidateService';
 import ScoreCircle from '../components/ScoreCircle';
 import ScoreBar from '../components/ScoreBar';
+import { ArrowLeft, Briefcase, Mail, Phone, Sparkles, Brain, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
@@ -74,7 +75,7 @@ const handleAnalyze = async () => {
   if (loading) return <Layout title="Candidate Detail"><Spinner /></Layout>;
   if (!candidate) return (
     <Layout title="Candidate Detail">
-      <p className="text-gray-400">Candidate not found.</p>
+      <p className="text-slate-500">Candidate not found.</p>
     </Layout>
   );
 
@@ -84,12 +85,12 @@ const handleAnalyze = async () => {
       {/* Back Button */}
       <button
         onClick={() => navigate('/candidates')}
-        className="text-gray-400 hover:text-white text-sm mb-6 flex items-center gap-1"
+        className="text-slate-400 hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
       >
-        ← Back to Candidates
+        <ArrowLeft size={16} /> Back to Candidates
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
 
         {/* Left — Main Info */}
         <div className="lg:col-span-2 flex flex-col gap-5">
@@ -98,14 +99,17 @@ const handleAnalyze = async () => {
           <Card>
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary font-bold text-xl border border-primary/20">
                   {candidate.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">{candidate.name}</h2>
-                  <p className="text-gray-400 text-sm">{candidate.email} • {candidate.phone || 'No phone'}</p>
-                  <p className="text-gray-300 text-sm mt-1">
-                    💼 {candidate.jobId?.title || 'No job assigned'} • {candidate.experience || 0} years exp
+                  <h2 className="text-xl font-bold text-white tracking-tight">{candidate.name}</h2>
+                  <div className="flex flex-wrap items-center gap-3 mt-1">
+                    <span className="text-slate-400 text-sm flex items-center gap-1"><Mail size={13} /> {candidate.email}</span>
+                    {candidate.phone && <span className="text-slate-400 text-sm flex items-center gap-1"><Phone size={13} /> {candidate.phone}</span>}
+                  </div>
+                  <p className="text-slate-300 text-sm mt-1 flex items-center gap-1.5">
+                    <Briefcase size={14} className="text-slate-500" /> {candidate.jobId?.title || 'No job assigned'} • {candidate.experience || 0} years exp
                   </p>
                 </div>
               </div>
@@ -113,71 +117,90 @@ const handleAnalyze = async () => {
             </div>
           </Card>
 
-          {/* AI Analysis */}
-<Card>
-  <h3 className="text-white font-semibold mb-3">AI Analysis</h3>
-  {candidate.aiAnalysis ? (
-    <p className="text-gray-300 text-sm leading-relaxed">{candidate.aiAnalysis}</p>
-  ) : (
-    <div className="text-center py-6">
-      <p className="text-4xl mb-2">🤖</p>
-      <p className="text-gray-400 text-sm">AI analysis not run yet</p>
-      <p className="text-gray-500 text-xs mt-1">Click "Run AI Analysis" to begin</p>
-    </div>
-  )}
-</Card>
+          {/* Dynamic Analysis Card: AI Analysis or Match Reason */}
+          <Card>
+            <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+              <Sparkles size={16} className="text-primary" /> 
+              {candidate.aiAnalysis ? 'AI Analysis' : 'Job Match Reason'}
+            </h3>
+            
+            {candidate.aiAnalysis ? (
+              // 1. Show detailed AI Analysis if generated
+              <p className="text-slate-300 text-sm leading-relaxed">{candidate.aiAnalysis}</p>
+            ) : candidate.reason ? (
+              // 2. Fall back to Match Reason before AI Analysis
+              <div>
+                <p className="text-slate-300 text-sm leading-relaxed mb-4">
+                  {candidate.reason}
+                </p>
+                <div className="flex items-center justify-center gap-2 text-slate-500 text-xs mt-4 pt-4 border-t border-slate-800">
+                  <Sparkles size={14} className="text-slate-500" />
+                  <span>Click "Run AI Analysis" for a deeper evaluation</span>
+                </div>
+              </div>
+            ) : (
+              // 3. Fall back to default empty state
+              <div className="text-center py-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3 border border-violet-500/15">
+                  <Sparkles size={24} className="text-violet-400" />
+                </div>
+                <p className="text-slate-400 text-sm">No analysis available</p>
+                <p className="text-slate-600 text-xs mt-1">Click "Run AI Analysis" to begin</p>
+              </div>
+            )}
+          </Card>
 
-{/* ✅ Strengths */}
-{candidate.aiStrengths?.length > 0 && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-green-400">💪</span> Strengths
-    </h3>
-    <ul className="flex flex-col gap-2">
-      {candidate.aiStrengths.map((s: string, i: number) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-          <span className="text-green-400 mt-0.5">✓</span>
-          <span className="leading-relaxed">{s}</span>
-        </li>
-      ))}
-    </ul>
-  </Card>
-)}
+          {/* Strengths */}
+          {candidate.aiStrengths?.length > 0 && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-emerald-400" /> Strengths
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {candidate.aiStrengths.map((s: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                    <span className="text-emerald-400 mt-0.5 text-xs">✓</span>
+                    <span className="leading-relaxed">{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
-{/* ✅ Weaknesses */}
-{candidate.aiWeaknesses?.length > 0 && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-red-400">⚠️</span> Areas of Concern
-    </h3>
-    <ul className="flex flex-col gap-2">
-      {candidate.aiWeaknesses.map((w: string, i: number) => (
-        <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-          <span className="text-red-400 mt-0.5">✗</span>
-          <span className="leading-relaxed">{w}</span>
-        </li>
-      ))}
-    </ul>
-  </Card>
-)}
+          {/* Weaknesses */}
+          {candidate.aiWeaknesses?.length > 0 && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <AlertTriangle size={16} className="text-amber-400" /> Areas of Concern
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {candidate.aiWeaknesses.map((w: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                    <span className="text-red-400 mt-0.5 text-xs">✗</span>
+                    <span className="leading-relaxed">{w}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
-{/* ✅ AI Reasoning */}
-{candidate.aiReasoning && (
-  <Card>
-    <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-      <span className="text-blue-400">🧠</span> AI Reasoning
-    </h3>
-    <p className="text-gray-300 text-sm leading-relaxed italic border-l-2 border-primary/50 pl-3">
-      {candidate.aiReasoning}
-    </p>
-  </Card>
-)}
+          {/* AI Reasoning */}
+          {candidate.aiReasoning && (
+            <Card>
+              <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <Brain size={16} className="text-blue-400" /> AI Reasoning
+              </h3>
+              <p className="text-slate-300 text-sm leading-relaxed italic border-l-2 border-primary/30 pl-3">
+                {candidate.aiReasoning}
+              </p>
+            </Card>
+          )}
 
           {/* Education */}
           {candidate.education && (
             <Card>
               <h3 className="text-white font-semibold mb-2">Education</h3>
-              <p className="text-gray-300 text-sm">{candidate.education}</p>
+              <p className="text-slate-300 text-sm">{candidate.education}</p>
             </Card>
           )}
 
@@ -185,8 +208,8 @@ const handleAnalyze = async () => {
           {candidate.rawText && (
             <Card>
               <h3 className="text-white font-semibold mb-3">Resume Text Preview</h3>
-              <div className="bg-gray-900 rounded-lg p-4 max-h-48 overflow-y-auto">
-                <p className="text-gray-400 text-xs font-mono leading-relaxed whitespace-pre-wrap">
+              <div className="bg-slate-900/60 rounded-xl p-4 max-h-48 overflow-y-auto border border-white/5">
+                <p className="text-slate-400 text-xs font-mono leading-relaxed whitespace-pre-wrap">
                   {candidate.rawText.slice(0, 800)}
                   {candidate.rawText.length > 800 && '...'}
                 </p>
@@ -199,36 +222,49 @@ const handleAnalyze = async () => {
         {/* Right — Score + Skills + Actions */}
         <div className="flex flex-col gap-5">
 
-          {/* AI Score */}
-         <Card>
-  <h3 className="text-white font-semibold mb-4">AI Score</h3>
-  {candidate.aiScore !== null ? (
-    <>
-      <div className="flex items-center justify-center mb-4">
-        <ScoreCircle score={candidate.aiScore} size="lg" />
-      </div>
-      <ScoreBar score={candidate.aiScore} />
-      <p className={`text-center text-sm font-medium mt-3 ${
-        candidate.aiScore >= 80 ? 'text-green-400'
-        : candidate.aiScore >= 60 ? 'text-yellow-400'
-        : 'text-red-400'
-      }`}>
-        Recommendation: {candidate.aiRecommendation || 'None'}
-      </p>
-    </>
-  ) : (
-    <div className="text-center py-4">
-      <ScoreCircle score={null} size="md" />
-      <p className="text-gray-500 text-sm mt-3">Not scored yet</p>
-    </div>
-  )}
-</Card>
+          {/* Dynamic Score Card: AI Score or Match Score */}
+          <Card>
+            <h3 className="text-white font-semibold mb-4">
+              {candidate.aiScore != null ? 'AI Score' : 'Match Score'}
+            </h3>
+            
+            {candidate.aiScore != null ? (
+              // 1. Show AI Score if generated
+              <>
+                <div className="flex items-center justify-center mb-4">
+                  <ScoreCircle score={candidate.aiScore} size="lg" />
+                </div>
+                <ScoreBar score={candidate.aiScore} />
+                <p className={`text-center text-sm font-medium mt-3 ${
+                  candidate.aiScore >= 80 ? 'text-emerald-400'
+                  : candidate.aiScore >= 60 ? 'text-amber-400'
+                  : 'text-red-400'
+                }`}>
+                  Recommendation: {candidate.aiRecommendation || 'None'}
+                </p>
+              </>
+            ) : candidate.match_score != null ? (
+              // 2. Fall back to Match Score
+              <div className="text-center py-4">
+                 <div className="flex items-center justify-center mb-4">
+                  <ScoreCircle score={candidate.match_score} size="lg" />
+                </div>
+                <p className="text-slate-500 text-sm mt-3">Basic match (AI Analysis pending)</p>
+              </div>
+            ) : (
+              // 3. Fall back to default
+              <div className="text-center py-4">
+                <ScoreCircle score={null as any} size="md" />
+                <p className="text-slate-600 text-sm mt-3">Not scored yet</p>
+              </div>
+            )}
+          </Card>
 
           {/* Skills */}
           <Card>
             <h3 className="text-white font-semibold mb-3">
               Skills
-              <span className="text-gray-500 text-xs font-normal ml-2">
+              <span className="text-slate-600 text-xs font-normal ml-2">
                 ({candidate.skills?.length || 0} found)
               </span>
             </h3>
@@ -237,14 +273,14 @@ const handleAnalyze = async () => {
                 {candidate.skills.map((skill: string) => (
                   <span
                     key={skill}
-                    className="text-xs bg-gray-700 text-gray-300 px-2.5 py-1 rounded-full"
+                    className="text-xs bg-white/5 text-slate-300 px-2.5 py-1 rounded-lg border border-white/5"
                   >
                     {skill}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No skills extracted</p>
+              <p className="text-slate-600 text-sm">No skills extracted</p>
             )}
           </Card>
 
@@ -295,17 +331,17 @@ const handleAnalyze = async () => {
             <h3 className="text-white font-semibold mb-3">Details</h3>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Uploaded</span>
-                <span className="text-gray-300">
+                <span className="text-slate-500">Uploaded</span>
+                <span className="text-slate-300">
                   {new Date(candidate.createdAt).toLocaleDateString('en-IN')}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Experience</span>
-                <span className="text-gray-300">{candidate.experience || 0} years</span>
+                <span className="text-slate-500">Experience</span>
+                <span className="text-slate-300">{candidate.experience || 0} years</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Status</span>
+                <span className="text-slate-500">Status</span>
                 <Badge label={candidate.status} color={statusColor[candidate.status]} />
               </div>
               {candidate.resumeUrl && (
@@ -313,7 +349,7 @@ const handleAnalyze = async () => {
                     href={`http://localhost:5000/${candidate.resumeUrl.replace(/\\/g, '/')}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-primary text-sm hover:underline text-center mt-2"
+                    className="text-primary text-sm hover:text-primary-dark text-center mt-2 transition-colors font-medium"
                 >
                   View Resume PDF →
                 </a>

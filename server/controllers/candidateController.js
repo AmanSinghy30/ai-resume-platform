@@ -1,3 +1,4 @@
+//const { triggerResumeWorkflow } = require('../utils/n8nClient');
 const Candidate = require('../models/Candidate');
 const Job = require('../models/Job');
 const ActivityLog = require('../models/ActivityLog');
@@ -79,6 +80,28 @@ const uploadResume = async (req, res) => {
       console.warn(`⚠️ PDF parsing failed for ${name}`);
     }
 
+
+// Try n8n first — falls back to manual if n8n is off or unavailable
+/*const n8nResult = await triggerResumeWorkflow(
+  candidate._id.toString(),
+  filePath
+);
+
+if (!n8nResult.success) {
+  // n8n not available — run existing manual flow as before
+  if (parsed.success && parsed.text) {
+    candidate.rawText = parsed.text;
+    candidate.skills = extractSkills(parsed.text);
+    candidate.experience = extractExperience(parsed.text);
+    candidate.education = extractEducation(parsed.text);
+    await candidate.save();
+    console.log(`✅ Saved — ${name} | ${candidate.skills.length} skills extracted`);
+  } else {
+    console.warn(`⚠️ PDF parsing failed for ${name}`);
+  }
+} else {
+  console.log(`✅ n8n handled parsing + analysis for: ${name}`);
+}*/
     // Add candidate to job's candidates array
     if (jobId) {
       await Job.findByIdAndUpdate(jobId, { $push: { candidates: candidate._id } });

@@ -9,6 +9,7 @@ import ScoreBar from '../components/ScoreBar';
 import ScoreCircle from '../components/ScoreCircle';
 import { getJobById, matchCandidates, scoreAllForJob } from '../services/jobService';
 import toast from 'react-hot-toast';
+import { ArrowLeft, Brain, Users, Trophy, Eye, CheckSquare, Square } from 'lucide-react';
 
 type RankedCandidate = {
   candidateId: string;
@@ -34,7 +35,7 @@ export default function JobDetail() {
   const [scoring, setScoring] = useState(false);
   const [view, setView] = useState<'candidates' | 'ranked'>('candidates');
 
-  // ✅ NEW — Selected candidate IDs
+  // Selected candidate IDs
   const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
@@ -131,7 +132,7 @@ export default function JobDetail() {
   if (loading) return <Layout title="Job Detail"><Spinner /></Layout>;
   if (!job) return (
     <Layout title="Job Detail">
-      <p className="text-gray-400">Job not found.</p>
+      <p className="text-slate-500">Job not found.</p>
     </Layout>
   );
 
@@ -143,43 +144,43 @@ export default function JobDetail() {
 
       <button
         onClick={() => navigate('/jobs')}
-        className="text-gray-400 hover:text-white text-sm mb-6 flex items-center gap-1"
+        className="text-slate-400 hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
       >
-        ← Back to Jobs
+        <ArrowLeft size={16} /> Back to Jobs
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
 
         {/* Left — Job Info */}
         <div className="flex flex-col gap-5">
 
           <Card>
-            <h2 className="text-xl font-bold text-white mb-2">{job.title}</h2>
-            <p className="text-gray-300 text-sm leading-relaxed mb-4">{job.description}</p>
+            <h2 className="text-xl font-bold text-white mb-2 tracking-tight">{job.title}</h2>
+            <p className="text-slate-400 text-sm leading-relaxed mb-5">{job.description}</p>
 
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-6">
               {job.requiredSkills.map((skill: string) => (
                 <span
                   key={skill}
-                  className="text-xs bg-primary/20 text-primary px-2.5 py-1 rounded-full"
+                  className="text-xs bg-white/5 border border-white/5 text-slate-300 px-2.5 py-1 rounded-lg"
                 >
                   {skill}
                 </span>
               ))}
             </div>
 
-            <div className="flex flex-col gap-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Experience</span>
-                <span className="text-gray-300">{job.experienceRequired}+ years</span>
+            <div className="flex flex-col gap-3 text-sm">
+              <div className="flex justify-between items-center py-2 border-b border-white/5">
+                <span className="text-slate-500">Experience</span>
+                <span className="text-slate-300 font-medium">{job.experienceRequired}+ years</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Candidates</span>
-                <span className="text-gray-300">{candidates.length}</span>
+              <div className="flex justify-between items-center py-2 border-b border-white/5">
+                <span className="text-slate-500">Candidates</span>
+                <span className="text-slate-300 font-medium">{candidates.length}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Created</span>
-                <span className="text-gray-300">
+              <div className="flex justify-between items-center py-2">
+                <span className="text-slate-500">Created</span>
+                <span className="text-slate-300 font-medium">
                   {new Date(job.createdAt).toLocaleDateString('en-IN')}
                 </span>
               </div>
@@ -188,13 +189,16 @@ export default function JobDetail() {
 
           {/* AI Actions */}
           <Card>
-            <h3 className="text-white font-semibold mb-3">AI Actions</h3>
-            <div className="flex flex-col gap-3">
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <Brain size={16} className="text-primary" /> AI Actions
+            </h3>
+            <div className="flex flex-col gap-4">
 
-              <div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <Button
                   variant="secondary"
-                  className="w-full justify-center"
+                  className="w-full justify-center relative z-10"
                   disabled={scoring || candidates.length === 0 || selected.length === 0}
                   onClick={handleScore}
                 >
@@ -204,53 +208,56 @@ export default function JobDetail() {
                     ? '🤖 Score Selected'
                     : `🤖 Score Selected (${selected.length})`}
                 </Button>
-                <p className="text-gray-500 text-xs mt-1 text-center">
+                <p className="text-slate-500 text-xs mt-2 text-center relative z-10">
                   {selected.length === 0
                     ? 'Select candidates from the list to score'
                     : `Will score ${selected.length} candidate${selected.length > 1 ? 's' : ''}`}
                 </p>
+                
+                {/* Quick Selectors */}
+                {candidates.length > 0 && (
+                  <div className="flex gap-2 mt-3 relative z-10">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="flex-1 text-xs bg-black/20 hover:bg-black/30 border border-white/5 text-slate-300 px-2 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      {allSelected ? <CheckSquare size={12} /> : <Square size={12} />}
+                      {allSelected ? 'Deselect All' : 'Select All'}
+                    </button>
+                    <button
+                      onClick={selectUnscored}
+                      className="flex-1 text-xs bg-black/20 hover:bg-black/30 border border-white/5 text-slate-300 px-2 py-1.5 rounded-lg transition-colors"
+                    >
+                      Select Unscored
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Quick Selectors */}
-              {candidates.length > 0 && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={toggleSelectAll}
-                    className="flex-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1.5 rounded transition-colors"
-                  >
-                    {allSelected ? 'Deselect All' : 'Select All'}
-                  </button>
-                  <button
-                    onClick={selectUnscored}
-                    className="flex-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1.5 rounded transition-colors"
-                  >
-                    Select Unscored
-                  </button>
-                </div>
-              )}
-
-              <div>
+              <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <Button
                   variant="primary"
-                  className="w-full justify-center"
+                  className="w-full justify-center bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-glow-green relative z-10"
                   disabled={matching || candidates.length === 0 || !job.description}
                   onClick={handleMatch}
                 >
                   {matching ? '⏳ Ranking...' : '🏆 Rank by AI Match'}
                 </Button>
                 {!job.description && (
-                  <p className="text-yellow-400 text-xs text-center mt-1">
+                  <p className="text-amber-400 text-xs text-center mt-2 relative z-10">
                     Add a job description to enable ranking
                   </p>
                 )}
-                <p className="text-gray-500 text-xs mt-1 text-center">
+                <p className="text-slate-500 text-xs mt-2 text-center relative z-10">
                   Ranks all candidates by job fit
                 </p>
               </div>
+
             </div>
 
             {candidates.length === 0 && (
-              <p className="text-yellow-400 text-xs text-center mt-3">
+              <p className="text-amber-400 text-xs text-center mt-4">
                 No candidates assigned to this job yet
               </p>
             )}
@@ -262,28 +269,29 @@ export default function JobDetail() {
 
           {/* View Toggle */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold">
+            <h3 className="text-white font-semibold flex items-center gap-2">
+              {view === 'ranked' ? <Trophy size={18} className="text-amber-400" /> : <Users size={18} className="text-blue-400" />}
               {view === 'ranked'
                 ? 'AI Ranked Candidates'
                 : `All Candidates (${candidates.length})${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
             </h3>
             {ranking.length > 0 && (
-              <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
+              <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
                 <button
                   onClick={() => setView('candidates')}
-                  className={`px-3 py-1.5 rounded text-xs transition-colors ${
-                    view === 'candidates' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1.5 ${
+                    view === 'candidates' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  All
+                  <Users size={14} /> All
                 </button>
                 <button
                   onClick={() => setView('ranked')}
-                  className={`px-3 py-1.5 rounded text-xs transition-colors ${
-                    view === 'ranked' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1.5 ${
+                    view === 'ranked' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-glow-green' : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  🏆 Ranked
+                  <Trophy size={14} /> Ranked
                 </button>
               </div>
             )}
@@ -292,10 +300,12 @@ export default function JobDetail() {
           {/* Empty / Ranked / All */}
           {candidates.length === 0 ? (
             <Card>
-              <div className="text-center py-10">
-                <p className="text-4xl mb-3">👤</p>
-                <p className="text-white font-medium mb-1">No candidates yet</p>
-                <p className="text-gray-400 text-sm mb-4">
+              <div className="text-center py-16 animate-fade-in">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mx-auto mb-5 border border-white/5">
+                  <Users size={36} className="text-slate-500" />
+                </div>
+                <p className="text-white font-medium mb-1 text-lg">No candidates yet</p>
+                <p className="text-slate-500 text-sm mb-6">
                   Upload resumes and select this job position
                 </p>
                 <Button variant="primary" onClick={() => navigate('/upload')}>
@@ -304,34 +314,39 @@ export default function JobDetail() {
               </div>
             </Card>
           ) : view === 'ranked' ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 animate-fade-in">
               {getRankedCandidates().map((c: any, index: number) => (
-                <Card key={c._id} className="hover:border-gray-500 transition-colors">
-                  <div className="flex items-start gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                      index === 0 ? 'bg-yellow-500/20 text-yellow-400'
-                      : index === 1 ? 'bg-gray-400/20 text-gray-300'
-                      : index === 2 ? 'bg-orange-500/20 text-orange-400'
-                      : 'bg-gray-700 text-gray-400'
+                <Card key={c._id} className="relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+                  {/* Subtle rank gradient background */}
+                  <div className={`absolute top-0 right-0 bottom-0 w-1/3 bg-gradient-to-l from-emerald-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                  
+                  <div className="flex items-start gap-4 relative z-10">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${
+                      index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-600 text-white border border-yellow-300/30 shadow-glow-yellow'
+                      : index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white border border-slate-300/30'
+                      : index === 2 ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white border border-orange-300/30'
+                      : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-400 border border-white/5'
                     }`}>
                       #{index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="text-white font-semibold">{c.name}</h4>
-                          <p className="text-gray-400 text-xs">{c.email}</p>
+                          <h4 className="text-white font-semibold text-lg">{c.name}</h4>
+                          <p className="text-slate-500 text-xs mt-0.5">{c.email}</p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3">
                           <Badge label={c.status} color={statusColor[c.status]} />
                           <ScoreCircle score={c.matchScore} size="sm" />
                         </div>
                       </div>
                       <ScoreBar score={c.matchScore} showLabel={false} height="h-1.5" />
-                      <p className="text-gray-400 text-xs mt-2 italic">{c.reason}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {c.skills?.slice(0, 4).map((s: string) => (
-                          <span key={s} className="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full">
+                      <p className="text-slate-400 text-sm mt-3 leading-relaxed bg-white/5 rounded-lg p-3 border border-white/5 border-l-2 border-l-emerald-500">
+                        {c.reason}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {c.skills?.slice(0, 6).map((s: string) => (
+                          <span key={s} className="text-xs bg-black/20 border border-white/5 text-slate-300 px-2 py-1 rounded-lg">
                             {s}
                           </span>
                         ))}
@@ -339,43 +354,42 @@ export default function JobDetail() {
                     </div>
                     <Button
                       variant="ghost"
-                      className="text-xs py-1 px-2 flex-shrink-0"
+                      className="text-xs py-1.5 px-3 flex-shrink-0 flex items-center gap-1.5"
                       onClick={() => navigate(`/candidates/${c._id}`)}
                     >
-                      View
+                      <Eye size={14} /> View
                     </Button>
                   </div>
                 </Card>
               ))}
             </div>
           ) : (
-            // ✅ NEW — All candidates with checkboxes
             <>
               {/* Master checkbox */}
-              <div className="flex items-center gap-3 mb-3 px-1">
+              <div className="flex items-center gap-3 mb-4 px-2">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleSelectAll}
                   className="w-4 h-4 accent-primary cursor-pointer"
                 />
-                <span className="text-gray-400 text-xs">
+                <span className="text-slate-400 text-sm">
                   {allSelected ? 'Deselect all' : 'Select all'}
                 </span>
               </div>
 
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 animate-fade-in">
                 {candidates.map((c: any) => {
                   const isSelected = selected.includes(c._id);
                   return (
                     <Card
                       key={c._id}
-                      className={`hover:border-gray-500 transition-colors cursor-pointer ${
-                        isSelected ? 'border-primary' : ''
+                      className={`cursor-pointer transition-all duration-200 group ${
+                        isSelected ? 'border-primary shadow-glow-sm bg-primary/5' : 'hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex items-center gap-4 flex-1 min-w-0" onClick={() => toggleSelect(c._id)}>
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -384,33 +398,31 @@ export default function JobDetail() {
                             className="w-4 h-4 accent-primary cursor-pointer flex-shrink-0"
                           />
                           <div
-                            className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0 cursor-pointer"
-                            onClick={() => toggleSelect(c._id)}
+                            className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 transition-colors ${
+                              isSelected ? 'bg-primary text-white shadow-lg' : 'bg-gradient-to-br from-indigo-500/20 to-violet-500/20 text-primary border border-indigo-500/20'
+                            }`}
                           >
                             {c.name.charAt(0).toUpperCase()}
                           </div>
-                          <div
-                            className="cursor-pointer min-w-0"
-                            onClick={() => toggleSelect(c._id)}
-                          >
-                            <h4 className="text-white font-medium truncate">{c.name}</h4>
-                            <p className="text-gray-400 text-xs truncate">{c.email}</p>
+                          <div className="min-w-0">
+                            <h4 className="text-white font-medium truncate text-base">{c.name}</h4>
+                            <p className="text-slate-500 text-xs mt-0.5 truncate">{c.email}</p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="flex items-center gap-4 flex-shrink-0">
                           {c.aiScore !== null && c.aiScore !== undefined ? (
-                            <div className="w-32">
+                            <div className="w-32 hidden sm:block">
                               <ScoreBar score={c.aiScore} showLabel={false} height="h-1.5" />
                             </div>
                           ) : (
-                            <span className="text-gray-500 text-xs">Not scored</span>
+                            <span className="text-slate-600 text-xs hidden sm:block">Not scored</span>
                           )}
                           <Badge label={c.status} color={statusColor[c.status]} />
                           <Button
                             variant="ghost"
-                            className="text-xs py-1 px-2"
-                            onClick={() => navigate(`/candidates/${c._id}`)}
+                            className="text-xs py-1.5 px-3 opacity-70 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c._id}`); }}
                           >
                             View
                           </Button>

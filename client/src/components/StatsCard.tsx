@@ -9,11 +9,11 @@ type StatsCardProps = {
 };
 
 const colorMap = {
-  blue:   'text-blue-400   bg-blue-400/10   border-blue-400/20',
-  green:  'text-green-400  bg-green-400/10  border-green-400/20',
-  yellow: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-  purple: 'text-purple-400 bg-purple-400/10 border-purple-400/20',
-  red:    'text-red-400    bg-red-400/10    border-red-400/20',
+  blue:   { icon: 'from-blue-500 to-indigo-600',   text: 'text-blue-400',   glow: 'shadow-glow-sm' },
+  green:  { icon: 'from-emerald-500 to-teal-600',   text: 'text-emerald-400', glow: 'shadow-glow-green' },
+  yellow: { icon: 'from-amber-500 to-orange-600',   text: 'text-amber-400',  glow: 'shadow-glow-yellow' },
+  purple: { icon: 'from-violet-500 to-purple-600',  text: 'text-violet-400', glow: 'shadow-glow-purple' },
+  red:    { icon: 'from-red-500 to-rose-600',       text: 'text-red-400',    glow: 'shadow-glow-red' },
 };
 
 export default function StatsCard({
@@ -23,21 +23,21 @@ export default function StatsCard({
   color,
   subtitle,
 }: StatsCardProps) {
-  const textColor = colorMap[color].split(' ')[0];
+  const c = colorMap[color];
 
   return (
-    <div className={`rounded-xl border p-4 md:p-5 ${colorMap[color]}`}>
+    <div className="glass rounded-2xl p-5 card-hover group animate-fade-in">
       <div className="flex items-center justify-between mb-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorMap[color]}`}>
-          <Icon size={20} className={textColor} />
+        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${c.icon} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+          <Icon size={20} className="text-white" />
         </div>
-        <span className={`text-2xl md:text-3xl font-bold ${textColor}`}>
+        <span className={`text-3xl font-bold ${c.text} tracking-tight`}>
           {value}
         </span>
       </div>
-      <p className="text-white font-medium text-sm md:text-base">{title}</p>
+      <p className="text-slate-200 font-medium text-sm">{title}</p>
       {subtitle && (
-        <p className="text-xs mt-0.5 opacity-70">{subtitle}</p>
+        <p className="text-xs mt-1 text-slate-500">{subtitle}</p>
       )}
     </div>
   );
