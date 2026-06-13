@@ -11,7 +11,7 @@ const variants = {
   primary: 'gradient-primary hover:shadow-glow-sm text-white hover:-translate-y-0.5',
   secondary: 'bg-gradient-to-r from-violet-600 to-purple-600 hover:shadow-glow-purple text-white hover:-translate-y-0.5',
   danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:shadow-glow-red text-white hover:-translate-y-0.5',
-  ghost: 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-slate-300',
+  ghost: 'bg-slate-100 border border-slate-200 hover:bg-slate-200 hover:border-slate-300 text-slate-700 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 dark:hover:border-white/20 dark:text-slate-300',
 }
 
 export default function Button({ children, variant = 'primary', onClick, disabled, type = 'button', className = '' }: ButtonProps) {

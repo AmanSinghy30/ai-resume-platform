@@ -3,7 +3,7 @@ const axios = require('axios');
 const N8N_ENABLED = process.env.N8N_ENABLED === 'true';
 const N8N_BASE_URL = process.env.N8N_BASE_URL || 'http://localhost:5678';
 
-async function triggerResumeWorkflow(candidateId, filePath) {
+async function triggerResumeWorkflow(candidateId, filePath, jobId) {
   // If n8n is disabled — skip silently
   if (!N8N_ENABLED) {
     return { success: false, reason: 'n8n disabled' };
@@ -12,7 +12,7 @@ async function triggerResumeWorkflow(candidateId, filePath) {
   try {
     const response = await axios.post(
       `${N8N_BASE_URL}/webhook/resume-upload`,
-      { candidateId, filePath },
+      { candidateId, filePath, jobId },
       { timeout: 60000 }
     );
     return { success: true, data: response.data };

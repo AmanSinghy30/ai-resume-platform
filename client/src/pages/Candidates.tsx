@@ -135,8 +135,8 @@ export default function Candidates() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">All Candidates</h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">All Candidates</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
             {loading
               ? 'Loading...'
               : `${candidates.length} candidates found${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
@@ -154,11 +154,11 @@ export default function Candidates() {
               {deleting ? 'Deleting...' : `Delete (${selected.length})`}
             </Button>
           )}
-          <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+          <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 border border-slate-200 dark:border-white/10">
             <button
               onClick={() => setView('grid')}
               className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
-                view === 'grid' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
+                view === 'grid' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <LayoutGrid size={14} /> Grid
@@ -166,7 +166,7 @@ export default function Candidates() {
             <button
               onClick={() => setView('list')}
               className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
-                view === 'list' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
+                view === 'list' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <List size={14} /> List
@@ -196,33 +196,33 @@ export default function Candidates() {
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2 mb-4">
           {search && (
-            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
               Search: "{search}"
-              <button onClick={() => setSearch('')} className="text-slate-400 hover:text-white ml-1 transition-colors">
+              <button onClick={() => setSearch('')} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {filters.status && (
-            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
               Status: {filters.status}
-              <button onClick={() => setFilters(f => ({ ...f, status: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
+              <button onClick={() => setFilters(f => ({ ...f, status: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {filters.jobId && (
-            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
               Job filtered
-              <button onClick={() => setFilters(f => ({ ...f, jobId: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
+              <button onClick={() => setFilters(f => ({ ...f, jobId: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
           )}
           {(filters.minScore || filters.maxScore) && (
-            <span className="text-xs bg-white/5 text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/10">
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
               Score: {filters.minScore || '0'}–{filters.maxScore || '100'}
-              <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-slate-400 hover:text-white ml-1 transition-colors">
+              <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>
@@ -239,7 +239,7 @@ export default function Candidates() {
             onChange={toggleSelectAll}
             className="w-4 h-4 accent-primary cursor-pointer"
           />
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-600 dark:text-slate-500">
             {allSelected ? 'Deselect all' : 'Select all'}
           </span>
         </div>
@@ -251,11 +251,11 @@ export default function Candidates() {
       {/* Empty */}
       {!loading && candidates.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-5 border border-white/5">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-800/50 flex items-center justify-center mb-5 border border-slate-200 dark:border-white/5">
             <FileText size={36} className="text-slate-500" />
           </div>
-          <h3 className="text-white font-semibold text-lg mb-2">No candidates found</h3>
-          <p className="text-slate-500 text-sm mb-6">
+          <h3 className="text-slate-900 dark:text-white font-semibold text-lg mb-2">No candidates found</h3>
+          <p className="text-slate-600 dark:text-slate-500 text-sm mb-6">
             {hasActiveFilters
               ? 'Try adjusting your search or filters'
               : 'Upload resumes to start screening'}
@@ -289,14 +289,14 @@ export default function Candidates() {
                       className="w-4 h-4 accent-primary cursor-pointer mt-1 flex-shrink-0"
                     />
                     <div className="min-w-0">
-                      <h3 className="text-white font-semibold truncate">{c.name}</h3>
-                      <p className="text-slate-500 text-sm truncate">{c.email}</p>
+                      <h3 className="text-slate-900 dark:text-white font-semibold truncate">{c.name}</h3>
+                      <p className="text-slate-600 dark:text-slate-500 text-sm truncate">{c.email}</p>
                     </div>
                   </div>
                   <Badge label={c.status} color={statusColor[c.status]} />
                 </div>
 
-                <p className="text-slate-400 text-sm mb-3 flex items-center gap-1.5">
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-3 flex items-center gap-1.5">
                   <Briefcase size={14} className="flex-shrink-0 text-slate-500" />
                   {c.jobId?.title || 'No job'} • {c.experience} yrs
                 </p>
@@ -304,18 +304,18 @@ export default function Candidates() {
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {c.skills.length > 0
                     ? c.skills.slice(0, 4).map(s => (
-                        <span key={s} className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5">{s}</span>
+                        <span key={s} className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{s}</span>
                       ))
-                    : <span className="text-xs text-slate-600">No skills yet</span>
+                    : <span className="text-xs text-slate-500 dark:text-slate-600">No skills yet</span>
                   }
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className={`font-bold text-sm ${
-                    c.aiScore === null ? 'text-slate-600'
-                    : c.aiScore >= 80 ? 'text-emerald-400'
-                    : c.aiScore >= 60 ? 'text-amber-400'
-                    : 'text-red-400'
+                    c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
+                    : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                    : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-red-600 dark:text-red-400'
                   }`}>
                     {c.aiScore !== null ? `${c.aiScore}/100` : 'Not scored'}
                   </span>
@@ -329,7 +329,7 @@ export default function Candidates() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      className="text-xs py-1.5 px-2.5 text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 hover:bg-red-500/10"
                       onClick={() => handleDeleteOne(c._id, c.name)}
                     >
                       <Trash2 size={12} />
@@ -366,23 +366,23 @@ export default function Candidates() {
                       {c.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-white font-medium truncate">{c.name}</h3>
-                      <p className="text-slate-500 text-xs truncate">{c.email} • {c.jobId?.title || 'No job'}</p>
+                      <h3 className="text-slate-900 dark:text-white font-medium truncate">{c.name}</h3>
+                      <p className="text-slate-600 dark:text-slate-500 text-xs truncate">{c.email} • {c.jobId?.title || 'No job'}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-4 flex-shrink-0">
                     <div className="hidden md:flex gap-1.5">
                       {c.skills.slice(0, 3).map(s => (
-                        <span key={s} className="text-xs bg-white/5 text-slate-300 px-2 py-0.5 rounded-lg border border-white/5">{s}</span>
+                        <span key={s} className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{s}</span>
                       ))}
                     </div>
                     <Badge label={c.status} color={statusColor[c.status]} />
                     <span className={`font-bold text-sm w-16 text-right ${
-                      c.aiScore === null ? 'text-slate-600'
-                      : c.aiScore >= 80 ? 'text-emerald-400'
-                      : c.aiScore >= 60 ? 'text-amber-400'
-                      : 'text-red-400'
+                      c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
+                      : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                      : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-red-600 dark:text-red-400'
                     }`}>
                       {c.aiScore !== null ? `${c.aiScore}/100` : '—'}
                     </span>
@@ -396,7 +396,7 @@ export default function Candidates() {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="text-xs py-1.5 px-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-xs py-1.5 px-2.5 text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 hover:bg-red-500/10"
                         onClick={() => handleDeleteOne(c._id, c.name)}
                       >
                         <Trash2 size={12} />

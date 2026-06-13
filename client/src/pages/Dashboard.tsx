@@ -68,9 +68,9 @@ export default function Dashboard() {
             <Sparkles size={18} className="text-primary" />
             <span className="text-primary text-sm font-semibold">AI-Powered Dashboard</span>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Welcome back! 👋</h2>
-          <p className="text-slate-400 text-sm">
-            You have <span className="text-white font-semibold">{stats.pending}</span> candidates pending review and <span className="text-white font-semibold">{stats.totalJobs}</span> active job positions.
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 tracking-tight">Welcome back! 👋</h2>
+          <p className="text-slate-700 dark:text-slate-400 text-sm">
+            You have <span className="text-slate-900 dark:text-white font-semibold">{stats.pending}</span> candidates pending review and <span className="text-slate-900 dark:text-white font-semibold">{stats.totalJobs}</span> active job positions.
           </p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function Dashboard() {
         {/* Recent Candidates */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white tracking-tight">Recent Candidates</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">Recent Candidates</h2>
             <button
               onClick={() => navigate('/candidates')}
               className="text-sm text-primary hover:text-primary-dark flex items-center gap-1 transition-colors font-medium"
@@ -125,10 +125,10 @@ export default function Dashboard() {
           {recentCandidates.length === 0 ? (
             <Card>
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-4 border border-white/5">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-800/50 flex items-center justify-center mb-4 border border-slate-200 dark:border-white/5">
                   <FileText size={28} className="text-slate-500" />
                 </div>
-                <p className="text-white font-medium mb-1">No candidates yet</p>
+                <p className="text-slate-900 dark:text-white font-medium mb-1">No candidates yet</p>
                 <p className="text-slate-500 text-sm mb-4">
                   Upload resumes to start screening
                 </p>
@@ -148,7 +148,7 @@ export default function Dashboard() {
         {/* Activity Feed */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-white tracking-tight">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white tracking-tight">Recent Activity</h2>
             <button
               onClick={() => navigate('/activity')}
               className="text-sm text-primary hover:text-primary-dark flex items-center gap-1 transition-colors font-medium"
@@ -166,24 +166,24 @@ export default function Dashboard() {
       {/* Quick Stats Row */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
-          <p className="text-slate-500 text-sm mb-1">Rejection Rate</p>
-          <p className="text-2xl font-bold text-red-400">
+          <p className="text-slate-600 dark:text-slate-500 text-sm mb-1">Rejection Rate</p>
+          <p className="text-2xl font-bold text-red-600 dark:text-red-400">
             {stats.total > 0
               ? `${Math.round((stats.rejected / stats.total) * 100)}%`
               : '—'}
           </p>
         </Card>
         <Card>
-          <p className="text-slate-500 text-sm mb-1">Shortlist Rate</p>
-          <p className="text-2xl font-bold text-emerald-400">
+          <p className="text-slate-600 dark:text-slate-500 text-sm mb-1">Shortlist Rate</p>
+          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {stats.total > 0
               ? `${Math.round((stats.shortlisted / stats.total) * 100)}%`
               : '—'}
           </p>
         </Card>
         <Card>
-          <p className="text-slate-500 text-sm mb-1">Pending Review</p>
-          <p className="text-2xl font-bold text-amber-400">{stats.pending}</p>
+          <p className="text-slate-600 dark:text-slate-500 text-sm mb-1">Pending Review</p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</p>
         </Card>
       </div>
 

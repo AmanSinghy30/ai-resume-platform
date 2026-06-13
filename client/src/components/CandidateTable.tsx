@@ -29,38 +29,38 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="overflow-x-auto rounded-2xl glass shadow-glass">
+    <div className="overflow-x-auto rounded-2xl glass shadow-sm dark:shadow-glass">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-white/5">
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Name</th>
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Job</th>
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider w-36">AI Score</th>
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Status</th>
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Uploaded</th>
-            <th className="text-left px-5 py-4 text-slate-400 font-medium text-xs uppercase tracking-wider">Actions</th>
+          <tr className="border-b border-slate-200 dark:border-white/5">
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider">Name</th>
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider">Job</th>
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider w-36">AI Score</th>
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider">Status</th>
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider">Uploaded</th>
+            <th className="text-left px-5 py-4 text-slate-500 dark:text-slate-400 font-medium text-xs uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/5">
+        <tbody className="divide-y divide-slate-200 dark:divide-white/5">
           {candidates.map((c) => (
-            <tr key={c.id} className="hover:bg-white/[0.03] transition-colors group">
+            <tr key={c.id} className="hover:bg-slate-100/50 dark:hover:bg-white/[0.03] transition-colors group">
               <td className="px-5 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-indigo-500/20">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/10 to-violet-500/10 dark:from-indigo-500/20 dark:to-violet-500/20 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-indigo-500/20">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="text-white font-medium">{c.name}</p>
+                    <p className="text-slate-900 dark:text-white font-medium">{c.name}</p>
                     <p className="text-slate-500 text-xs">{c.email}</p>
                   </div>
                 </div>
               </td>
-              <td className="px-5 py-4 text-slate-300 text-sm">{c.jobTitle}</td>
+              <td className="px-5 py-4 text-slate-700 dark:text-slate-300 text-sm">{c.jobTitle}</td>
               <td className="px-5 py-4 w-36">
                 {c.score !== null ? (
                   <ScoreBar score={c.score} showLabel={false} />
                 ) : (
-                  <span className="text-slate-600 text-xs">Not scored</span>
+                  <span className="text-slate-500 dark:text-slate-600 text-xs">Not scored</span>
                 )}
               </td>
               <td className="px-5 py-4">
@@ -80,7 +80,7 @@ export default function CandidateTable({ candidates }: CandidateTableProps) {
           ))}
           {candidates.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-5 py-12 text-center text-slate-600">
+              <td colSpan={6} className="px-5 py-12 text-center text-slate-500 dark:text-slate-600">
                 No candidates found.
               </td>
             </tr>

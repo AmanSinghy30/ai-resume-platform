@@ -9,11 +9,11 @@ type StatsCardProps = {
 };
 
 const colorMap = {
-  blue:   { icon: 'from-blue-500 to-indigo-600',   text: 'text-blue-400',   glow: 'shadow-glow-sm' },
-  green:  { icon: 'from-emerald-500 to-teal-600',   text: 'text-emerald-400', glow: 'shadow-glow-green' },
-  yellow: { icon: 'from-amber-500 to-orange-600',   text: 'text-amber-400',  glow: 'shadow-glow-yellow' },
-  purple: { icon: 'from-violet-500 to-purple-600',  text: 'text-violet-400', glow: 'shadow-glow-purple' },
-  red:    { icon: 'from-red-500 to-rose-600',       text: 'text-red-400',    glow: 'shadow-glow-red' },
+  blue:   { icon: 'from-blue-500 to-indigo-600',   text: 'text-blue-600 dark:text-blue-400',   glow: 'shadow-glow-sm' },
+  green:  { icon: 'from-emerald-500 to-teal-600',   text: 'text-emerald-600 dark:text-emerald-400', glow: 'shadow-glow-green' },
+  yellow: { icon: 'from-amber-500 to-orange-600',   text: 'text-amber-600 dark:text-amber-400',  glow: 'shadow-glow-yellow' },
+  purple: { icon: 'from-violet-500 to-purple-600',  text: 'text-violet-600 dark:text-violet-400', glow: 'shadow-glow-purple' },
+  red:    { icon: 'from-red-500 to-rose-600',       text: 'text-red-600 dark:text-red-400',    glow: 'shadow-glow-red' },
 };
 
 export default function StatsCard({
@@ -35,7 +35,7 @@ export default function StatsCard({
           {value}
         </span>
       </div>
-      <p className="text-slate-200 font-medium text-sm">{title}</p>
+      <p className="text-slate-700 dark:text-slate-200 font-medium text-sm">{title}</p>
       {subtitle && (
         <p className="text-xs mt-1 text-slate-500">{subtitle}</p>
       )}

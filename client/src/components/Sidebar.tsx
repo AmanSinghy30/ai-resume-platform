@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   LayoutDashboard,
   Users,
@@ -14,6 +15,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Sun,
+  Moon,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -35,6 +38,7 @@ const NAV_LINKS: NavLinkItem[] = [
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -56,7 +60,7 @@ export default function Sidebar() {
     <div className="flex flex-col h-full">
 
       {/* Logo */}
-      <div className={`py-5 border-b border-white/5 flex items-center ${
+      <div className={`py-5 border-b border-slate-200 dark:border-white/5 flex items-center ${
         isCollapsed ? 'px-3 justify-center' : 'px-6 justify-between'
       }`}>
         {!isCollapsed ? (
@@ -65,7 +69,7 @@ export default function Sidebar() {
               AI
             </div>
             <div>
-              <span className="text-white font-bold text-sm whitespace-nowrap tracking-tight">
+              <span className="text-slate-900 dark:text-white font-bold text-sm whitespace-nowrap tracking-tight">
                 ResumeScreen
               </span>
               <p className="text-[10px] text-slate-500 font-medium tracking-wider uppercase">Smart Hiring</p>
@@ -93,8 +97,8 @@ export default function Sidebar() {
                   isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
                 } py-2.5 rounded-xl text-sm transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary/20 to-secondary/10 text-white font-medium border border-primary/20 shadow-inner-glow'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-primary/10 to-secondary/5 dark:from-primary/20 dark:to-secondary/10 text-primary dark:text-white font-medium border border-primary/20 shadow-sm dark:shadow-inner-glow'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
                 }`
               }
             >
@@ -109,7 +113,7 @@ export default function Sidebar() {
 
                   {/* Hover tooltip when collapsed */}
                   {isCollapsed && (
-                    <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
+                    <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-slate-900 dark:text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
                       {link.label}
                     </span>
                   )}
@@ -120,38 +124,55 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* User Info + Logout */}
-      <div className={`py-4 border-t border-white/5 ${isCollapsed ? 'px-2' : 'px-3'}`}>
+      {/* User Info + Logout + Theme Toggle */}
+      <div className={`py-4 border-t border-slate-200 dark:border-white/5 ${isCollapsed ? 'px-2' : 'px-3'}`}>
         {!isCollapsed ? (
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-primary/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/30 dark:to-secondary/30 flex items-center justify-center text-primary font-bold text-xs flex-shrink-0 border border-primary/20">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="min-w-0">
-              <p className="text-white text-xs font-medium truncate">{user?.name}</p>
-              <p className="text-slate-600 text-xs truncate">{user?.email}</p>
+              <p className="text-slate-900 dark:text-white text-xs font-medium truncate">{user?.name}</p>
+              <p className="text-slate-500 dark:text-slate-600 text-xs truncate">{user?.email}</p>
             </div>
           </div>
         ) : (
           <div className="flex justify-center mb-2" title={user?.name}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/30 dark:to-secondary/30 flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
         )}
 
         <button
+          onClick={toggleTheme}
+          title={isCollapsed ? 'Toggle Theme' : undefined}
+          className={`group relative w-full flex items-center ${
+            isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
+          } py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200 mb-1`}
+        >
+          {theme === 'dark' ? <Sun size={18} className="flex-shrink-0" /> : <Moon size={18} className="flex-shrink-0" />}
+          {!isCollapsed && <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>}
+
+          {isCollapsed && (
+            <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-slate-900 dark:text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
+              Toggle Theme
+            </span>
+          )}
+        </button>
+
+        <button
           onClick={handleLogout}
           title={isCollapsed ? 'Logout' : undefined}
           className={`group relative w-full flex items-center ${
             isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
-          } py-2.5 rounded-xl text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200`}
+          } py-2.5 rounded-xl text-sm text-slate-600 dark:text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-500/5 transition-all duration-200`}
         >
           <LogOut size={18} className="flex-shrink-0" />
           {!isCollapsed && <span>Logout</span>}
 
           {isCollapsed && (
-            <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
+            <span className="absolute left-full ml-3 px-3 py-1.5 glass-strong text-slate-900 dark:text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity shadow-glass">
               Logout
             </span>
           )}
@@ -164,20 +185,16 @@ export default function Sidebar() {
     <>
       {/* ─── DESKTOP SIDEBAR ─── */}
       <aside
-        className={`hidden md:flex flex-col h-screen sticky top-0 flex-shrink-0 transition-all duration-300 ${
+        className={`hidden md:flex flex-col h-screen sticky top-0 flex-shrink-0 transition-all duration-300 bg-white border-r border-slate-200 dark:bg-slate-900/95 dark:border-white/5 ${
           collapsed ? 'w-16' : 'w-60'
         }`}
-        style={{
-          background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.98) 100%)',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-        }}
       >
         <SidebarContent isCollapsed={collapsed} />
 
         {/* Collapse Toggle */}
         <button
           onClick={() => setCollapsed(prev => !prev)}
-          className="absolute -right-3 top-14 w-7 h-7 glass-strong rounded-full flex items-center justify-center text-white shadow-glass transition-all duration-200 z-20 hover:scale-110 hover:shadow-glow-sm"
+          className="absolute -right-3 top-14 w-7 h-7 glass-strong rounded-full flex items-center justify-center text-slate-600 dark:text-white shadow-sm dark:shadow-glass transition-all duration-200 z-20 hover:scale-110 hover:shadow-md dark:hover:shadow-glow-sm"
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -187,7 +204,7 @@ export default function Sidebar() {
       {/* ─── MOBILE HAMBURGER ─── */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 glass-strong rounded-xl flex items-center justify-center text-white shadow-glass"
+        className="md:hidden fixed top-4 left-4 z-50 w-10 h-10 glass-strong rounded-xl flex items-center justify-center text-slate-700 dark:text-white shadow-sm dark:shadow-glass"
       >
         <Menu size={20} />
       </button>
@@ -196,19 +213,15 @@ export default function Sidebar() {
       {mobileOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="md:hidden fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-40"
             onClick={() => setMobileOpen(false)}
           />
           <aside
-            className="md:hidden fixed left-0 top-0 h-full w-64 z-50 flex flex-col shadow-glass-lg animate-slide-up"
-            style={{
-              background: 'linear-gradient(180deg, rgba(15,23,42,0.98) 0%, rgba(15,23,42,1) 100%)',
-              borderRight: '1px solid rgba(255,255,255,0.06)',
-            }}
+            className="md:hidden fixed left-0 top-0 h-full w-64 z-50 flex flex-col shadow-xl animate-slide-up bg-white dark:bg-slate-900/98 border-r border-slate-200 dark:border-white/5"
           >
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white z-10 transition-colors"
+              className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white z-10 transition-colors"
             >
               <X size={20} />
             </button>

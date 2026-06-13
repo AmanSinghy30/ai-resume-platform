@@ -144,7 +144,7 @@ export default function JobDetail() {
 
       <button
         onClick={() => navigate('/jobs')}
-        className="text-slate-400 hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
+        className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
       >
         <ArrowLeft size={16} /> Back to Jobs
       </button>
@@ -155,14 +155,14 @@ export default function JobDetail() {
         <div className="flex flex-col gap-5">
 
           <Card>
-            <h2 className="text-xl font-bold text-white mb-2 tracking-tight">{job.title}</h2>
-            <p className="text-slate-400 text-sm leading-relaxed mb-5">{job.description}</p>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{job.title}</h2>
+            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">{job.description}</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {job.requiredSkills.map((skill: string) => (
                 <span
                   key={skill}
-                  className="text-xs bg-white/5 border border-white/5 text-slate-300 px-2.5 py-1 rounded-lg"
+                  className="text-xs bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg"
                 >
                   {skill}
                 </span>
@@ -170,17 +170,17 @@ export default function JobDetail() {
             </div>
 
             <div className="flex flex-col gap-3 text-sm">
-              <div className="flex justify-between items-center py-2 border-b border-white/5">
-                <span className="text-slate-500">Experience</span>
-                <span className="text-slate-300 font-medium">{job.experienceRequired}+ years</span>
+              <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
+                <span className="text-slate-600 dark:text-slate-500">Experience</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{job.experienceRequired}+ years</span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-white/5">
-                <span className="text-slate-500">Candidates</span>
-                <span className="text-slate-300 font-medium">{candidates.length}</span>
+              <div className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-white/5">
+                <span className="text-slate-600 dark:text-slate-500">Candidates</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">{candidates.length}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-slate-500">Created</span>
-                <span className="text-slate-300 font-medium">
+                <span className="text-slate-600 dark:text-slate-500">Created</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium">
                   {new Date(job.createdAt).toLocaleDateString('en-IN')}
                 </span>
               </div>
@@ -189,7 +189,7 @@ export default function JobDetail() {
 
           {/* AI Actions */}
           <Card>
-            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+            <h3 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
               <Brain size={16} className="text-primary" /> AI Actions
             </h3>
             <div className="flex flex-col gap-4">
@@ -208,7 +208,7 @@ export default function JobDetail() {
                     ? '🤖 Score Selected'
                     : `🤖 Score Selected (${selected.length})`}
                 </Button>
-                <p className="text-slate-500 text-xs mt-2 text-center relative z-10">
+                <p className="text-slate-600 dark:text-slate-500 text-xs mt-2 text-center relative z-10">
                   {selected.length === 0
                     ? 'Select candidates from the list to score'
                     : `Will score ${selected.length} candidate${selected.length > 1 ? 's' : ''}`}
@@ -219,14 +219,14 @@ export default function JobDetail() {
                   <div className="flex gap-2 mt-3 relative z-10">
                     <button
                       onClick={toggleSelectAll}
-                      className="flex-1 text-xs bg-black/20 hover:bg-black/30 border border-white/5 text-slate-300 px-2 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                      className="flex-1 text-xs bg-slate-100 dark:bg-black/20 hover:bg-slate-200 dark:hover:bg-black/30 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 px-2 py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1.5"
                     >
                       {allSelected ? <CheckSquare size={12} /> : <Square size={12} />}
                       {allSelected ? 'Deselect All' : 'Select All'}
                     </button>
                     <button
                       onClick={selectUnscored}
-                      className="flex-1 text-xs bg-black/20 hover:bg-black/30 border border-white/5 text-slate-300 px-2 py-1.5 rounded-lg transition-colors"
+                      className="flex-1 text-xs bg-slate-100 dark:bg-black/20 hover:bg-slate-200 dark:hover:bg-black/30 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 px-2 py-1.5 rounded-lg transition-colors"
                     >
                       Select Unscored
                     </button>
@@ -245,11 +245,11 @@ export default function JobDetail() {
                   {matching ? '⏳ Ranking...' : '🏆 Rank by AI Match'}
                 </Button>
                 {!job.description && (
-                  <p className="text-amber-400 text-xs text-center mt-2 relative z-10">
+                  <p className="text-amber-600 dark:text-amber-400 text-xs text-center mt-2 relative z-10">
                     Add a job description to enable ranking
                   </p>
                 )}
-                <p className="text-slate-500 text-xs mt-2 text-center relative z-10">
+                <p className="text-slate-600 dark:text-slate-500 text-xs mt-2 text-center relative z-10">
                   Ranks all candidates by job fit
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function JobDetail() {
             </div>
 
             {candidates.length === 0 && (
-              <p className="text-amber-400 text-xs text-center mt-4">
+              <p className="text-amber-600 dark:text-amber-400 text-xs text-center mt-4">
                 No candidates assigned to this job yet
               </p>
             )}
@@ -269,18 +269,18 @@ export default function JobDetail() {
 
           {/* View Toggle */}
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-semibold flex items-center gap-2">
-              {view === 'ranked' ? <Trophy size={18} className="text-amber-400" /> : <Users size={18} className="text-blue-400" />}
+            <h3 className="text-slate-900 dark:text-white font-semibold flex items-center gap-2">
+              {view === 'ranked' ? <Trophy size={18} className="text-amber-500 dark:text-amber-400" /> : <Users size={18} className="text-blue-500 dark:text-blue-400" />}
               {view === 'ranked'
                 ? 'AI Ranked Candidates'
                 : `All Candidates (${candidates.length})${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
             </h3>
             {ranking.length > 0 && (
-              <div className="flex bg-white/5 rounded-xl p-1 border border-white/10">
+              <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 border border-slate-200 dark:border-white/10">
                 <button
                   onClick={() => setView('candidates')}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1.5 ${
-                    view === 'candidates' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-400 hover:text-white'
+                    view === 'candidates' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Users size={14} /> All
@@ -288,7 +288,7 @@ export default function JobDetail() {
                 <button
                   onClick={() => setView('ranked')}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1.5 ${
-                    view === 'ranked' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-glow-green' : 'text-slate-400 hover:text-white'
+                    view === 'ranked' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-glow-green' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Trophy size={14} /> Ranked
@@ -301,11 +301,11 @@ export default function JobDetail() {
           {candidates.length === 0 ? (
             <Card>
               <div className="text-center py-16 animate-fade-in">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mx-auto mb-5 border border-white/5">
-                  <Users size={36} className="text-slate-500" />
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-800/50 flex items-center justify-center mx-auto mb-5 border border-slate-200 dark:border-white/5">
+                  <Users size={36} className="text-slate-600 dark:text-slate-500" />
                 </div>
-                <p className="text-white font-medium mb-1 text-lg">No candidates yet</p>
-                <p className="text-slate-500 text-sm mb-6">
+                <p className="text-slate-900 dark:text-white font-medium mb-1 text-lg">No candidates yet</p>
+                <p className="text-slate-600 dark:text-slate-500 text-sm mb-6">
                   Upload resumes and select this job position
                 </p>
                 <Button variant="primary" onClick={() => navigate('/upload')}>
@@ -325,15 +325,15 @@ export default function JobDetail() {
                       index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-600 text-white border border-yellow-300/30 shadow-glow-yellow'
                       : index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-500 text-white border border-slate-300/30'
                       : index === 2 ? 'bg-gradient-to-br from-orange-400 to-red-500 text-white border border-orange-300/30'
-                      : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-400 border border-white/5'
+                      : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/5'
                     }`}>
                       #{index + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <h4 className="text-white font-semibold text-lg">{c.name}</h4>
-                          <p className="text-slate-500 text-xs mt-0.5">{c.email}</p>
+                          <h4 className="text-slate-900 dark:text-white font-semibold text-lg">{c.name}</h4>
+                          <p className="text-slate-600 dark:text-slate-500 text-xs mt-0.5">{c.email}</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge label={c.status} color={statusColor[c.status]} />
@@ -341,12 +341,12 @@ export default function JobDetail() {
                         </div>
                       </div>
                       <ScoreBar score={c.matchScore} showLabel={false} height="h-1.5" />
-                      <p className="text-slate-400 text-sm mt-3 leading-relaxed bg-white/5 rounded-lg p-3 border border-white/5 border-l-2 border-l-emerald-500">
+                      <p className="text-slate-700 dark:text-slate-400 text-sm mt-3 leading-relaxed bg-slate-50 dark:bg-white/5 rounded-lg p-3 border border-slate-200 dark:border-white/5 border-l-2 border-l-emerald-500">
                         {c.reason}
                       </p>
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {c.skills?.slice(0, 6).map((s: string) => (
-                          <span key={s} className="text-xs bg-black/20 border border-white/5 text-slate-300 px-2 py-1 rounded-lg">
+                          <span key={s} className="text-xs bg-slate-100 dark:bg-black/20 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg">
                             {s}
                           </span>
                         ))}
@@ -373,7 +373,7 @@ export default function JobDetail() {
                   onChange={toggleSelectAll}
                   className="w-4 h-4 accent-primary cursor-pointer"
                 />
-                <span className="text-slate-400 text-sm">
+                <span className="text-slate-600 dark:text-slate-400 text-sm">
                   {allSelected ? 'Deselect all' : 'Select all'}
                 </span>
               </div>
@@ -385,7 +385,7 @@ export default function JobDetail() {
                     <Card
                       key={c._id}
                       className={`cursor-pointer transition-all duration-200 group ${
-                        isSelected ? 'border-primary shadow-glow-sm bg-primary/5' : 'hover:border-white/20'
+                        isSelected ? 'border-primary shadow-glow-sm bg-primary/5' : 'hover:border-slate-300 dark:hover:border-white/20'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -405,8 +405,8 @@ export default function JobDetail() {
                             {c.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <h4 className="text-white font-medium truncate text-base">{c.name}</h4>
-                            <p className="text-slate-500 text-xs mt-0.5 truncate">{c.email}</p>
+                            <h4 className="text-slate-900 dark:text-white font-medium truncate text-base">{c.name}</h4>
+                            <p className="text-slate-600 dark:text-slate-500 text-xs mt-0.5 truncate">{c.email}</p>
                           </div>
                         </div>
 
@@ -416,7 +416,7 @@ export default function JobDetail() {
                               <ScoreBar score={c.aiScore} showLabel={false} height="h-1.5" />
                             </div>
                           ) : (
-                            <span className="text-slate-600 text-xs hidden sm:block">Not scored</span>
+                            <span className="text-slate-500 dark:text-slate-600 text-xs hidden sm:block">Not scored</span>
                           )}
                           <Badge label={c.status} color={statusColor[c.status]} />
                           <Button

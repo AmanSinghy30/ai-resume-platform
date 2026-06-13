@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen auth-bg flex items-center justify-center px-4">
+    <div className="min-h-screen bg-slate-50 dark:auth-bg flex items-center justify-center px-4">
       <div className="w-full max-w-md animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -37,32 +37,32 @@ export default function Login() {
             AI
           </div>
           <h1 className="text-3xl font-bold gradient-text">RecruitAI</h1>
-          <p className="text-slate-500 mt-2 text-sm">AI-Powered Resume Screening</p>
+          <p className="text-slate-600 dark:text-slate-500 mt-2 text-sm">AI-Powered Resume Screening</p>
         </div>
 
         {/* Card */}
         <div className="glass-strong rounded-2xl p-8 shadow-glass-lg">
-          <h2 className="text-xl font-semibold text-white mb-6 tracking-tight">Sign In</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6 tracking-tight">Sign In</h2>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="text-sm text-slate-400 mb-1.5 block font-medium">Email</label>
+              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full input-glass text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-500"
+                className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
             <div>
-              <label className="text-sm text-slate-400 mb-1.5 block font-medium">Password</label>
+              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full input-glass text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-500"
+                className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
               />
             </div>
             <button
@@ -74,7 +74,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-slate-500 text-sm mt-6">
+          <p className="text-center text-slate-600 dark:text-slate-500 text-sm mt-6">
             Don't have an account?{' '}
             <Link to="/register" className="text-primary hover:text-primary-dark transition-colors font-medium">Register</Link>
           </p>

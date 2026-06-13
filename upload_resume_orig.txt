@@ -7,7 +7,6 @@ import { getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
 import { useFormValidation } from '../hooks/useFormValidation';
 import FormError from '../components/FormError';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, X, Loader2, Files, User } from 'lucide-react';
 
 type Job = { _id: string; title: string };
 type Mode = 'single' | 'bulk';
@@ -146,6 +145,7 @@ export default function UploadResume() {
     const initial: BulkFile[] = arr.map(f => ({ file: f, status: 'pending' }));
     setBulkFiles(initial);
 
+    // Parse each file in parallel (but cap concurrency to 3 to avoid spam)
     const concurrency = 3;
     for (let i = 0; i < arr.length; i += concurrency) {
       const batch = arr.slice(i, i + concurrency);
@@ -231,63 +231,63 @@ export default function UploadResume() {
     }
   };
 
-  const StatusIcon = ({ status }: { status: BulkFile['status'] }) => {
+  const statusIcon = (status: BulkFile['status']) => {
     switch (status) {
-      case 'pending': return <Loader2 size={16} className="text-slate-500 animate-spin" />;
-      case 'parsing': return <Loader2 size={16} className="text-primary animate-spin" />;
-      case 'parsed': return <FileText size={16} className="text-blue-400" />;
-      case 'uploading': return <UploadCloud size={16} className="text-primary animate-bounce" />;
-      case 'done': return <CheckCircle2 size={16} className="text-emerald-400" />;
-      case 'error': return <AlertCircle size={16} className="text-red-400" />;
+      case 'pending': return '⏸️';
+      case 'parsing': return '⏳';
+      case 'parsed': return '📝';
+      case 'uploading': return '⬆️';
+      case 'done': return '✅';
+      case 'error': return '❌';
     }
   };
 
   // ─── RENDER ─────────────────────────────────────────────
   return (
     <Layout title="Upload Resume">
-      <div className="max-w-4xl mx-auto animate-fade-in">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Upload Candidates</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">PDF files only, max 5MB each</p>
+            <h2 className="text-xl font-bold text-white">Upload Candidate Resume</h2>
+            <p className="text-gray-400 text-sm mt-1">PDF files only, max 5MB each</p>
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-1.5 self-start sm:self-auto">
+          <div className="flex bg-gray-800 border border-gray-700 rounded-lg p-1">
             <button
               onClick={() => setMode('single')}
-              className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                mode === 'single' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              className={`px-4 py-1.5 text-sm rounded-md transition ${
+                mode === 'single' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              <User size={16} /> Single
+              Single
             </button>
             <button
               onClick={() => setMode('bulk')}
-              className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 ${
-                mode === 'bulk' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              className={`px-4 py-1.5 text-sm rounded-md transition ${
+                mode === 'bulk' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
-              <Files size={16} /> Bulk
+              Bulk
             </button>
           </div>
         </div>
 
         {/* ─── SINGLE MODE ─── */}
         {mode === 'single' && (
-          <div className="glass-strong border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-glass-lg flex flex-col gap-6 animate-scale-in">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col gap-5">
 
             {/* Drag Drop FIRST so user drops file → form auto-fills */}
             <div>
-              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Resume PDF *</label>
+              <label className="text-sm text-gray-400 mb-1 block">Resume PDF *</label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 relative overflow-hidden group ${
-                  dragging ? 'border-primary bg-primary/10' : 'border-slate-300 dark:border-white/10 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5'
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                  dragging ? 'border-primary bg-primary/10' : 'border-gray-600 hover:border-gray-400'
                 }`}
               >
                 <input
@@ -297,82 +297,72 @@ export default function UploadResume() {
                   className="hidden"
                   onChange={e => { if (e.target.files?.[0]) handleSingleFile(e.target.files[0]); }}
                 />
-                
-                <div className="relative z-10 flex flex-col items-center">
-                  {parsing ? (
-                    <>
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center mb-4 border border-indigo-500/20">
-                        <Loader2 size={32} className="text-primary animate-spin" />
-                      </div>
-                      <p className="text-slate-900 dark:text-white font-medium">Parsing resume...</p>
-                      <p className="text-slate-600 dark:text-slate-500 text-sm mt-1">Extracting details using AI</p>
-                    </>
-                  ) : file ? (
-                    <>
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center mb-4 border border-emerald-500/20 shadow-glow-green">
-                        <FileText size={32} className="text-emerald-500 dark:text-emerald-400" />
-                      </div>
-                      <p className="text-slate-900 dark:text-white font-medium">{file.name}</p>
-                      <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                      <p className="text-primary text-xs mt-3 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to change file</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
-                        <UploadCloud size={32} className="text-primary" />
-                      </div>
-                      <p className="text-slate-900 dark:text-white font-medium text-lg">Drop PDF to auto-fill form</p>
-                      <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">or click to browse from your computer</p>
-                    </>
-                  )}
-                </div>
+                {parsing ? (
+                  <div>
+                    <p className="text-3xl mb-2">⏳</p>
+                    <p className="text-white">Parsing resume...</p>
+                  </div>
+                ) : file ? (
+                  <div>
+                    <p className="text-2xl mb-2">📄</p>
+                    <p className="text-white font-medium">{file.name}</p>
+                    <p className="text-gray-400 text-sm mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="text-primary text-xs mt-2">Click to change file</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-4xl mb-3">📂</p>
+                    <p className="text-white font-medium">Drop PDF to auto-fill form</p>
+                    <p className="text-gray-400 text-sm mt-1">or click to browse</p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Auto-filled form */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Full Name *</label>
+                <label className="text-sm text-gray-400 mb-1 block">Full Name *</label>
                 <input
                   value={name}
                   onChange={e => { setName(e.target.value); clearError('name'); }}
                   placeholder="Auto-filled from resume"
-                  className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
                 />
                 <FormError message={errors.name} />
               </div>
 
               <div>
-                <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Email *</label>
+                <label className="text-sm text-gray-400 mb-1 block">Email *</label>
                 <input
                   type="email"
                   value={email}
                   onChange={e => { setEmail(e.target.value); clearError('email'); }}
                   placeholder="Auto-filled from resume"
-                  className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
                 />
                 <FormError message={errors.email} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Phone</label>
+                <label className="text-sm text-gray-400 mb-1 block">Phone</label>
                 <input
                   value={phone}
                   onChange={e => { setPhone(e.target.value); clearError('phone'); }}
                   placeholder="Auto-filled from resume"
-                  className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
                 />
                 <FormError message={errors.phone} />
               </div>
 
               <div>
-                <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Job Position</label>
+                <label className="text-sm text-gray-400 mb-1 block">Job Position</label>
                 <select
                   value={jobId}
                   onChange={e => setJobId(e.target.value)}
-                  className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="">Select a job (optional)</option>
                   {jobs.map(job => (
@@ -382,15 +372,15 @@ export default function UploadResume() {
               </div>
             </div>
 
-            <div className="flex gap-4 mt-2">
-              <Button variant="ghost" onClick={() => navigate('/candidates')} className="flex-1 py-3">
+            <div className="flex gap-3">
+              <Button variant="ghost" onClick={() => navigate('/candidates')} className="flex-1">
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleSingleSubmit}
                 disabled={loading || parsing}
-                className="flex-1 py-3 shadow-glow-md"
+                className="flex-1"
               >
                 {loading ? 'Uploading...' : 'Upload Resume'}
               </Button>
@@ -400,15 +390,15 @@ export default function UploadResume() {
 
         {/* ─── BULK MODE ─── */}
         {mode === 'bulk' && (
-          <div className="glass-strong border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-glass-lg flex flex-col gap-6 animate-scale-in">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col gap-5">
 
             {/* Job for all */}
             <div>
-              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Job Position (applies to all)</label>
+              <label className="text-sm text-gray-400 mb-1 block">Job Position (applies to all)</label>
               <select
                 value={bulkJobId}
                 onChange={e => setBulkJobId(e.target.value)}
-                className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm"
+                className="w-full bg-gray-900 border border-gray-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
               >
                 <option value="">No job assigned</option>
                 {jobs.map(job => (
@@ -427,8 +417,8 @@ export default function UploadResume() {
                 if (e.dataTransfer.files) handleBulkFiles(e.dataTransfer.files);
               }}
               onClick={() => bulkInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-300 group ${
-                dragging ? 'border-primary bg-primary/10' : 'border-slate-300 dark:border-white/10 hover:border-primary/50 hover:bg-slate-50 dark:hover:bg-white/5'
+              className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                dragging ? 'border-primary bg-primary/10' : 'border-gray-600 hover:border-gray-400'
               }`}
             >
               <input
@@ -439,72 +429,60 @@ export default function UploadResume() {
                 className="hidden"
                 onChange={e => { if (e.target.files) handleBulkFiles(e.target.files); }}
               />
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-4 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
-                <Files size={32} className="text-primary" />
-              </div>
-              <p className="text-slate-900 dark:text-white font-medium text-lg">Drop multiple PDFs here</p>
-              <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">or click to browse • Up to 20 files</p>
+              <p className="text-4xl mb-3">📂</p>
+              <p className="text-white font-medium">Drop multiple PDFs here</p>
+              <p className="text-gray-400 text-sm mt-1">or click to browse • Up to 20 files</p>
             </div>
 
             {/* File List */}
             {bulkFiles.length > 0 && (
-              <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
                 {bulkFiles.map((b, i) => (
-                  <div key={i} className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 rounded-xl p-4 transition-all duration-200 hover:border-slate-300 dark:hover:border-white/10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="p-1.5 bg-white dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5 flex-shrink-0">
-                          <StatusIcon status={b.status} />
-                        </div>
-                        <span className="text-slate-800 dark:text-slate-300 text-sm font-medium truncate">{b.file.name}</span>
+                  <div key={i} className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-lg">{statusIcon(b.status)}</span>
+                        <span className="text-gray-300 text-sm truncate">{b.file.name}</span>
                       </div>
                       <button
                         onClick={() => removeBulkFile(i)}
-                        className="text-slate-500 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/10 transition-colors"
+                        className="text-gray-500 hover:text-red-400 text-sm"
                         disabled={bulkUploading}
-                        title="Remove file"
                       >
-                        <X size={16} />
+                        ✕
                       </button>
                     </div>
 
                     {b.status === 'parsed' || b.status === 'uploading' || b.status === 'done' ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-3 gap-2">
                         <input
                           value={b.name || ''}
                           onChange={e => updateBulkField(i, 'name', e.target.value)}
                           placeholder="Name *"
                           disabled={bulkUploading || b.status === 'done'}
-                          className="input-glass text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs placeholder-slate-400 dark:placeholder-slate-500 disabled:opacity-50"
+                          className="bg-gray-800 border border-gray-600 text-white rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary"
                         />
                         <input
                           value={b.email || ''}
                           onChange={e => updateBulkField(i, 'email', e.target.value)}
                           placeholder="Email *"
                           disabled={bulkUploading || b.status === 'done'}
-                          className="input-glass text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs placeholder-slate-400 dark:placeholder-slate-500 disabled:opacity-50"
+                          className="bg-gray-800 border border-gray-600 text-white rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary"
                         />
                         <input
                           value={b.phone || ''}
                           onChange={e => updateBulkField(i, 'phone', e.target.value)}
                           placeholder="Phone"
                           disabled={bulkUploading || b.status === 'done'}
-                          className="input-glass text-slate-900 dark:text-white rounded-lg px-3 py-2 text-xs placeholder-slate-400 dark:placeholder-slate-500 disabled:opacity-50"
+                          className="bg-gray-800 border border-gray-600 text-white rounded px-2 py-1.5 text-xs focus:outline-none focus:border-primary"
                         />
                       </div>
                     ) : b.status === 'error' ? (
-                      <div className="flex items-center gap-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-2 mt-2">
-                        <AlertCircle size={14} className="text-red-500 dark:text-red-400" />
-                        <p className="text-red-500 dark:text-red-400 text-xs font-medium">{b.error}</p>
-                      </div>
+                      <p className="text-red-400 text-xs">{b.error}</p>
                     ) : (
-                      <div className="flex items-center gap-2 mt-2 px-1">
-                        <p className="text-slate-600 dark:text-slate-500 text-xs font-medium flex items-center gap-1.5">
-                          {b.status === 'parsing' ? (
-                            <><Loader2 size={12} className="animate-spin text-primary" /> Parsing PDF with AI...</>
-                          ) : 'Waiting...'}
-                        </p>
-                      </div>
+                      <p className="text-gray-500 text-xs">
+                        {b.status === 'parsing' ? 'Parsing PDF...' : 'Waiting...'}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -512,15 +490,15 @@ export default function UploadResume() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-4 mt-2">
-              <Button variant="ghost" onClick={() => navigate('/candidates')} className="flex-1 py-3">
+            <div className="flex gap-3">
+              <Button variant="ghost" onClick={() => navigate('/candidates')} className="flex-1">
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 onClick={handleBulkSubmit}
                 disabled={bulkUploading || bulkFiles.length === 0}
-                className="flex-1 py-3 shadow-glow-md"
+                className="flex-1"
               >
                 {bulkUploading
                   ? 'Uploading...'

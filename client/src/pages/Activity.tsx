@@ -29,15 +29,15 @@ type Log = {
 
 // Map actions to Lucide icons and gradient colors
 const actionConfig: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
-  resume_uploaded:       { icon: <UploadCloud size={18} />, color: 'text-blue-400',   bg: 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/20' },
-  candidate_shortlisted: { icon: <CheckCircle2 size={18} />, color: 'text-emerald-400',  bg: 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/20' },
-  candidate_rejected:    { icon: <XCircle size={18} />, color: 'text-red-400',    bg: 'bg-gradient-to-br from-red-500/20 to-rose-500/20 border-red-500/20' },
-  candidate_reviewed:    { icon: <Eye size={18} />, color: 'text-amber-400', bg: 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border-amber-500/20' },
-  job_created:           { icon: <Briefcase size={18} />, color: 'text-violet-400', bg: 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-violet-500/20' },
-  job_updated:           { icon: <Edit3 size={18} />, color: 'text-indigo-400',   bg: 'bg-gradient-to-br from-indigo-500/20 to-blue-500/20 border-indigo-500/20' },
-  job_deleted:           { icon: <Trash2 size={18} />, color: 'text-slate-400',   bg: 'bg-gradient-to-br from-slate-500/20 to-slate-600/20 border-slate-500/20' },
-  ai_analysis_run:       { icon: <Sparkles size={18} />, color: 'text-primary',     bg: 'bg-gradient-to-br from-primary/20 to-secondary/20 border-primary/20 shadow-glow-sm' },
-  candidate_deleted:     { icon: <Trash2 size={18} />, color: 'text-slate-400',   bg: 'bg-gradient-to-br from-slate-500/20 to-slate-600/20 border-slate-500/20' },
+  resume_uploaded:       { icon: <UploadCloud size={18} />, color: 'text-blue-600 dark:text-blue-400',   bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-blue-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:to-cyan-500/20 border-blue-500/20' },
+  candidate_shortlisted: { icon: <CheckCircle2 size={18} />, color: 'text-emerald-600 dark:text-emerald-400',  bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 border-emerald-500/20' },
+  candidate_rejected:    { icon: <XCircle size={18} />, color: 'text-red-600 dark:text-red-400',    bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-red-500/10 to-rose-500/10 dark:from-red-500/20 dark:to-rose-500/20 border-red-500/20' },
+  candidate_reviewed:    { icon: <Eye size={18} />, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-amber-500/10 to-orange-500/10 dark:from-amber-500/20 dark:to-orange-500/20 border-amber-500/20' },
+  job_created:           { icon: <Briefcase size={18} />, color: 'text-violet-600 dark:text-violet-400', bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-500/20 dark:to-purple-500/20 border-violet-500/20' },
+  job_updated:           { icon: <Edit3 size={18} />, color: 'text-indigo-600 dark:text-indigo-400',   bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-indigo-500/10 to-blue-500/10 dark:from-indigo-500/20 dark:to-blue-500/20 border-indigo-500/20' },
+  job_deleted:           { icon: <Trash2 size={18} />, color: 'text-slate-600 dark:text-slate-400',   bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-slate-500/10 to-slate-600/10 dark:from-slate-500/20 dark:to-slate-600/20 border-slate-500/20' },
+  ai_analysis_run:       { icon: <Sparkles size={18} />, color: 'text-primary',     bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 border-primary/20 shadow-glow-sm' },
+  candidate_deleted:     { icon: <Trash2 size={18} />, color: 'text-slate-600 dark:text-slate-400',   bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-slate-500/10 to-slate-600/10 dark:from-slate-500/20 dark:to-slate-600/20 border-slate-500/20' },
 };
 
 const ACTION_FILTERS = [
@@ -107,8 +107,8 @@ export default function Activity() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 animate-fade-in">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Activity Log</h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Activity Log</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
             {total} total actions recorded
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function Activity() {
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border ${
               actionFilter === f.value
                 ? 'gradient-primary text-white border-primary/50 shadow-glow-sm'
-                : 'bg-white/5 text-slate-400 hover:text-white border-white/10 hover:border-white/20 hover:bg-white/10'
+                : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-200 dark:hover:bg-white/10'
             }`}
           >
             {f.label}
@@ -138,11 +138,11 @@ export default function Activity() {
       {!loading && logs.length === 0 && (
         <Card className="animate-fade-in">
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center mb-5 border border-white/5">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700/50 dark:to-slate-800/50 flex items-center justify-center mb-5 border border-slate-200 dark:border-white/5">
               <ClipboardList size={36} className="text-slate-500" />
             </div>
-            <h3 className="text-white font-semibold text-lg mb-2">No activity yet</h3>
-            <p className="text-slate-500 text-sm">
+            <h3 className="text-slate-900 dark:text-white font-semibold text-lg mb-2">No activity yet</h3>
+            <p className="text-slate-600 dark:text-slate-500 text-sm">
               Actions like uploading resumes and shortlisting candidates will appear here
             </p>
           </div>
@@ -155,12 +155,12 @@ export default function Activity() {
           {logs.map((log) => {
             const config = actionConfig[log.action] || {
               icon: <ClipboardList size={18} />,
-              color: 'text-slate-400',
-              bg: 'bg-gradient-to-br from-slate-500/20 to-slate-600/20 border-slate-500/20',
+              color: 'text-slate-600 dark:text-slate-400',
+              bg: 'bg-white dark:bg-transparent bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-500/20 dark:to-slate-600/20 border-slate-200 dark:border-slate-500/20',
             };
 
             return (
-              <Card key={log._id} className="hover:border-white/20 transition-all duration-200 group">
+              <Card key={log._id} className="hover:border-slate-300 dark:hover:border-white/20 transition-all duration-200 group">
                 <div className="flex items-start gap-4">
 
                   {/* Icon */}
@@ -177,25 +177,25 @@ export default function Activity() {
                         </p>
                         <div className="flex flex-wrap items-center gap-3 mt-2">
                           {log.candidateId && (
-                            <span className="text-xs text-slate-400 flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-lg border border-white/5">
+                            <span className="text-xs text-slate-700 dark:text-slate-400 flex items-center gap-1.5 bg-slate-100 dark:bg-black/20 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
                               <User size={12} className="text-slate-500" /> {log.candidateId.name}
                             </span>
                           )}
                           {log.jobId && (
-                            <span className="text-xs text-slate-400 flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-lg border border-white/5">
+                            <span className="text-xs text-slate-700 dark:text-slate-400 flex items-center gap-1.5 bg-slate-100 dark:bg-black/20 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
                               <Briefcase size={12} className="text-slate-500" /> {log.jobId.title}
                             </span>
                           )}
                           {log.performedBy && (
-                            <span className="text-xs text-slate-500">
+                            <span className="text-xs text-slate-600 dark:text-slate-500">
                               by {log.performedBy.name}
                             </span>
                           )}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-slate-400 font-medium">{timeAgo(log.createdAt)}</p>
-                        <p className="text-[10px] text-slate-600 mt-1 uppercase tracking-wider">{formatDate(log.createdAt)}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{timeAgo(log.createdAt)}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-600 mt-1 uppercase tracking-wider">{formatDate(log.createdAt)}</p>
                       </div>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export default function Activity() {
           <button
             onClick={() => handlePageChange(page - 1)}
             disabled={page === 1}
-            className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-xl text-sm disabled:opacity-40 hover:border-white/20 hover:bg-white/10 transition-all font-medium"
+            className="px-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-xl text-sm disabled:opacity-40 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-200 dark:hover:bg-white/10 transition-all font-medium"
           >
             ← Prev
           </button>
@@ -228,7 +228,7 @@ export default function Activity() {
               }, [])
               .map((p, i) =>
                 p === '...' ? (
-                  <span key={`dots-${i}`} className="px-2 py-2 text-slate-600 text-sm">...</span>
+                  <span key={`dots-${i}`} className="px-2 py-2 text-slate-500 dark:text-slate-600 text-sm">...</span>
                 ) : (
                   <button
                     key={p}
@@ -236,7 +236,7 @@ export default function Activity() {
                     className={`w-9 h-9 rounded-xl text-sm font-medium transition-all ${
                       page === p
                         ? 'gradient-primary text-white shadow-glow-sm border border-primary/50'
-                        : 'bg-white/5 border border-white/10 text-slate-400 hover:border-white/30 hover:text-white'
+                        : 'bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/30 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {p}
@@ -248,7 +248,7 @@ export default function Activity() {
           <button
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
-            className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-xl text-sm disabled:opacity-40 hover:border-white/20 hover:bg-white/10 transition-all font-medium"
+            className="px-4 py-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 rounded-xl text-sm disabled:opacity-40 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-200 dark:hover:bg-white/10 transition-all font-medium"
           >
             Next →
           </button>

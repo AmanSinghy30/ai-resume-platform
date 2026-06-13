@@ -53,6 +53,9 @@ web_modules/
 # Optional eslint cache
 .eslintcache
 
+# Uploads 
+server/uploads/
+
 # Optional stylelint cache
 .stylelintcache
 

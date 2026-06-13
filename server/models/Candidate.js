@@ -69,6 +69,16 @@ const candidateSchema = new mongoose.Schema({
     enum: ['shortlist', 'review', 'reject', null],
     default: null,
   },
+  matchScore: {
+    type: Number,
+    default: null,
+    min: 0,
+    max: 100,
+  },
+  reason: {
+    type: String,
+    default: '',
+  },
   status: {
     type: String,
     enum: ['new', 'reviewed', 'shortlisted', 'rejected'],

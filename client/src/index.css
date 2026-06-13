@@ -10,8 +10,10 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #020617;
-  color: #e2e8f0;
+  @apply bg-slate-50 text-slate-900;
+}
+.dark body {
+  @apply bg-slate-950 text-slate-200;
 }
 
 code {
@@ -24,43 +26,51 @@ code {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  @apply bg-slate-200;
+}
+.dark ::-webkit-scrollbar-track {
+  @apply bg-slate-900/50;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.4);
-  border-radius: 3px;
+  @apply bg-slate-300 rounded;
+}
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-500/40;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  @apply bg-slate-400;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500/60;
 }
 
 /* ─── Selection ─── */
 ::selection {
   background: rgba(99, 102, 241, 0.3);
-  color: #fff;
+  color: inherit;
 }
 
 /* ─── Glassmorphism Utilities ─── */
 @layer components {
   .glass {
-    background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    @apply bg-white/70 border border-slate-200 shadow-sm backdrop-blur-md;
+  }
+  .dark .glass {
+    @apply bg-slate-800/60 border-white/5 shadow-none backdrop-blur-md;
   }
 
   .glass-light {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    @apply bg-white/50 border border-slate-100 backdrop-blur-sm;
+  }
+  .dark .glass-light {
+    @apply bg-slate-800/40 border-white/5 backdrop-blur-sm;
   }
 
   .glass-strong {
-    background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    @apply bg-white border border-slate-200 shadow-md backdrop-blur-xl;
+  }
+  .dark .glass-strong {
+    @apply bg-slate-800/80 border-white/10 shadow-none backdrop-blur-xl;
   }
 
   .gradient-primary {
@@ -93,45 +103,45 @@ code {
   .card-hover {
     transition: all 0.3s ease;
   }
-  .card-hover:hover {
+  .dark .card-hover:hover {
     border-color: rgba(99, 102, 241, 0.3);
     box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.15);
+    transform: translateY(-1px);
+  }
+  .card-hover:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 20px -5px rgba(99, 102, 241, 0.2);
     transform: translateY(-1px);
   }
 
   /* Input focus glow */
   .input-glass {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(100, 116, 139, 0.3);
-    transition: all 0.2s ease;
+    @apply bg-white border border-slate-300 transition-all duration-200;
   }
+  .dark .input-glass {
+    @apply bg-slate-900/60 border-slate-600/50;
+  }
+  
   .input-glass:focus {
-    border-color: rgba(99, 102, 241, 0.5);
+    @apply border-primary outline-none;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    outline: none;
   }
-
-  /* Gradient border trick */
-  .border-gradient {
-    position: relative;
-    border: none;
-  }
-  .border-gradient::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.3));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
+  .dark .input-glass:focus {
+    @apply border-primary outline-none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
   }
 }
 
 /* ─── Page Background Gradient ─── */
 .page-bg {
+  @apply bg-slate-50;
+  background-image: 
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
+}
+
+.dark .page-bg {
   background: 
     radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
@@ -141,10 +151,14 @@ code {
 
 /* ─── Animated Background Orbs (for login/register pages) ─── */
 .auth-bg {
-  background: #020617;
+  @apply bg-slate-50;
   position: relative;
   overflow: hidden;
 }
+.dark .auth-bg {
+  @apply bg-slate-950;
+}
+
 .auth-bg::before,
 .auth-bg::after {
   content: '';

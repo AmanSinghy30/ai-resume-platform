@@ -16,10 +16,10 @@ export default function Layout({ title, children }: LayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Top Bar */}
-        <header className="glass-strong px-4 md:px-6 py-4 flex items-center gap-4 flex-shrink-0 border-b border-white/5">
+        <header className="glass-strong px-4 md:px-6 py-4 flex items-center gap-4 flex-shrink-0 border-b border-slate-200 dark:border-white/5">
           {/* Spacer for mobile hamburger */}
           <div className="w-10 md:hidden flex-shrink-0" />
-          <h1 className="text-white font-semibold text-lg tracking-tight">{title}</h1>
+          <h1 className="text-slate-900 dark:text-white font-semibold text-lg tracking-tight">{title}</h1>
         </header>
 
         {/* Page Content */}
