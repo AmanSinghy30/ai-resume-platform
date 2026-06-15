@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
@@ -37,7 +37,7 @@ export default function Rankings() {
   useEffect(() => {
     getJobs()
       .then(d => setJobs(d.jobs))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -52,6 +52,33 @@ export default function Rankings() {
       .finally(() => setLoading(false));
   }, [selectedJob]);
 
+  const sortedCandidates = useMemo(() => {
+    return [...candidates].sort((a, b) => {
+      // 1. Primary: AI Score (descending)
+      if (b.aiScore !== a.aiScore) {
+        return (b.aiScore || 0) - (a.aiScore || 0);
+      }
+
+      // 2. Secondary: Skill Match Count (descending)
+      const getMatchCount = (c: any) => {
+        const jobId = c.jobId?._id || c.jobId;
+        const job = jobs.find(j => j._id === jobId);
+        if (!job?.requiredSkills || !c.skills) return 0;
+        const cSkills = c.skills.map((s: string) => s.toLowerCase());
+        return job.requiredSkills.filter((s: string) => cSkills.includes(s.toLowerCase())).length;
+      };
+
+      const aMatchCount = getMatchCount(a);
+      const bMatchCount = getMatchCount(b);
+      if (bMatchCount !== aMatchCount) {
+        return bMatchCount - aMatchCount;
+      }
+
+      // 3. Tertiary: Experience Years (descending)
+      return (b.experience || 0) - (a.experience || 0);
+    });
+  }, [candidates, jobs]);
+
   const toggleCompare = (id: string) => {
     setCompareIds(prev => {
       if (prev.includes(id)) return prev.filter(i => i !== id);
@@ -60,7 +87,7 @@ export default function Rankings() {
     });
   };
 
-  const compareList = candidates.filter(c => compareIds.includes(c._id));
+  const compareList = sortedCandidates.filter(c => compareIds.includes(c._id));
 
   return (
     <Layout title="Rankings">
@@ -136,12 +163,11 @@ export default function Rankings() {
           )}
 
           <div className="flex flex-col gap-3">
-            {candidates.map((c, index) => (
+            {sortedCandidates.map((c, index) => (
               <Card
                 key={c._id}
-                className={`transition-all duration-300 relative overflow-hidden group ${
-                  compareIds.includes(c._id) ? 'border-violet-500/50 shadow-glow-purple bg-violet-500/5' : 'hover:border-slate-300 dark:hover:border-white/20'
-                }`}
+                className={`transition-all duration-300 relative overflow-hidden group ${compareIds.includes(c._id) ? 'border-violet-500/50 shadow-glow-purple bg-violet-500/5' : 'hover:border-slate-300 dark:hover:border-white/20'
+                  }`}
               >
                 {/* Subtle rank gradient background for top 3 */}
                 {index < 3 && (
@@ -151,9 +177,8 @@ export default function Rankings() {
                 <div className="flex items-center gap-4 relative z-10">
 
                   {/* Rank */}
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${
-                    index < 3 ? medalColors[index] : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/5'
-                  }`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${index < 3 ? medalColors[index] : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/5'
+                    }`}>
                     {index === 0 ? <Crown size={20} /> : index < 3 ? <Medal size={20} /> : `#${index + 1}`}
                   </div>
 
@@ -200,11 +225,10 @@ export default function Rankings() {
                     </Button>
                     <button
                       onClick={() => toggleCompare(c._id)}
-                      className={`text-xs px-3 py-1.5 rounded-xl border transition-all duration-200 ${
-                        compareIds.includes(c._id)
-                          ? 'border-violet-500 bg-violet-500/20 text-violet-600 dark:text-violet-300 shadow-glow-sm'
-                          : 'border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/30 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5'
-                      }`}
+                      className={`text-xs px-3 py-1.5 rounded-xl border transition-all duration-200 ${compareIds.includes(c._id)
+                        ? 'border-violet-500 bg-violet-500/20 text-violet-600 dark:text-violet-300 shadow-glow-sm'
+                        : 'border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-white/30 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/5'
+                        }`}
                     >
                       {compareIds.includes(c._id) ? '✓ Added' : 'Compare'}
                     </button>
@@ -234,9 +258,8 @@ export default function Rankings() {
                 </button>
               </div>
 
-              <div className={`grid gap-px bg-slate-200 dark:bg-white/5 ${
-                compareList.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
-              }`}>
+              <div className={`grid gap-px bg-slate-200 dark:bg-white/5 ${compareList.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
+                }`}>
                 {compareList.map((c, i) => (
                   <div key={c._id} className="bg-slate-50 dark:bg-slate-900/60 p-6 flex flex-col h-full">
 
@@ -270,11 +293,10 @@ export default function Rankings() {
                       </div>
                       <div className="flex justify-between items-center py-1">
                         <span className="text-slate-600 dark:text-slate-500">Recommendation</span>
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${
-                          c.aiRecommendation === 'shortlist' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-lg ${c.aiRecommendation === 'shortlist' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                           : c.aiRecommendation === 'reject' ? 'bg-red-500/10 text-red-600 dark:text-red-400'
-                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                        }`}>
+                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                          }`}>
                           {c.aiRecommendation || 'N/A'}
                         </span>
                       </div>
