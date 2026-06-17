@@ -217,7 +217,7 @@ export default function Sidebar() {
             onClick={() => setMobileOpen(false)}
           />
           <aside
-            className="md:hidden fixed left-0 top-0 h-full w-64 z-50 flex flex-col shadow-xl animate-slide-up bg-white dark:bg-slate-900/98 border-r border-slate-200 dark:border-white/5"
+            className="md:hidden fixed left-0 top-0 h-full w-64 z-50 flex flex-col shadow-xl animate-slide-up bg-white dark:bg-slate-900/95 border-r border-slate-200 dark:border-white/5"
           >
             <button
               onClick={() => setMobileOpen(false)}
