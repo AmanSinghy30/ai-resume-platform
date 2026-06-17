@@ -113,6 +113,9 @@ dist
 # Serverless directories
 .serverless/
 
+# Original text files
+*_orig.txt
+
 # FuseBox cache
 .fusebox/
 
