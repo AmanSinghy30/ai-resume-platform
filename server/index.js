@@ -54,6 +54,54 @@ const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
+    
+    // Listen for n8n background status updates using Change Streams
+    try {
+      const Candidate = require('./models/Candidate');
+      const ActivityLog = require('./models/ActivityLog');
+      
+      const candidateChangeStream = Candidate.watch([], { fullDocument: 'updateLookup' });
+      
+      candidateChangeStream.on('change', async (change) => {
+        if (change.operationType === 'update' && change.updateDescription?.updatedFields?.status) {
+          const newStatus = change.updateDescription.updatedFields.status;
+          const candidate = change.fullDocument;
+          
+          if (candidate && candidate.userId) {
+            const actionMap = {
+              shortlisted: 'candidate_shortlisted',
+              rejected: 'candidate_rejected',
+              reviewed: 'candidate_reviewed',
+            };
+            
+            const action = actionMap[newStatus];
+            if (action) {
+              // Prevent duplicate logs if the backend already logged this manually in the last 3 seconds
+              const recentLog = await ActivityLog.findOne({
+                action,
+                candidateId: candidate._id,
+                createdAt: { $gte: new Date(Date.now() - 3000) }
+              });
+
+              if (!recentLog) {
+                await ActivityLog.create({
+                  action,
+                  performedBy: candidate.userId,
+                  candidateId: candidate._id,
+                  jobId: candidate.jobId,
+                  description: `${candidate.name} marked as ${newStatus} (Auto)`
+                });
+                console.log(`✅ Auto-logged status change for ${candidate.name}`);
+              }
+            }
+          }
+        }
+      });
+      console.log('✅ Candidate Change Stream initialized');
+    } catch (err) {
+      console.warn('⚠️ Change stream not supported (requires Replica Set):', err.message);
+    }
+
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
     });
