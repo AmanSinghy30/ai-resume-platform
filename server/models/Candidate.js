@@ -42,6 +42,14 @@ const candidateSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  matchedSkills: {
+    type: [String],
+    default: [],
+  },
+  missingSkills: {
+    type: [String],
+    default: [],
+  },
   aiScore: {
     type: Number,
     default: null,

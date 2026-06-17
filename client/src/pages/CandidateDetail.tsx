@@ -236,8 +236,8 @@ export default function CandidateDetail() {
                 </div>
                 <ScoreBar score={candidate.aiScore} />
                 <p className={`text-center text-sm font-medium mt-3 ${candidate.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-                    : candidate.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-red-600 dark:text-red-400'
+                  : candidate.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-red-600 dark:text-red-400'
                   }`}>
                   Recommendation: {candidate.aiRecommendation || 'None'}
                 </p>
@@ -265,10 +265,39 @@ export default function CandidateDetail() {
             <h3 className="text-slate-900 dark:text-white font-semibold mb-3">
               Skills
               <span className="text-slate-500 dark:text-slate-600 text-xs font-normal ml-2">
-                ({candidate.skills?.length || 0} found)
+                {(candidate.matchedSkills?.length > 0 || candidate.missingSkills?.length > 0) 
+                  ? `(${candidate.matchedSkills?.length || 0} matched and ${candidate.missingSkills?.length || 0} missing)` 
+                  : `(${candidate.skills?.length || 0} found)`}
               </span>
             </h3>
-            {candidate.skills?.length > 0 ? (
+            {candidate.matchedSkills?.length > 0 || candidate.missingSkills?.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {candidate.matchedSkills?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">Matched Skills</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {candidate.matchedSkills.map((skill: string) => (
+                        <span key={skill} className="text-xs bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-500/20">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {candidate.missingSkills?.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-2">Missing Skills</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {candidate.missingSkills.map((skill: string) => (
+                        <span key={skill} className="text-xs bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-500/20">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : candidate.skills?.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {candidate.skills.map((skill: string) => (
                   <span
