@@ -77,6 +77,9 @@ server/uploads/
 .cache
 .parcel-cache
 
+# Upload files
+server/uploads/
+
 # Next.js build output
 .next
 out

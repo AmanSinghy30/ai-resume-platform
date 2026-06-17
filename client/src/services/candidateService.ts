@@ -1,5 +1,5 @@
 import api from './api';
-
+import axios from 'axios';
 export const uploadResume = async (formData: FormData) => {
   const res = await api.post('/candidates/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
