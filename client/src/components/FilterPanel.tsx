@@ -9,6 +9,8 @@ type Filters = {
   maxScore: string;
   sortBy: string;
   order: string;
+  skills: string;
+  minExperience: string;
 };
 
 type FilterPanelProps = {
@@ -114,6 +116,28 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
                   className="w-full input-glass text-white rounded-xl px-3 py-2.5 text-sm"
                 />
               </div>
+            </div>
+
+            {/* Skills & Experience */}
+            <div>
+              <label className="text-xs text-slate-400 mb-1.5 block font-medium">Skills (e.g. React + Node)</label>
+              <input
+                type="text"
+                value={filters.skills}
+                onChange={e => update('skills', e.target.value)}
+                placeholder="Comma or + separated..."
+                className="w-full input-glass text-white rounded-xl px-3 py-2.5 text-sm mb-4"
+              />
+              
+              <label className="text-xs text-slate-400 mb-1.5 block font-medium">Min Experience (Years)</label>
+              <input
+                type="number"
+                value={filters.minExperience}
+                onChange={e => update('minExperience', e.target.value)}
+                placeholder="0"
+                min="0"
+                className="w-full input-glass text-white rounded-xl px-3 py-2.5 text-sm"
+              />
             </div>
 
             {/* Sort */}

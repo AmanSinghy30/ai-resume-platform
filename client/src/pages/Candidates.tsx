@@ -41,7 +41,7 @@ const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> 
 };
 
 const EMPTY_FILTERS = {
-  status: '', jobId: '', minScore: '', maxScore: '', sortBy: '', order: 'desc'
+  status: '', jobId: '', minScore: '', maxScore: '', sortBy: '', order: 'desc', skills: '', minExperience: ''
 };
 
 export default function Candidates() {
@@ -65,6 +65,8 @@ export default function Candidates() {
     if (filters.maxScore) params.maxScore = filters.maxScore;
     if (filters.sortBy) params.sortBy = filters.sortBy;
     if (filters.order) params.order = filters.order;
+    if (filters.skills) params.skills = filters.skills;
+    if (filters.minExperience) params.minExperience = filters.minExperience;
 
     getCandidates(params)
       .then(data => setCandidates(data.candidates))
@@ -123,8 +125,8 @@ export default function Candidates() {
     }
   };
 
-  const hasActiveFilters = search || Object.values(filters).some(
-    (v, i) => v !== '' && i !== 5
+  const hasActiveFilters = search || Object.entries(filters).some(
+    ([k, v]) => v !== '' && k !== 'order' && k !== 'sortBy'
   );
 
   const allSelected = candidates.length > 0 && selected.length === candidates.length;
@@ -223,6 +225,22 @@ export default function Candidates() {
             <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
               Score: {filters.minScore || '0'}–{filters.maxScore || '100'}
               <button onClick={() => setFilters(f => ({ ...f, minScore: '', maxScore: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.skills && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Skills: {filters.skills}
+              <button onClick={() => setFilters(f => ({ ...f, skills: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.minExperience && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Exp: {filters.minExperience}+ yrs
+              <button onClick={() => setFilters(f => ({ ...f, minExperience: '' }))} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
                 <X size={12} />
               </button>
             </span>

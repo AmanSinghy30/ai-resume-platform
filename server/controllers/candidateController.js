@@ -56,6 +56,24 @@ const uploadResume = async (req, res) => {
     // Parse PDF for raw text + extra info
     const parsed = await extractTextFromPDF(filePath);
 
+    // Check for duplicate candidate
+    if (email) {
+      const duplicateQuery = { 
+        email, 
+        userId: req.user.id,
+        jobId: jobId || null
+      };
+      
+      const existingCandidate = await Candidate.findOne(duplicateQuery);
+      if (existingCandidate) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: jobId ? 'Candidate has already applied for this job' : 'Candidate profile already exists'
+        });
+      }
+    }
+
     // Create candidate
     const cleanedPhone = phone ? String(phone).replace(/\D/g, '') : '';
     const candidate = await Candidate.create({
@@ -114,7 +132,7 @@ const uploadResume = async (req, res) => {
 // @route GET /api/candidates
 const getCandidates = async (req, res) => {
   try {
-    const { status, jobId, search, sortBy, order, minScore, maxScore } = req.query;
+    const { status, jobId, search, sortBy, order, minScore, maxScore, skills, minExperience } = req.query;
 const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
     if (status) query.status = status;
     if (jobId) query.jobId = jobId;
@@ -123,6 +141,17 @@ const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
       query.aiScore = {};
       if (minScore) query.aiScore.$gte = Number(minScore);
       if (maxScore) query.aiScore.$lte = Number(maxScore);
+    }
+    if (minExperience) {
+      query.experience = { $gte: Number(minExperience) };
+    }
+    if (skills) {
+      const skillArray = skills.split(/[,+]/).map(s => s.trim()).filter(Boolean);
+      if (skillArray.length > 0) {
+        query.skills = { 
+          $all: skillArray.map(skill => new RegExp(skill, 'i')) 
+        };
+      }
     }
 
     const sort = {};
