@@ -16,14 +16,15 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally — log out if token expired
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const originalRequest = error.config;
+    // Don't redirect if the 401 is from the login endpoint
+    if (error.response?.status === 401 && !originalRequest?.url?.includes('/auth/login')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/login?expired=true';
     }
     return Promise.reject(error);
   }

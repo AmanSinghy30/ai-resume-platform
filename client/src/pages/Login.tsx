@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -7,8 +7,18 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (searchParams.get('expired') === 'true') {
+      toast.error('Session has expired, please login again', { duration: 5000 });
+      // Remove the query parameter to prevent the toast from showing again on refresh
+      searchParams.delete('expired');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
