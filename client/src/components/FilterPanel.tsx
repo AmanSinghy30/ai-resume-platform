@@ -24,7 +24,7 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    getJobs().then(d => setJobs(d.jobs)).catch(() => {});
+    getJobs().then(d => setJobs(d.jobs)).catch(() => { });
   }, []);
 
   const update = (key: keyof Filters, value: string) => {
@@ -37,17 +37,16 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${
-          hasFilters
-            ? 'gradient-primary text-white shadow-glow-sm'
-            : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
-        }`}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all duration-200 ${hasFilters
+          ? 'gradient-primary text-white shadow-glow-sm'
+          : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
+          }`}
       >
         <SlidersHorizontal size={14} />
         Filters
         {hasFilters && (
           <span className="bg-white/20 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-            {Object.values(filters).filter(v => v !== '').length}
+            {Object.values(filters).filter(v => v !== '').length - 1}
           </span>
         )}
       </button>
@@ -128,7 +127,7 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
                 placeholder="Comma or + separated..."
                 className="w-full input-glass text-white rounded-xl px-3 py-2.5 text-sm mb-4"
               />
-              
+
               <label className="text-xs text-slate-400 mb-1.5 block font-medium">Min Experience (Years)</label>
               <input
                 type="number"

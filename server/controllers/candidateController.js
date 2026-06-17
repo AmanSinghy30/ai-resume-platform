@@ -1,4 +1,4 @@
-const { triggerResumeWorkflow } = require('../utils/n8nClient');
+const { triggerResumeWorkflow, triggerManualStatusUpdateWorkflow } = require('../utils/n8nClient');
 const Candidate = require('../models/Candidate');
 const Job = require('../models/Job');
 const ActivityLog = require('../models/ActivityLog');
@@ -211,6 +211,11 @@ const candidate = await Candidate.findOneAndUpdate(
     if (actionMap[status]) {
       await log(actionMap[status], req.user.id, candidate._id, candidate.jobId,
         `${candidate.name} marked as ${status}`);
+        
+      // Trigger n8n manual status webhook so emails can be sent
+      triggerManualStatusUpdateWorkflow(candidate._id.toString(), status, candidate.jobId).catch(err => {
+        console.error(`⚠️ Async n8n manual update failed for ${candidate.name}:`, err.message);
+      });
     }
 
     res.json({ success: true, candidate });
@@ -268,6 +273,9 @@ const bulkUpdateStatus = async (req, res) => {
   query = { _id: { $in: candidateIds }, userId: req.user.id };  // ✅
 }
 
+    // Find candidates first so we can trigger webhooks for them
+    const candidatesToUpdate = await Candidate.find(query);
+
     const result = await Candidate.updateMany(query, { status });
 
     await logActivity(
@@ -277,6 +285,13 @@ const bulkUpdateStatus = async (req, res) => {
       null,
       `Bulk update: ${result.modifiedCount} candidates set to ${status}`
     );
+
+    // Trigger n8n manual status webhook for each updated candidate
+    for (const c of candidatesToUpdate) {
+      triggerManualStatusUpdateWorkflow(c._id.toString(), status, c.jobId).catch(err => {
+        console.error(`⚠️ Async n8n bulk manual update failed for ${c.name}:`, err.message);
+      });
+    }
 
     res.json({
       success: true,

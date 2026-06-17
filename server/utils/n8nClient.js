@@ -23,4 +23,20 @@ async function triggerResumeWorkflow(candidateId, filePath, jobId) {
   }
 }
 
-module.exports = { triggerResumeWorkflow };
+async function triggerManualStatusUpdateWorkflow(candidateId, status, jobId) {
+  if (!N8N_ENABLED) return { success: false, reason: 'n8n disabled' };
+
+  try {
+    const response = await axios.post(
+      `${N8N_BASE_URL}/webhook/manual-status-update`,
+      { candidateId, status, jobId },
+      { timeout: 10000 }
+    );
+    return { success: true, data: response.data };
+  } catch (err) {
+    console.warn(`⚠️ n8n manual update webhook failed: ${err.message}`);
+    return { success: false, reason: err.message };
+  }
+}
+
+module.exports = { triggerResumeWorkflow, triggerManualStatusUpdateWorkflow };
