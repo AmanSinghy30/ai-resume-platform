@@ -9,8 +9,6 @@ import { useFormValidation } from '../hooks/useFormValidation';
 import FormError from '../components/FormError';
 import { UploadCloud, FileText, CheckCircle2, AlertCircle, X, Loader2, Files, User } from 'lucide-react';
 
-const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook-test/upload-resume';
-
 type Job = { _id: string; title: string };
 type Mode = 'single' | 'bulk';
 

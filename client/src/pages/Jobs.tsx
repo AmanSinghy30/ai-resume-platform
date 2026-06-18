@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import Badge from '../components/Badge';
+
 import Spinner from '../components/Spinner';
 import SearchBar from '../components/SearchBar';
 import { useFormValidation } from '../hooks/useFormValidation';
