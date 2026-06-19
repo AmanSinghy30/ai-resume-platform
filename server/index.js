@@ -13,10 +13,31 @@ const aiRoutes = require('./routes/ai');
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
+const fs = require('fs');
+const uploadsDir = './uploads';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const app = express();
 
 // Core middleware
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.FRONTEND_URL, // will add this after Vercel deploy
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,7 +46,7 @@ app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     success: true,
     message: 'AI Resume Platform API is running',
     version: '1.0.0'
@@ -54,26 +75,26 @@ const PORT = process.env.PORT || 5000;
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
-    
+
     // Listen for n8n background status updates using Change Streams
     try {
       const Candidate = require('./models/Candidate');
       const ActivityLog = require('./models/ActivityLog');
-      
+
       const candidateChangeStream = Candidate.watch([], { fullDocument: 'updateLookup' });
-      
+
       candidateChangeStream.on('change', async (change) => {
         if (change.operationType === 'update' && change.updateDescription?.updatedFields?.status) {
           const newStatus = change.updateDescription.updatedFields.status;
           const candidate = change.fullDocument;
-          
+
           if (candidate && candidate.userId) {
             const actionMap = {
               shortlisted: 'candidate_shortlisted',
               rejected: 'candidate_rejected',
               reviewed: 'candidate_reviewed',
             };
-            
+
             const action = actionMap[newStatus];
             if (action) {
               // Prevent duplicate logs if the backend already logged this manually in the last 3 seconds

@@ -19,6 +19,7 @@ const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
   new: 'yellow',
   rejected: 'red',
 };
+const API_BASE = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 export default function CandidateDetail() {
   const { id } = useParams<{ id: string }>();
@@ -375,7 +376,7 @@ export default function CandidateDetail() {
               </div>
               {candidate.resumeUrl && (
                 <a
-                  href={`http://localhost:5000/${candidate.resumeUrl.replace(/\\/g, '/')}`}
+                  href={`${API_BASE}/${candidate.resumeUrl.replace(/\\/g, '/')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-primary text-sm hover:text-primary-dark text-center mt-2 transition-colors font-medium"

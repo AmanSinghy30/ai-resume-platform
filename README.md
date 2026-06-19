@@ -142,29 +142,6 @@ JWT_SECRET=your_secret_key
 ```
 
 ---
-
-## Current Progress
-
-* [x] Project Setup
-* [x] UI Components
-* [x] Dashboard UI
-* [x] Authentication System
-* [x] Resume Upload System
-* [x] Candidate CRUD APIs
-* [x] PDF Parsing
-* [x] Skill Extraction
-* [x] Experience Extraction
-* [x] Dashboard Integration
-
-### Upcoming Features
-
-* AI Resume Analysis
-* Candidate Scoring
-* Job Matching
-* Candidate Ranking
-* Automated Shortlisting
-* Deployment
-
 ---
 
 ## Author
