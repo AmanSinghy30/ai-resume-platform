@@ -1,0 +1,929 @@
+{
+  "name": "Job Matching Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "jobId",
+              "field2": "_id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "c69a1d0e-7f63-4c99-9cef-8de8322c35ef",
+      "name": "Merge",
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a recruitment expert. Score how well a candidate matches a job description. Return only valid JSON — no markdown, no explanation.",
+              "role": "model"
+            },
+            {
+              "content": "=You are an expert HR recruiter scoring a candidate for a job. Do not use strict keyword matching. Evaluate candidates based on semantic meaning, transferable skills, and overall core competency.\n\nJOB:\nTitle: {{ $json.title }}\nRequired Skills: {{ $json.requiredSkills }}\nDescription: {{ $json.description }}\n\nCANDIDATE PROFILE:\nName: {{ $json.name }}\nEmail: {{ $json.email }}\nPhone: {{ $json.phone }}\nLocation: {{ $json.location }}\nSummary: {{ $json.rawText }}\nSkills: {{ $json.skills }}\nExperience: {{ $json.experience }}\nEducation: {{ $json.education }}\nCandidate_id: {{ $json._id }}\nStatus: {{ $json.status }}\n\nEvaluation Rules:\n1. Transferable Skills: If a candidate lacks an exact required skill but has strong experience in an equivalent technology (e.g., has Vue.js instead of React, or GCP instead of AWS), consider it a valid match.\n2. Core vs. Bonus: Focus on the fundamental ability to do the job. Do not reject a candidate for missing minor or \"nice-to-have\" skills.\n3. Recommendation Thresholds:\n   - \"shortlist\": match_score 90-100. Meets core requirements or shows strong equivalent experience.\n   - \"review\": match_score 70-89. Missing some specific skills but demonstrates strong foundational potential. Use this instead of rejecting when in doubt.\n   - \"reject\": match_score 0-69. Completely lacks the fundamental skills required for the role.\n\nExtraction Rules:\n- Carefully read the \"Summary\" (rawText) provided above.\n- Extract the candidate's true Full Name, Email, and Phone Number directly from this text to correct any parsing errors. If a value is missing, return null.\n\nScore this candidate against this job and extract their contact details.\nReturn ONLY valid JSON, no explanation, no markdown:\n\n{\n  \"extracted_name\": \"Full Name from rawText\",\n  \"extracted_email\": \"Email from rawText\",\n  \"extracted_phone\": \"Phone from rawText\",\n  \"experience\": \"Real experience outside educational experience like matriculation or BTech etc. \",\n  \"match_score\": 0,\n  \"matchedSkills\": [],\n  \"missingSkills\": [],\n  \"recommendation\": \"shortlist\",\n  \"reason\": \"2 sentence explanation of the score, noting any transferable skills considered.\",\n\"improve\": \"2 sentence explaination on how candidate can improve his current resume for this job if rejected or reviewed(e.g- You can improve your resume by..)\"\n}\n\nRules:\n- match_score must be integer 0-100\n- recommendation must be exactly: shortlisted, reviewed, or rejected\n- Output ONLY the JSON object"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        -240
+      ],
+      "id": "b5481e21-e560-4927-9437-d7903a68971d",
+      "name": "Message a model",
+      "executeOnce": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "iv5tFt8pxcgg3o0m",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "collection": "candidates",
+        "updateKey": "_id",
+        "fields": "=matchScore,reason,matched_skills,missing_skills,shortlisted_at,status, matched_job_id,job_title,aiAnalysis,name,email,phone,experience,matchedSkills,missingSkills\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        1312,
+        -272
+      ],
+      "id": "4b4e0a96-6fac-4a88-93ab-9bc3d81954e4",
+      "name": "Update documents",
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "collection": "candidates",
+        "updateKey": "_id",
+        "fields": "=matchScore,reason,shortlisted_at,status, matched_job_id,job_title,aiAnalysis,name,email,phone,experience,matchedSkills,missingSkills,improve",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        1120,
+        144
+      ],
+      "id": "5f332bde-c2d0-4469-82ad-1ac12b45a0a3",
+      "name": "Update documents2",
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "collection": "candidates",
+        "options": {},
+        "query": "={\n  \"status\": \"new\",\n  \"_id\": \"{{ $json.body.candidateId }}\"\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        -192
+      ],
+      "id": "ffceb4a6-1240-4b5e-be67-3421fd5f7f1d",
+      "name": "Find candidates",
+      "executeOnce": false,
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "collection": "jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        128
+      ],
+      "id": "faba41fa-6d25-42a5-978a-d77a80613f92",
+      "name": "Find jobs",
+      "executeOnce": false,
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7e5f7bc8-ec7f-4bc5-bec6-ac4a2b7e4336",
+              "name": "candidate_id",
+              "value": "={{ String($json._id).replace(/\"/g, '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        -192
+      ],
+      "id": "cd1d263c-cefa-45ab-9759-94cea7edccc5",
+      "name": "candidate id change"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b74c0f9-2ee0-417b-87d2-eb916a0fc23a",
+              "name": "jobId",
+              "value": "={{ $json._id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        128
+      ],
+      "id": "458089d1-c552-4eb2-8c5a-a84d06af6e29",
+      "name": "job id change"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1927dd7-4fe4-49b7-9607-0da7bb703ea0",
+              "name": "status",
+              "value": "={{ $json.recommendation }}",
+              "type": "string"
+            },
+            {
+              "id": "68a9a99f-804e-47a5-83a7-0b6e592fbe93",
+              "name": "=job_id",
+              "value": "={{ $('Find jobs').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "4138e722-4f41-4906-8a8e-487d28d6a9d9",
+              "name": "=job_title",
+              "value": "={{ $('Find jobs').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "7c3dd27b-ec02-4560-85c1-f1e0abc04db2",
+              "name": "=_id",
+              "value": "={{ $json.candidate_id }}",
+              "type": "string"
+            },
+            {
+              "id": "fc89210f-5f0d-465d-92db-f90a3026ae80",
+              "name": "=matched_job_id",
+              "value": "={{ $('Merge').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "0ca6cad7-a8be-4572-b475-fe452199987d",
+              "name": "shortlisted_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        -272
+      ],
+      "id": "3dd6e61e-d8cd-4164-818f-717c474f8197",
+      "name": "shortlisted"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1927dd7-4fe4-49b7-9607-0da7bb703ea0",
+              "name": "status",
+              "value": "rejected",
+              "type": "string"
+            },
+            {
+              "id": "68a9a99f-804e-47a5-83a7-0b6e592fbe93",
+              "name": "=job_id",
+              "value": "={{ $('Find jobs').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "4138e722-4f41-4906-8a8e-487d28d6a9d9",
+              "name": "=job_title",
+              "value": "={{ $('Find jobs').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "7c3dd27b-ec02-4560-85c1-f1e0abc04db2",
+              "name": "=_id",
+              "value": "={{ $json.candidate_id }}",
+              "type": "string"
+            },
+            {
+              "id": "fc89210f-5f0d-465d-92db-f90a3026ae80",
+              "name": "=matched_job_id",
+              "value": "={{ $('Merge').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "02a82464-7e44-440f-bc5f-86c98d9d3775",
+              "name": "shortlisted_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "a7b44061-2226-47c5-9410-8211fe87f3e0",
+              "name": "aiAnalysis",
+              "value": "={{ $json.reason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        144
+      ],
+      "id": "9abe7762-df9d-4184-ae05-1ff88ce1dacf",
+      "name": "rejected"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Get current item from AI node\nconst item = $json;\n\n// Get original merged data from 2 nodes back\nconst mergeData = $('Merge').item.json;\n\n// ── Extract AI text ───────────────────────────────────────────────────────\nlet raw = '';\nif (item.candidates?.[0]?.content?.parts?.[0]?.text) {\n  raw = item.candidates[0].content.parts[0].text;\n} else if (item.message?.content) {\n  raw = item.message.content;\n} else if (item.text) {\n  raw = item.text;\n}\n\n// ── Clean and parse JSON ──────────────────────────────────────────────────\nconst cleaned = raw.replace(/```json\\s*/gi, '').replace(/```\\s*/gi, '').trim();\nlet parsed = {};\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (e1) {\n  const firstBrace = cleaned.indexOf('{');\n  const lastBrace = cleaned.lastIndexOf('}');\n  if (firstBrace !== -1 && lastBrace !== -1) {\n    try {\n      parsed = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));\n    } catch (e2) {\n      parsed = {\n        match_score: 0,\n        matchedSkills: [],\n        missingSkills: [],\n        recommendation: 'review',\n        reason: 'Could not parse AI response',\n      };\n    }\n  }\n}\n\n// ── Pull candidate + job from Merge node ──────────────────────────────────\nconst candidateId = mergeData.candidate_id;\nconst candidateScore = mergeData.input1?.overall_score || mergeData.overall_score || '';\nconst candidateName = mergeData.input1?.name || mergeData.name || '';\nconst candidateEmail = mergeData.input1?.email || mergeData.email || '';\nconst candidateStatus = mergeData.input1?.status || mergeData.status || '';\n\nconst jobId = mergeData.jobId || '';\nconst jobTitle = mergeData.title || '';\n\n// ── Return final result ───────────────────────────────────────────────────\nreturn {\n  json: {\n    // AI scores\n    matchScore: parsed.match_score ?? 0,\n    matchedSkills: parsed.matchedSkills ?? [],\n    missingSkills: parsed.missingSkills ?? [],\n    recommendation: parsed.recommendation ?? 'review',\n    reason: parsed.reason ?? '',\n    improve: parsed.improve ?? '',\n\n    // Candidate info\n    candidate_id: candidateId,\n    overall_score: candidateScore,\n    name: parsed.extracted_name || candidateName, \n    email: parsed.extracted_email || candidateEmail,\n    phone: parsed.extracted_phone || '',\n    status: candidateStatus,\n    experience:parsed. experience,\n\n    // Job info\n    job_id: jobId,\n    job_title: jobTitle,\n    processed_at: new Date().toISOString(),\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -240
+      ],
+      "id": "f9496df0-eb94-441a-b552-911c70d2a214",
+      "name": "Fetch details through JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "resume-upload",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -64
+      ],
+      "id": "591e7287-2d22-45b1-b529-cd9c737e2c8b",
+      "name": "Webhook",
+      "webhookId": "761bbe42-dc74-4c74-a6d2-069fb99b13c8"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "collection": "candidates",
+        "updateKey": "_id",
+        "fields": "=matchScore,reason,shortlisted_at,status, matched_job_id,job_title,aiAnalysis,name,email,phone,experience,matchedSkills,missingSkills,improve",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        1408,
+        16
+      ],
+      "id": "553eb83f-e683-4c47-92aa-93aff8e6584c",
+      "name": "Update documents3",
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1927dd7-4fe4-49b7-9607-0da7bb703ea0",
+              "name": "status",
+              "value": "={{ $json.recommendation }}",
+              "type": "string"
+            },
+            {
+              "id": "68a9a99f-804e-47a5-83a7-0b6e592fbe93",
+              "name": "=job_id",
+              "value": "={{ $('Find jobs').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "4138e722-4f41-4906-8a8e-487d28d6a9d9",
+              "name": "=job_title",
+              "value": "={{ $('Find jobs').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "7c3dd27b-ec02-4560-85c1-f1e0abc04db2",
+              "name": "=_id",
+              "value": "={{ $json.candidate_id }}",
+              "type": "string"
+            },
+            {
+              "id": "fc89210f-5f0d-465d-92db-f90a3026ae80",
+              "name": "=matched_job_id",
+              "value": "={{ $('Merge').item.json._id }}",
+              "type": "string"
+            },
+            {
+              "id": "02a82464-7e44-440f-bc5f-86c98d9d3775",
+              "name": "=shortlisted_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "a7b44061-2226-47c5-9410-8211fe87f3e0",
+              "name": "=aiAnalysis",
+              "value": "={{ $json.reason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1232,
+        16
+      ],
+      "id": "d13ba476-56c7-41c2-b517-b2bfcb1c547a",
+      "name": "reviewed"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=You have been shortlisted!",
+        "emailType": "text",
+        "message": "=Dear {{ $json.name }},\n\nThank you for taking the time to apply for the {{ $json.job_title }} position. We have reviewed your application and were very impressed with your background and skills.\n\nWe are excited to let you know that you have been shortlisted for the next round of our hiring process!\n\nOur recruitment team will be in touch with you shortly to share the next steps and coordinate an interview time that works for you.\n\nCongratulations, and we look forward to speaking with you soon.\n\nBest regards,\n\nThe Hiring Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        -192
+      ],
+      "id": "12ba20da-ceec-4ca7-a5d2-0c8bf4da7078",
+      "name": "Send a message to shortlisted candidate",
+      "webhookId": "1cadc1c6-97ab-437f-9413-17d2a71595fc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PxkMSOculVj63Hhh",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=Update on your application for {{ $json.job_title }}",
+        "emailType": "text",
+        "message": "=Dear {{ $json.name }},\n\nThank you for taking the time to apply for the {{ $json.job_title }} position. We appreciate the effort you put into sharing your background and experience with us.\n\nWhile your qualifications are impressive, we have decided to move forward with other candidates whose profiles more closely match our current needs for this specific role.\n\nBecause we deeply value the time you invested in your application, our system generated some constructive feedback that might be helpful for your job search. To better align your resume with this type of role in the future, here are some areas you could focus on:\n\n{{ $json.improve }}\n\nWe encourage you to keep an eye on our careers page for future openings that might be a better fit. We wish you the absolute best in your job search and professional journey.\n\nBest regards,\n\nThe Hiring Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        320
+      ],
+      "id": "d74891b7-aea4-40d9-b272-6b9c24803429",
+      "name": "Send a message to rejected candidate",
+      "webhookId": "1cadc1c6-97ab-437f-9413-17d2a71595fc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PxkMSOculVj63Hhh",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "manual-status-update",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        336
+      ],
+      "id": "a9e978e5-53b0-4deb-9304-d3fd11f1bc72",
+      "name": "Webhook1",
+      "webhookId": "07805082-e119-416f-b571-5604a0c9a135"
+    },
+    {
+      "parameters": {
+        "collection": "candidates",
+        "options": {},
+        "query": "={\n  \"_id\": \"{{ $json.body.candidateId }}\"\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        336
+      ],
+      "id": "d77ceee9-4c13-41e5-b15a-6cdcc54a079d",
+      "name": "Find candidates1",
+      "executeOnce": false,
+      "credentials": {
+        "mongoDb": {
+          "id": "GMhQVpALKJIPGn7F",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook1').item.json.body.status }}",
+                    "rightValue": "shortlisted",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2889ee41-1193-4c2f-bd05-b9d45f510c0b"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6265f949-602c-4dc4-981f-1e64ac3725d8",
+                    "leftValue": "={{ $('Webhook1').item.json.body.status }}",
+                    "rightValue": "rejected",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        336
+      ],
+      "id": "e51cd3c8-47c1-477d-8839-4fc532c8c64c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.matchScore }}",
+                    "rightValue": 90,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    },
+                    "id": "5766863e-54ec-4a15-9628-1ac0f982b750"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "093f160c-ec66-460b-9567-2fc3679ef126",
+                    "leftValue": "={{ $json.matchScore }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f9917520-81e9-4693-a29c-a270e52e1df2",
+                    "leftValue": "={{ $json.matchScore }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        -256
+      ],
+      "id": "b63f4614-7c12-47af-bf98-236aa4a0c79a",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "sendTo": "amansinghy30@gmail.com",
+        "subject": "=Manual Review Required For: {{ $json.name }}",
+        "emailType": "text",
+        "message": "=A new candidate has been flagged for manual review! \n\nCandidate: {{ $json.name }} \nApplied For: {{ $json.job_title }}\nMatch Score: {{ $json.matchScore }}/100  \nMatched Skills: {{ $json.matchedSkills }} \nMissing Skills: {{ $json.missingSkills }} \n\nReason: {{ $json.reason }} \nLog in to the dashboard to review this candidate.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        16
+      ],
+      "id": "bbc517bb-9b4f-4e98-862b-71c99f7696f8",
+      "name": "Send a message",
+      "webhookId": "62b8cc48-79b2-4dd4-a119-463b57fba051",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "PxkMSOculVj63Hhh",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Fetch details through JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update documents": {
+      "main": [
+        [
+          {
+            "node": "Send a message to shortlisted candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find candidates": {
+      "main": [
+        [
+          {
+            "node": "candidate id change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find jobs": {
+      "main": [
+        [
+          {
+            "node": "job id change",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "candidate id change": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job id change": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "shortlisted": {
+      "main": [
+        [
+          {
+            "node": "Update documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rejected": {
+      "main": [
+        [
+          {
+            "node": "Update documents2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch details through JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update documents2": {
+      "main": [
+        [
+          {
+            "node": "Send a message to rejected candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Find jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reviewed": {
+      "main": [
+        [
+          {
+            "node": "Update documents3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update documents3": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Find candidates1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find candidates1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message to shortlisted candidate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message to rejected candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "shortlisted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "reviewed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b2d86680-b8c3-435c-ac2b-9089ad059d0c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ba98c075ce821de065c3b8aeb380882cce87b9d93e140977dfa63ca8c7229f9"
+  },
+  "id": "pJmsD0oGJtXAQPn9",
+  "tags": []
+}

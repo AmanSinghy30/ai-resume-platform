@@ -14,8 +14,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Check local storage
     const saved = localStorage.getItem('theme');
     if (saved === 'light' || saved === 'dark') return saved;
-    // Otherwise fallback to default dark
-    return 'dark';
+    // Otherwise fallback to default light
+    return 'light';
   });
 
   useEffect(() => {

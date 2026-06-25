@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import {
-  Sparkles, Upload, Brain, BarChart3, Users, CheckCircle2,
+  Sparkles, Upload, Brain, BarChart3, Users,
   ArrowRight, ChevronRight, Menu, X, Moon, Sun, Zap, Search, Layers,
-  Shield, Clock, Star, TrendingUp, Award, Globe, Code2, Link2, Mail,
+  Shield, Star, TrendingUp, Award, Globe, Code2, Link2, Mail,
   Play, Check, ChevronDown, FileText, Target, Rocket,
 } from 'lucide-react';
 
@@ -686,7 +686,7 @@ export default function Landing() {
                   { icon: Link2, label: 'LinkedIn' },
                   { icon: Code2, label: 'GitHub' },
                 ].map(({ icon: SIcon, label }) => (
-                  <a key={label} href="#" aria-label={label}
+                  <a key={label} href="/" aria-label={label}
                     className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all">
                     <SIcon size={17} />
                   </a>
@@ -705,10 +705,10 @@ export default function Landing() {
             <div>
               <h4 className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Company</h4>
               <ul className="space-y-2.5">
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a></li>
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</a></li>
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Careers</a></li>
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Blog</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Careers</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
@@ -722,8 +722,8 @@ export default function Landing() {
                     <li><Link to="/register" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Register</Link></li>
                   </>
                 )}
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Service</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
+                <li><a href="/" className="text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </div>
