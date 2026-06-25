@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Card from '../components/Card';
@@ -24,15 +24,19 @@ export default function Shortlisted() {
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
-  const fetchShortlisted = () => {
-    setLoading(true);
+  const fetchShortlisted = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     getCandidates({ status: 'shortlisted', sortBy: 'aiScore', order: 'desc' })
       .then(data => setCandidates(data.candidates))
-      .catch(() => toast.error('Failed to load'))
-      .finally(() => setLoading(false));
-  };
+      .catch(() => { if (!silent) toast.error('Failed to load'); })
+      .finally(() => { if (!silent) setLoading(false); });
+  }, []);
 
-  useEffect(() => { fetchShortlisted(); }, []);
+  useEffect(() => {
+    fetchShortlisted();
+    const interval = setInterval(() => fetchShortlisted(true), 5000);
+    return () => clearInterval(interval);
+  }, [fetchShortlisted]);
 
   const toggleSelect = (id: string) => {
     setSelected(prev =>

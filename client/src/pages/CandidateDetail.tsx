@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Badge from '../components/Badge';
@@ -29,13 +29,26 @@ export default function CandidateDetail() {
   const [updating, setUpdating] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
 
-  useEffect(() => {
+  const fetchCandidate = useCallback(async (silent = false) => {
     if (!id) return;
-    getCandidateById(id)
-      .then(data => setCandidate(data.candidate))
-      .catch(() => toast.error('Failed to load candidate'))
-      .finally(() => setLoading(false));
+    if (!silent) setLoading(true);
+    try {
+      const data = await getCandidateById(id);
+      // Only update if the status or score changed to avoid unnecessary re-renders
+      // Actually React will handle shallow equality, but we can just set it.
+      setCandidate(data.candidate);
+    } catch {
+      if (!silent) toast.error('Failed to load candidate');
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchCandidate();
+    const interval = setInterval(() => fetchCandidate(true), 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [fetchCandidate]);
   const handleAnalyze = async () => {
     if (!id) return;
 

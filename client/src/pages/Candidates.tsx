@@ -55,8 +55,8 @@ export default function Candidates() {
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
 
-  const loadCandidates = useCallback(() => {
-    setLoading(true);
+  const loadCandidates = useCallback((silent = false) => {
+    if (!silent) setLoading(true);
     const params: Record<string, string> = {};
     if (debouncedSearch) params.search = debouncedSearch;
     if (filters.status) params.status = filters.status;
@@ -70,13 +70,16 @@ export default function Candidates() {
 
     getCandidates(params)
       .then(data => setCandidates(data.candidates))
-      .catch(() => toast.error('Failed to load candidates'))
-      .finally(() => setLoading(false));
+      .catch(() => { if (!silent) toast.error('Failed to load candidates'); })
+      .finally(() => { if (!silent) setLoading(false); });
   }, [debouncedSearch, filters]);
 
   useEffect(() => {
     loadCandidates();
     setSelected([]);
+    
+    const interval = setInterval(() => loadCandidates(true), 5000);
+    return () => clearInterval(interval);
   }, [debouncedSearch, filters, loadCandidates]);
 
   // ─── Selection helpers ───
