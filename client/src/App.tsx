@@ -14,6 +14,7 @@ import JobDetail from './pages/JobDetail';
 import Rankings from './pages/Rankings';
 import Activity from './pages/Activity';
 import Shortlisted from './pages/Shortlisted';
+import Landing from './pages/Landing';
 
 function App() {
   return (
@@ -37,11 +38,11 @@ function App() {
           />
           <Routes>
             {/* Public routes */}
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/upload" element={<ProtectedRoute><UploadResume /></ProtectedRoute>} />
             {/* Protected routes */}
-            <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/candidates" element={<ProtectedRoute><Candidates /></ProtectedRoute>} />
             <Route path="/candidates/:id" element={<ProtectedRoute><CandidateDetail /></ProtectedRoute>} />
