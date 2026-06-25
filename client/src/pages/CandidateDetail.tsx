@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
@@ -24,6 +24,8 @@ const API_BASE = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://l
 export default function CandidateDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromJob = location.state?.fromJob;
   const [candidate, setCandidate] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -98,10 +100,10 @@ export default function CandidateDetail() {
 
       {/* Back Button */}
       <button
-        onClick={() => navigate('/candidates')}
+        onClick={() => navigate(fromJob ? `/jobs/${fromJob}` : '/candidates')}
         className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
       >
-        <ArrowLeft size={16} /> Back to Candidates
+        <ArrowLeft size={16} /> {fromJob ? 'Back to Job' : 'Back to Candidates'}
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">

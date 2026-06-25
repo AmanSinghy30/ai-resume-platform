@@ -355,7 +355,7 @@ export default function JobDetail() {
                     <Button
                       variant="ghost"
                       className="text-xs py-1.5 px-3 flex-shrink-0 flex items-center gap-1.5"
-                      onClick={() => navigate(`/candidates/${c._id}`)}
+                      onClick={() => navigate(`/candidates/${c._id}`, { state: { fromJob: id } })}
                     >
                       <Eye size={14} /> View
                     </Button>
@@ -422,7 +422,7 @@ export default function JobDetail() {
                           <Button
                             variant="ghost"
                             className="text-xs py-1.5 px-3 opacity-70 group-hover:opacity-100 transition-opacity"
-                            onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c._id}`); }}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/candidates/${c._id}`, { state: { fromJob: id } }); }}
                           >
                             View
                           </Button>
