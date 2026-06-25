@@ -8,9 +8,9 @@ type ScoreBarProps = {
 };
 
 function getScoreColor(score: number) {
-  if (score >= 80) return { bar: 'from-emerald-500 to-teal-400', text: 'text-emerald-400', border: 'border-emerald-500', glow: 'shadow-[0_0_12px_-3px_rgba(16,185,129,0.5)]' };
-  if (score >= 60) return { bar: 'from-amber-500 to-orange-400', text: 'text-amber-400', border: 'border-amber-500', glow: 'shadow-[0_0_12px_-3px_rgba(245,158,11,0.5)]' };
-  return { bar: 'from-red-500 to-rose-400', text: 'text-red-400', border: 'border-red-500', glow: 'shadow-[0_0_12px_-3px_rgba(239,68,68,0.5)]' };
+  if (score >= 80) return { bar: 'from-emerald-500 to-teal-400', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500', glow: 'shadow-[0_0_12px_-3px_rgba(16,185,129,0.5)]' };
+  if (score >= 60) return { bar: 'from-amber-500 to-orange-400', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500', glow: 'shadow-[0_0_12px_-3px_rgba(245,158,11,0.5)]' };
+  return { bar: 'from-red-500 to-rose-400', text: 'text-red-600 dark:text-red-400', border: 'border-red-500', glow: 'shadow-[0_0_12px_-3px_rgba(239,68,68,0.5)]' };
 }
 
 function getScoreLabel(score: number) {
@@ -40,7 +40,7 @@ export default function ScoreBar({ score, showLabel = true, height = 'h-2' }: Sc
           {clamped}/100
         </span>
       </div>
-      <div className={`w-full bg-slate-800/80 rounded-full ${height} overflow-hidden`}>
+      <div className={`w-full bg-slate-200 dark:bg-slate-800/80 rounded-full ${height} overflow-hidden`}>
         <div
           className={`${height} rounded-full transition-all duration-700 ease-out bg-gradient-to-r ${colors.bar} ${colors.glow}`}
           style={{ width: mounted ? `${clamped}%` : '0%' }}

@@ -16,8 +16,8 @@ export default function ScoreCircle({ score, size = 'md' }: ScoreCircleProps) {
 
   if (score === null || score === undefined) {
     return (
-      <div className={`${s.circle} rounded-full border-2 border-slate-700/50 flex items-center justify-center bg-slate-800/50`}>
-        <span className="text-slate-600 text-xs font-medium">N/A</span>
+      <div className={`${s.circle} rounded-full border-2 border-slate-200 dark:border-slate-700/50 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50`}>
+        <span className="text-slate-500 dark:text-slate-600 text-xs font-medium">N/A</span>
       </div>
     );
   }
@@ -28,7 +28,7 @@ export default function ScoreCircle({ score, size = 'md' }: ScoreCircleProps) {
     <div className={`${s.circle} rounded-full ${s.border} ${colors.border} flex items-center justify-center relative`}>
       {/* Inner glow */}
       <div className={`absolute inset-1 rounded-full ${colors.border.replace('border-', 'bg-')}/10 blur-sm`} />
-      <span className={`font-bold ${s.text} text-white relative z-10`}>{score}</span>
+      <span className={`font-bold ${s.text} ${colors.text} relative z-10`}>{score}</span>
     </div>
   );
 }

@@ -47,7 +47,9 @@ const EMPTY_FILTERS = {
 export default function Candidates() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [view, setView] = useState<'grid' | 'list'>(() => {
+    return (localStorage.getItem('candidatesView') as 'grid' | 'list') || 'grid';
+  });
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [debouncedSearch] = useDebounce(search, 300);
@@ -81,6 +83,10 @@ export default function Candidates() {
     const interval = setInterval(() => loadCandidates(true), 5000);
     return () => clearInterval(interval);
   }, [debouncedSearch, filters, loadCandidates]);
+
+  useEffect(() => {
+    localStorage.setItem('candidatesView', view);
+  }, [view]);
 
   // ─── Selection helpers ───
   const toggleSelect = (id: string) => {
