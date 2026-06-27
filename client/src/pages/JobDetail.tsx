@@ -19,8 +19,8 @@ type RankedCandidate = {
 
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> = {
   shortlisted: 'green',
-  reviewed: 'blue',
-  new: 'yellow',
+  reviewed: 'yellow',
+  new: 'blue',
   rejected: 'red',
 };
 

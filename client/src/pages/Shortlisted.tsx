@@ -78,24 +78,24 @@ export default function Shortlisted() {
     }
   };
 
-const handleAutoShortlist = async () => {
-  const score = Number(minScore);
-  if (isNaN(score) || score < 0 || score > 100) {
-    toast.error('Enter a valid score between 0 and 100');
-    return;
-  }
-  setProcessing(true);
-  try {
-    const data = await bulkUpdateStatus('auto', 'shortlisted', score);
-    toast.success(data.message);
-    setShowAutoModal(false);
-    fetchShortlisted();
-  } catch (err: any) {
-    toast.error(err.response?.data?.message || 'Auto-shortlist failed');
-  } finally {
-    setProcessing(false);
-  }
-};
+  const handleAutoShortlist = async () => {
+    const score = Number(minScore);
+    if (isNaN(score) || score < 0 || score > 100) {
+      toast.error('Enter a valid score between 0 and 100');
+      return;
+    }
+    setProcessing(true);
+    try {
+      const data = await bulkUpdateStatus('auto', 'shortlisted', score);
+      toast.success(data.message);
+      setShowAutoModal(false);
+      fetchShortlisted();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Auto-shortlist failed');
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   if (loading) return <Layout title="Shortlisted"><Spinner /></Layout>;
 
@@ -190,9 +190,8 @@ const handleAutoShortlist = async () => {
             {candidates.map((c) => (
               <Card
                 key={c._id}
-                className={`transition-all duration-200 group ${
-                  selected.includes(c._id) ? 'border-primary/50 shadow-glow-sm bg-primary/5' : 'hover:border-slate-300 dark:hover:border-emerald-500/30'
-                }`}
+                className={`transition-all duration-200 group ${selected.includes(c._id) ? 'border-primary/50 shadow-glow-sm bg-primary/5' : 'hover:border-slate-300 dark:hover:border-emerald-500/30'
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   {/* Left Group */}
@@ -212,7 +211,7 @@ const handleAutoShortlist = async () => {
                     </div>
 
                     {/* Info */}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-slate-900 dark:text-white font-medium text-base truncate">{c.name}</h3>
                       <p className="text-slate-600 dark:text-slate-500 text-xs mt-0.5 truncate">
                         {c.email} • {c.jobId?.title || 'No job'}
@@ -229,7 +228,7 @@ const handleAutoShortlist = async () => {
                         <span className="text-slate-500 dark:text-slate-600 text-xs">Not scored</span>
                       )}
                     </div>
-                    
+
                     <div className="hidden md:flex gap-1.5">
                       {c.skills?.slice(0, 3).map((s: string) => (
                         <span
