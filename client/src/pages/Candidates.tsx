@@ -27,6 +27,7 @@ type Candidate = {
   email: string;
   jobId: { _id: string; title: string } | null;
   aiScore: number | null;
+  matchScore: number | null;
   status: 'new' | 'reviewed' | 'shortlisted' | 'rejected';
   skills: string[];
   experience: number;
@@ -35,8 +36,8 @@ type Candidate = {
 
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red' | 'gray'> = {
   shortlisted: 'green',
-  reviewed: 'blue',
-  new: 'yellow',
+  reviewed: 'yellow',
+  new: 'blue',
   rejected: 'red',
 };
 
@@ -79,7 +80,7 @@ export default function Candidates() {
   useEffect(() => {
     loadCandidates();
     setSelected([]);
-    
+
     const interval = setInterval(() => loadCandidates(true), 5000);
     return () => clearInterval(interval);
   }, [debouncedSearch, filters, loadCandidates]);
@@ -168,17 +169,15 @@ export default function Candidates() {
           <div className="flex bg-slate-100 dark:bg-white/5 rounded-xl p-1 border border-slate-200 dark:border-white/10">
             <button
               onClick={() => setView('grid')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
-                view === 'grid' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${view === 'grid' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
             >
               <LayoutGrid size={14} /> Grid
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${
-                view === 'list' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-1 ${view === 'list' ? 'gradient-primary text-white shadow-glow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
             >
               <List size={14} /> List
             </button>
@@ -303,9 +302,8 @@ export default function Candidates() {
             return (
               <Card
                 key={c._id}
-                className={`transition-all duration-200 ${
-                  isSelected ? 'border-primary/40 shadow-glow-sm' : ''
-                }`}
+                className={`transition-all duration-200 ${isSelected ? 'border-primary/40 shadow-glow-sm' : ''
+                  }`}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-start gap-2.5 flex-1 min-w-0">
@@ -315,7 +313,7 @@ export default function Candidates() {
                       onChange={() => toggleSelect(c._id)}
                       className="w-4 h-4 accent-primary cursor-pointer mt-1 flex-shrink-0"
                     />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="text-slate-900 dark:text-white font-semibold truncate">{c.name}</h3>
                       <p className="text-slate-600 dark:text-slate-500 text-sm truncate">{c.email}</p>
                     </div>
@@ -323,27 +321,35 @@ export default function Candidates() {
                   <Badge label={c.status} color={statusColor[c.status]} />
                 </div>
 
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-3 flex items-center gap-1.5">
+                <p className="text-slate-600 dark:text-slate-400 text-sm mb-3 flex items-center gap-1.5 flex-wrap">
                   <Briefcase size={14} className="flex-shrink-0 text-slate-500" />
-                  {c.jobId?.title || 'No job'} • {c.experience} yrs
+                  {c.jobId?.title || 'No job'} • {c.experience ?? 0} yrs
+                  {c.matchScore != null && (
+                    <>
+                      • <span className={`font-medium ${
+                        c.matchScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                          : c.matchScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-red-600 dark:text-red-400'
+                      }`}>{c.matchScore}% Match</span>
+                    </>
+                  )}
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {c.skills.length > 0
                     ? c.skills.slice(0, 4).map(s => (
-                        <span key={s} className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{s}</span>
-                      ))
+                      <span key={s} className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{s}</span>
+                    ))
                     : <span className="text-xs text-slate-500 dark:text-slate-600">No skills yet</span>
                   }
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className={`font-bold text-sm ${
-                    c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
-                    : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-                    : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
-                    : 'text-red-600 dark:text-red-400'
-                  }`}>
+                  <span className={`font-bold text-sm ${c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
+                      : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                        : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-red-600 dark:text-red-400'
+                    }`}>
                     {c.aiScore !== null ? `${c.aiScore}/100` : 'Not scored'}
                   </span>
                   <div className="flex gap-1">
@@ -377,9 +383,8 @@ export default function Candidates() {
             return (
               <Card
                 key={c._id}
-                className={`transition-all duration-200 ${
-                  isSelected ? 'border-primary/40 shadow-glow-sm' : ''
-                }`}
+                className={`transition-all duration-200 ${isSelected ? 'border-primary/40 shadow-glow-sm' : ''
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -394,7 +399,18 @@ export default function Candidates() {
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-slate-900 dark:text-white font-medium truncate">{c.name}</h3>
-                      <p className="text-slate-600 dark:text-slate-500 text-xs truncate">{c.email} • {c.jobId?.title || 'No job'}</p>
+                      <p className="text-slate-600 dark:text-slate-500 text-xs truncate">
+                        {c.email} • {c.jobId?.title || 'No job'} • {c.experience ?? 0} yrs
+                        {c.matchScore != null && (
+                          <>
+                            {' '}• <span className={`font-medium ${
+                              c.matchScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                                : c.matchScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-red-600 dark:text-red-400'
+                            }`}>{c.matchScore}% Match</span>
+                          </>
+                        )}
+                      </p>
                     </div>
                   </div>
 
@@ -405,12 +421,11 @@ export default function Candidates() {
                       ))}
                     </div>
                     <Badge label={c.status} color={statusColor[c.status]} />
-                    <span className={`font-bold text-sm w-16 text-right ${
-                      c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
-                      : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
-                      : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-red-600 dark:text-red-400'
-                    }`}>
+                    <span className={`font-bold text-sm w-16 text-right ${c.aiScore === null ? 'text-slate-500 dark:text-slate-600'
+                        : c.aiScore >= 80 ? 'text-emerald-600 dark:text-emerald-400'
+                          : c.aiScore >= 60 ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-red-600 dark:text-red-400'
+                      }`}>
                       {c.aiScore !== null ? `${c.aiScore}/100` : '—'}
                     </span>
                     <div className="flex gap-1">

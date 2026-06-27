@@ -150,6 +150,7 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
                 >
                   <option value="">Date Added</option>
                   <option value="aiScore">AI Score</option>
+                  <option value="matchScore">Match Score</option>
                   <option value="name">Name</option>
                   <option value="experience">Experience</option>
                 </select>
