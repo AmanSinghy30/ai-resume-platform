@@ -344,9 +344,9 @@ const parseResume = async (req, res) => {
     console.log('🔍 Extracted name:', extractName(parsed.text));    
     console.log('🔍 Extracted phone:', extractPhone(parsed.text));*/
     const extracted = {
-      name: extractName(parsed.text) || '',
-      email: extractEmail(parsed.text) || '',
-      phone: extractPhone(parsed.text) || '',
+      name: extractName(parsed.text) || 'Unknown Candidate',
+      email: extractEmail(parsed.text) || 'no-email@example.com',
+      phone: extractPhone(parsed.text) || 'N/A',
       skills: extractSkills(parsed.text),
       experience: extractExperience(parsed.text),
       education: extractEducation(parsed.text),
