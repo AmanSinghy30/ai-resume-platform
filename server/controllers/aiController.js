@@ -8,6 +8,7 @@ const { logActivity } = require('../utils/activityLogger');
 // @route POST /api/ai/analyze/:candidateId
 const analyzeResume = async (req, res) => {
   try {
+    const { modelName } = req.body;
     const candidate = await Candidate.findOne({
   _id: req.params.candidateId,
   userId: req.user.id,        // ✅ Only own candidates
@@ -27,9 +28,9 @@ const analyzeResume = async (req, res) => {
     const jobDescription = candidate.jobId?.description || '';
     const prompt = buildAnalysisPrompt(candidate.rawText, jobDescription);
 
-    console.log(`🤖 Analyzing resume for: ${candidate.name}`);
+    console.log(`🤖 Analyzing resume for: ${candidate.name} using ${modelName || 'gemini-2.5-flash'}`);
     // ✅ NEW
-const result = await callAIWithRetry(prompt);
+const result = await callAIWithRetry(prompt, 3, modelName);
 console.log('RAW AI RESPONSE:', result.text);
 
 if (!result.success || !result.text) {
@@ -71,8 +72,9 @@ candidate.aiReasoning = analysis.reasoning || '';
     }
 
     // Update experience if missing
-    if (!candidate.experience && analysis.experienceYears) {
-      candidate.experience = analysis.experienceYears;
+    if (!candidate.experience && analysis.experienceYears !== undefined) {
+      const numExp = Number(analysis.experienceYears);
+      candidate.experience = isNaN(numExp) ? 0 : numExp;
     }
 
     await candidate.save();

@@ -2,9 +2,9 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function callAI(prompt) {
+async function callAI(prompt, modelName = 'gemini-2.5-flash') {
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const result = await model.generateContent(prompt);
     const response = result.response;
@@ -17,10 +17,10 @@ async function callAI(prompt) {
   }
 }
 
-async function callAIWithRetry(prompt, retries = 3) {
+async function callAIWithRetry(prompt, retries = 3, modelName = 'gemini-2.5-flash') {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const result = await callAI(prompt);
+      const result = await callAI(prompt, modelName);
 
       if (result.success) {
         return result; // ✅ return immediately on success

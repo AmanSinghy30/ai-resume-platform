@@ -26,6 +26,7 @@ Use exactly this structure:
 
 Rules:
 - overallScore must be a number between 0 and 100
+- experienceYears must be an integer (e.g., 0, 1, 2, etc.)
 - recommendation must be exactly one of: "shortlist", "review", "reject"
 - skills must be an array of strings
 - strengths and weaknesses must be arrays of strings
