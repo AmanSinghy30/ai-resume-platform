@@ -38,8 +38,8 @@ export const bulkDeleteCandidates = async (candidateIds: string[]) => {
   return res.data;
 };
 
-export const analyzeCandidate = async (id: string) => {
-  const res = await api.post(`/ai/analyze/${id}`);
+export const analyzeCandidate = async (id: string, modelName?: string) => {
+  const res = await api.post(`/ai/analyze/${id}`, { modelName });
   return res.data;
 };
 

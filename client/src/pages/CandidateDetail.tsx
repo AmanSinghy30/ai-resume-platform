@@ -15,8 +15,8 @@ import { ArrowLeft, Briefcase, Mail, Phone, Sparkles, Brain, ShieldCheck, AlertT
 
 const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
   shortlisted: 'green',
-  reviewed: 'blue',
-  new: 'yellow',
+  reviewed: 'yellow',
+  new: 'blue',
   rejected: 'red',
 };
 const API_BASE = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -30,6 +30,7 @@ export default function CandidateDetail() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
 
   const fetchCandidate = useCallback(async (silent = false) => {
     if (!id) return;
@@ -64,7 +65,7 @@ export default function CandidateDetail() {
 
     setAnalyzing(true);
     try {
-      const data = await analyzeCandidate(id);
+      const data = await analyzeCandidate(id, selectedModel);
       setCandidate(data.candidate);
       toast.success(`Analysis complete — Score: ${data.candidate.aiScore}/100`);
     } catch (err: any) {
@@ -281,8 +282,8 @@ export default function CandidateDetail() {
             <h3 className="text-slate-900 dark:text-white font-semibold mb-3">
               Skills
               <span className="text-slate-500 dark:text-slate-600 text-xs font-normal ml-2">
-                {(candidate.matchedSkills?.length > 0 || candidate.missingSkills?.length > 0) 
-                  ? `(${candidate.matchedSkills?.length || 0} matched and ${candidate.missingSkills?.length || 0} missing)` 
+                {(candidate.matchedSkills?.length > 0 || candidate.missingSkills?.length > 0)
+                  ? `(${candidate.matchedSkills?.length || 0} matched and ${candidate.missingSkills?.length || 0} missing)`
                   : `(${candidate.skills?.length || 0} found)`}
               </span>
             </h3>
@@ -333,6 +334,20 @@ export default function CandidateDetail() {
           <Card>
             <h3 className="text-slate-900 dark:text-white font-semibold mb-3">Actions</h3>
             <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5 mb-1">
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">AI Model</label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  disabled={analyzing || !!candidate.aiScore}
+                  className="w-full text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all disabled:opacity-50"
+                >
+                  <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+                  <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite</option>
+                  <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+                  <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+                </select>
+              </div>
               <Button
                 variant="secondary"
                 className="w-full justify-center"
