@@ -664,7 +664,7 @@
     },
     {
       "parameters": {
-        "sendTo": "amansinghy30@gmail.com",
+        "sendTo": "={{ $('Webhook').item.json.body.recruiterEmail }}",
         "subject": "=Manual Review Required For: {{ $json.name }}",
         "emailType": "text",
         "message": "=A new candidate has been flagged for manual review! \n\nCandidate: {{ $json.name }} \nApplied For: {{ $json.job_title }}\nMatch Score: {{ $json.matchScore }}/100  \nMatched Skills: {{ $json.matchedSkills }} \nMissing Skills: {{ $json.missingSkills }} \n\nReason: {{ $json.reason }} \nLog in to the dashboard to review this candidate.",

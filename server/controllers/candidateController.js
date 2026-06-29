@@ -100,7 +100,7 @@ const uploadResume = async (req, res) => {
 
 
     // Trigger n8n asynchronously to calculate basic Job Match Score
-    triggerResumeWorkflow(candidate._id.toString(), filePath, jobId).catch(err => {
+    triggerResumeWorkflow(candidate._id.toString(), filePath, jobId, req.user.email).catch(err => {
       console.error(`⚠️ Async n8n trigger failed for ${name}:`, err.message);
     });
     // Add candidate to job's candidates array
@@ -213,7 +213,7 @@ const candidate = await Candidate.findOneAndUpdate(
         `${candidate.name} marked as ${status}`);
         
       // Trigger n8n manual status webhook so emails can be sent
-      triggerManualStatusUpdateWorkflow(candidate._id.toString(), status, candidate.jobId).catch(err => {
+      triggerManualStatusUpdateWorkflow(candidate._id.toString(), status, candidate.jobId, req.user.email).catch(err => {
         console.error(`⚠️ Async n8n manual update failed for ${candidate.name}:`, err.message);
       });
     }

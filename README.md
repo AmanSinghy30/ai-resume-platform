@@ -14,7 +14,7 @@
   <br />
   
   <!-- Replace with your actual hero image path -->
-  <img src="docs/assets/dashboard.png" alt="ResumeScreen Dashboard" width="800"/>
+  <img src="docs/assets/Dashboard.png" alt="ResumeScreen Dashboard" width="800"/>
 
 </div>
 
@@ -40,26 +40,34 @@
 <details>
 <summary>Click to view UI Screenshots</summary>
 
-| Dashboard | Job Management |
+| Landing Page | Login |
 | :---: | :---: |
-| <img src="docs/assets/dashboard.png" width="400"/> | <img src="docs/assets/jobs.png" width="400"/> |
+| <img src="docs/assets/LandingPage2.png" width="400"/> | <img src="docs/assets/login.png" width="400"/> |
 
-| Detailed AI Analysis | Candidate Filtering |
+| Register | Dashboard |
 | :---: | :---: |
-| <img src="docs/assets/candidate-detail.png" width="400"/> | <img src="docs/assets/filtering.png" width="400"/> |
+| <img src="docs/assets/register.png" width="400"/> | <img src="docs/assets/Dashboard.png" width="400"/> |
 
-| PDF Upload & Auto-fill | Shortlisted & Export |
+| Candidate Grid | Candidate Filtering |
 | :---: | :---: |
-| <img src="docs/assets/upload.png" width="400"/> | <img src="docs/assets/shortlisted.png" width="400"/> |
+| <img src="docs/assets/Candidate.png" width="400"/> | <img src="docs/assets/Filter.png" width="400"/> |
 
-| Candidate Rankings | Real-Time Activity Log |
+| Job Management | Candidate Rankings |
 | :---: | :---: |
-| <img src="docs/assets/rankings.png" width="400"/> | <img src="docs/assets/activity.png" width="400"/> |
+| <img src="docs/assets/JobPositions.png" width="400"/> | <img src="docs/assets/CandidatesRankings.png" width="400"/> |
 
-| **n8n Webhook & Email Automation Flow** |
-| :---: |
-| [📥 Download Job Matching Workflow JSON](./Job%20Matching%20Workflow%20(1).json) |
-| <img src="docs/assets/n8n-workflow.png" width="800"/> |
+| Detailed Match Score | Detailed AI Score |
+| :---: | :---: |
+| <img src="docs/assets/MatchScore.png" width="400"/> | <img src="docs/assets/AiScore.png" width="400"/> |
+
+| Shortlisted & Export | PDF Upload & Auto-fill |
+| :---: | :---: |
+| <img src="docs/assets/ShortlisteCandidates.png" width="400"/> | <img src="docs/assets/Upload.png" width="400"/> |
+
+| Real-Time Activity Log | n8n Webhook Workflow |
+| :---: | :---: |
+| <img src="docs/assets/Activity.png" width="400"/> | <img src="docs/assets/n8nWorkflow.png" width="400"/> |
+
 
 </details>
 
