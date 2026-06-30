@@ -3,7 +3,7 @@ const Candidate = require('../models/Candidate');
 const Job = require('../models/Job');
 const ActivityLog = require('../models/ActivityLog');
 const fs = require('fs');
-const { extractTextFromPDF } = require('../utils/pdfParser');
+const { extractTextFromDocument } = require('../utils/documentParser');
 const { extractSkills, extractExperience, extractEducation } = require('../utils/skillExtractor');
 const { logActivity } = require('../utils/activityLogger');
 const { extractName, extractEmail, extractPhone } = require('../utils/contactExtractor');
@@ -37,7 +37,7 @@ const uploadResume = async (req, res) => {
     if (!filePath || !fs.existsSync(filePath)) {
       return res.status(400).json({
         success: false,
-        message: 'No PDF file found'
+        message: 'No supported file found'
       });
     }
 
@@ -54,7 +54,7 @@ const uploadResume = async (req, res) => {
     }
 
     // Parse PDF for raw text + extra info
-    const parsed = await extractTextFromPDF(filePath);
+    const parsed = await extractTextFromDocument(filePath);
 
     // Check for duplicate candidate
     if (email) {
@@ -86,7 +86,7 @@ const uploadResume = async (req, res) => {
       userId: req.user.id,
     });
 
-    // Save extracted data if PDF parsed successfully
+    // Save extracted data if document parsed successfully
     if (parsed.success && parsed.text) {
       candidate.rawText = parsed.text;
       candidate.skills = extractSkills(parsed.text);
@@ -95,7 +95,7 @@ const uploadResume = async (req, res) => {
       await candidate.save();
       console.log(`✅ Saved — ${name} | ${candidate.skills.length} skills extracted`);
     } else {
-      console.warn(`⚠️ PDF parsing failed for ${name}`);
+      console.warn(`⚠️ Document parsing failed for ${name}`);
     }
 
 
@@ -323,20 +323,20 @@ const totalJobs = await Job.countDocuments({ createdBy: uid });
   }
 };
 // @route POST /api/candidates/parse-resume
-// Parses PDF and returns extracted info WITHOUT saving to DB
+// Parses Document and returns extracted info WITHOUT saving to DB
 const parseResume = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No PDF file uploaded' });
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    const parsed = await extractTextFromPDF(req.file.path);
+    const parsed = await extractTextFromDocument(req.file.path);
 
     if (!parsed.success || !parsed.text) {
       fs.unlinkSync(req.file.path);
       return res.status(400).json({
         success: false,
-        message: 'Could not extract text from PDF',
+        message: 'Could not extract text from document',
       });
     }
     /*console.log('🔍 First 500 chars of PDF:', parsed.text.slice(0, 500));

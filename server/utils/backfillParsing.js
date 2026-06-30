@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Candidate = require('../models/Candidate');
-const { extractTextFromPDF } = require('./pdfParser');
+const { extractTextFromDocument } = require('./documentParser');
 const { extractSkills, extractExperience, extractEducation } = require('./skillExtractor');
 
 async function backfill() {
@@ -17,7 +17,7 @@ async function backfill() {
   for (const c of candidates) {
     if (!c.resumeUrl) { console.log(`Skipping ${c.name} — no file`); continue; }
 
-    const parsed = await extractTextFromPDF(c.resumeUrl);
+    const parsed = await extractTextFromDocument(c.resumeUrl);
     if (parsed.success && parsed.text) {
       c.rawText = parsed.text;
       c.skills = extractSkills(parsed.text);

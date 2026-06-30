@@ -59,8 +59,8 @@ export default function UploadResume() {
 
   // ─── SINGLE MODE ────────────────────────────────────────
   const handleSingleFile = async (selected: File) => {
-    if (selected.type !== 'application/pdf') {
-      toast.error('Only PDF files are allowed');
+    if (!['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(selected.type)) {
+      toast.error('Only PDF and Word files are allowed');
       return;
     }
     if (selected.size > 5 * 1024 * 1024) {
@@ -85,7 +85,7 @@ export default function UploadResume() {
 
       toast.success('Resume parsed! Review and edit if needed.');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Could not parse PDF');
+      toast.error(err.response?.data?.message || 'Could not parse document');
     } finally {
       setParsing(false);
     }
@@ -101,7 +101,7 @@ export default function UploadResume() {
   const handleSingleSubmit = async () => {
     const isValid = validate({ name, email, phone });
     if (!isValid) { toast.error('Please fix the form errors'); return; }
-    if (!file && !tempFilePath) { toast.error('Please select a PDF resume'); return; }
+    if (!file && !tempFilePath) { toast.error('Please select a resume (PDF/Word)'); return; }
 
     const formData = new FormData();
     formData.append('name', name);
@@ -139,9 +139,10 @@ export default function UploadResume() {
 
   // ─── BULK MODE ──────────────────────────────────────────
   const handleBulkFiles = async (selected: FileList) => {
-    const arr = Array.from(selected).filter(f => f.type === 'application/pdf' && f.size <= 5 * 1024 * 1024);
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const arr = Array.from(selected).filter(f => allowedTypes.includes(f.type) && f.size <= 5 * 1024 * 1024);
     if (arr.length === 0) {
-      toast.error('No valid PDF files selected (max 5MB each)');
+      toast.error('No valid PDF or Word files selected (max 5MB each)');
       return;
     }
     if (arr.length > 20) {
@@ -256,7 +257,7 @@ export default function UploadResume() {
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Upload Candidates</h2>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">PDF files only, max 5MB each</p>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">PDF or Word files only, max 5MB each</p>
           </div>
 
           {/* Mode Toggle */}
@@ -286,7 +287,7 @@ export default function UploadResume() {
 
             {/* Drag Drop FIRST so user drops file → form auto-fills */}
             <div>
-              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Resume PDF *</label>
+              <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">Resume (PDF/Word) *</label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragging(true); }}
                 onDragLeave={() => setDragging(false)}
@@ -299,7 +300,7 @@ export default function UploadResume() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.doc,.docx"
                   className="hidden"
                   onChange={e => { if (e.target.files?.[0]) handleSingleFile(e.target.files[0]); }}
                 />
@@ -327,7 +328,7 @@ export default function UploadResume() {
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-4 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
                         <UploadCloud size={32} className="text-primary" />
                       </div>
-                      <p className="text-slate-900 dark:text-white font-medium text-lg">Drop PDF to auto-fill form</p>
+                      <p className="text-slate-900 dark:text-white font-medium text-lg">Drop PDF/Word file to auto-fill form</p>
                       <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">or click to browse from your computer</p>
                     </>
                   )}
@@ -440,7 +441,7 @@ export default function UploadResume() {
               <input
                 ref={bulkInputRef}
                 type="file"
-                accept=".pdf"
+                accept=".pdf,.doc,.docx"
                 multiple
                 className="hidden"
                 onChange={e => { if (e.target.files) handleBulkFiles(e.target.files); }}
@@ -448,7 +449,7 @@ export default function UploadResume() {
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-4 border border-primary/20 group-hover:scale-110 transition-transform duration-300">
                 <Files size={32} className="text-primary" />
               </div>
-              <p className="text-slate-900 dark:text-white font-medium text-lg">Drop multiple PDFs here</p>
+              <p className="text-slate-900 dark:text-white font-medium text-lg">Drop PDF/Word files here</p>
               <p className="text-slate-600 dark:text-slate-400 text-sm mt-1">or click to browse • Up to 20 files</p>
             </div>
 
