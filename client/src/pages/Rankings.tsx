@@ -7,6 +7,7 @@ import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import ScoreBar from '../components/ScoreBar';
 import ScoreCircle from '../components/ScoreCircle';
+import Pagination from '../components/Pagination';
 import { getRankedCandidates } from '../services/candidateService';
 import { getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
@@ -32,6 +33,9 @@ export default function Rankings() {
   const [selectedJob, setSelectedJob] = useState('');
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,14 +46,20 @@ export default function Rankings() {
 
   useEffect(() => {
     setLoading(true);
-    getRankedCandidates(selectedJob || undefined)
+    getRankedCandidates(selectedJob || undefined, page, 10)
       .then(data => {
         // Only show scored candidates
         const scored = data.candidates.filter((c: any) => c.aiScore !== null);
         setCandidates(scored);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || 0);
       })
       .catch(() => toast.error('Failed to load rankings'))
       .finally(() => setLoading(false));
+  }, [selectedJob, page]);
+
+  useEffect(() => {
+    setPage(1);
   }, [selectedJob]);
 
   const sortedCandidates = useMemo(() => {
@@ -97,8 +107,8 @@ export default function Rankings() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Candidate Rankings</h2>
           <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
-            {candidates.length} scored candidates
-            {candidates.length === 0 && ' — run AI analysis to see rankings'}
+            {totalCount} scored candidates
+            {totalCount === 0 && ' — run AI analysis to see rankings'}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -163,23 +173,27 @@ export default function Rankings() {
           )}
 
           <div className="flex flex-col gap-3">
-            {sortedCandidates.map((c, index) => (
+            {sortedCandidates.map((c, index) => {
+              const globalIndex = (page - 1) * 10 + index;
+              const isTop3 = globalIndex < 3;
+              
+              return (
               <Card
                 key={c._id}
                 className={`transition-all duration-300 relative overflow-hidden group ${compareIds.includes(c._id) ? 'border-violet-500/50 shadow-glow-purple bg-violet-500/5' : 'hover:border-slate-300 dark:hover:border-white/20'
                   }`}
               >
                 {/* Subtle rank gradient background for top 3 */}
-                {index < 3 && (
+                {isTop3 && (
                   <div className={`absolute top-0 right-0 bottom-0 w-1/3 bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 )}
 
                 <div className="flex items-center gap-4 relative z-10">
 
                   {/* Rank */}
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${index < 3 ? medalColors[index] : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/5'
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-lg ${isTop3 ? medalColors[globalIndex] : 'bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-white/5'
                     }`}>
-                    {index === 0 ? <Crown size={20} /> : index < 3 ? <Medal size={20} /> : `#${index + 1}`}
+                    {globalIndex === 0 ? <Crown size={20} /> : isTop3 ? <Medal size={20} /> : `#${globalIndex + 1}`}
                   </div>
 
                   {/* Avatar */}
@@ -236,7 +250,7 @@ export default function Rankings() {
 
                 </div>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
       )}
@@ -348,6 +362,13 @@ export default function Rankings() {
         </div>
       )}
 
+      {candidates.length > 0 && (
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
+      )}
     </Layout>
   );
 }

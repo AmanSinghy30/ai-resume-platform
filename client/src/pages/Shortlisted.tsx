@@ -6,6 +6,7 @@ import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import ScoreBar from '../components/ScoreBar';
+import Pagination from '../components/Pagination';
 import {
   getCandidates,
   bulkUpdateStatus,
@@ -22,15 +23,22 @@ export default function Shortlisted() {
   const [showAutoModal, setShowAutoModal] = useState(false);
   const [minScore, setMinScore] = useState('75');
   const [processing, setProcessing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
 
   const fetchShortlisted = useCallback((silent = false) => {
     if (!silent) setLoading(true);
-    getCandidates({ status: 'shortlisted', sortBy: 'aiScore', order: 'desc' })
-      .then(data => setCandidates(data.candidates))
+    getCandidates({ status: 'shortlisted', sortBy: 'aiScore', order: 'desc', page: page.toString(), limit: '10' })
+      .then(data => {
+        setCandidates(data.candidates);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || 0);
+      })
       .catch(() => { if (!silent) toast.error('Failed to load'); })
       .finally(() => { if (!silent) setLoading(false); });
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchShortlisted();
@@ -107,7 +115,7 @@ export default function Shortlisted() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Shortlisted Candidates</h2>
           <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
-            {candidates.length} candidates ready for interview
+            {totalCount} candidates ready for interview
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -315,6 +323,13 @@ export default function Shortlisted() {
         </div>
       )}
 
+      {candidates.length > 0 && (
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
+      )}
     </Layout>
   );
 }

@@ -31,8 +31,33 @@ const createJob = async (req, res) => {
 
 const getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ createdBy: req.user.id }).sort({ createdAt: -1 });  // ✅
-    res.json({ success: true, jobs });
+    const { page = 1, limit = 9, search } = req.query;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 9);
+    const skip = (pageNum - 1) * limitNum;
+    
+    const query = { createdBy: req.user.id };
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+    const totalCount = await Job.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / limitNum);
+
+    const jobs = await Job.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+      
+    res.json({ 
+      success: true, 
+      jobs,
+      totalCount,
+      totalPages,
+      currentPage: pageNum
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

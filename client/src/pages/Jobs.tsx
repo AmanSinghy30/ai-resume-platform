@@ -8,6 +8,7 @@ import Spinner from '../components/Spinner';
 import SearchBar from '../components/SearchBar';
 import { useFormValidation } from '../hooks/useFormValidation';
 import FormError from '../components/FormError';
+import Pagination from '../components/Pagination';
 import { createJob, getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
 import {
@@ -39,6 +40,9 @@ export default function Jobs() {
   const [showModal, setShowModal] = useState(false);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -55,8 +59,15 @@ export default function Jobs() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const data = await getJobs();
+      const params = {
+        page: page.toString(),
+        limit: '9',
+        ...(search && { search })
+      };
+      const data = await getJobs(params);
       setJobs(data.jobs);
+      setTotalPages(data.totalPages || 1);
+      setTotalCount(data.totalCount || 0);
     } catch {
       toast.error('Failed to load jobs');
     } finally {
@@ -66,14 +77,15 @@ export default function Jobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [page, search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   // ── Filtered Jobs (client-side search) ────────────────────────────────────
-  const filteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(search.toLowerCase()) ||
-    job.description.toLowerCase().includes(search.toLowerCase()) ||
-    job.requiredSkills.some(s => s.toLowerCase().includes(search.toLowerCase()))
-  );
+  // ── (Client-side search removed, now handled by server) ─────────────────
+  const filteredJobs = jobs;
 
   // ── Create Job ─────────────────────────────────────────────────────────────
   const handleCreateJob = async () => {
@@ -123,7 +135,7 @@ export default function Jobs() {
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Job Positions</h2>
           <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
-            {loading ? 'Loading...' : `${filteredJobs.length} active positions`}
+            {loading ? 'Loading...' : `${totalCount} active positions`}
           </p>
         </div>
 
@@ -347,6 +359,16 @@ export default function Jobs() {
           ))}
         </div>
       )}
+
+      {/* ── Pagination ── */}
+      {jobs.length > 0 && (
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
+      )}
+
 
       {/* ── Create Job Modal ── */}
       {showModal && (

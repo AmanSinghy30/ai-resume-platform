@@ -8,6 +8,7 @@ import Card from '../components/Card';
 import Spinner from '../components/Spinner';
 import SearchBar from '../components/SearchBar';
 import FilterPanel from '../components/FilterPanel';
+import Pagination from '../components/Pagination';
 import { getCandidates, deleteCandidate, bulkDeleteCandidates } from '../services/candidateService';
 import toast from 'react-hot-toast';
 import {
@@ -56,6 +57,9 @@ export default function Candidates() {
   const [debouncedSearch] = useDebounce(search, 300);
   const [selected, setSelected] = useState<string[]>([]);
   const [deleting, setDeleting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const navigate = useNavigate();
 
   const loadCandidates = useCallback((silent = false) => {
@@ -70,11 +74,23 @@ export default function Candidates() {
     if (filters.order) params.order = filters.order;
     if (filters.skills) params.skills = filters.skills;
     if (filters.minExperience) params.minExperience = filters.minExperience;
+    
+    params.page = page.toString();
+    params.limit = '9';
 
     getCandidates(params)
-      .then(data => setCandidates(data.candidates))
+      .then(data => {
+        setCandidates(data.candidates);
+        setTotalPages(data.totalPages || 1);
+        setTotalCount(data.totalCount || 0);
+      })
       .catch(() => { if (!silent) toast.error('Failed to load candidates'); })
       .finally(() => { if (!silent) setLoading(false); });
+  }, [debouncedSearch, filters, page]);
+
+  // Reset page to 1 if search or filters change
+  useEffect(() => {
+    setPage(1);
   }, [debouncedSearch, filters]);
 
   useEffect(() => {
@@ -83,7 +99,7 @@ export default function Candidates() {
 
     const interval = setInterval(() => loadCandidates(true), 5000);
     return () => clearInterval(interval);
-  }, [debouncedSearch, filters, loadCandidates]);
+  }, [loadCandidates]);
 
   useEffect(() => {
     localStorage.setItem('candidatesView', view);
@@ -151,7 +167,7 @@ export default function Candidates() {
           <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">
             {loading
               ? 'Loading...'
-              : `${candidates.length} candidates found${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
+              : `${totalCount} candidates found${selected.length > 0 ? ` — ${selected.length} selected` : ''}`}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -450,6 +466,15 @@ export default function Candidates() {
             );
           })}
         </div>
+      )}
+
+      {/* ── Pagination ── */}
+      {candidates.length > 0 && (
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
       )}
 
     </Layout>

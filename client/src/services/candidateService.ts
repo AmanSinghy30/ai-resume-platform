@@ -91,10 +91,12 @@ export const bulkUpdateStatus = async (
   return res.data;
 };*/
 
-export const getRankedCandidates = async (jobId?: string) => {
+export const getRankedCandidates = async (jobId?: string, page = 1, limit = 10) => {
   const params: Record<string, string> = {
     sortBy: 'aiScore',
     order: 'desc',
+    page: page.toString(),
+    limit: limit.toString(),
   };
   if (jobId) params.jobId = jobId;
   const res = await api.get('/candidates', { params });

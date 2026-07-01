@@ -132,8 +132,12 @@ const uploadResume = async (req, res) => {
 // @route GET /api/candidates
 const getCandidates = async (req, res) => {
   try {
-    const { status, jobId, search, sortBy, order, minScore, maxScore, skills, minExperience } = req.query;
-const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
+    const { search, status, jobId, minScore, maxScore, sortBy, order, skills, minExperience, page = 1, limit = 10 } = req.query;
+
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.max(1, parseInt(limit, 10) || 10);
+    const skip = (pageNum - 1) * limitNum;
+    const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
     if (status) query.status = status;
     if (jobId) query.jobId = jobId;
     if (search) query.name = { $regex: search, $options: 'i' };
@@ -157,11 +161,23 @@ const query = { userId: req.user.id };  // ✅ Always filter by logged-in user
     const sort = {};
     sort[sortBy || 'createdAt'] = order === 'asc' ? 1 : -1;
 
+    const totalCount = await Candidate.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / limitNum);
+
     const candidates = await Candidate.find(query)
       .sort(sort)
+      .skip(skip)
+      .limit(limitNum)
       .populate('jobId', 'title');
 
-    res.json({ success: true, count: candidates.length, candidates });
+    res.json({ 
+      success: true, 
+      count: candidates.length, 
+      totalCount,
+      totalPages,
+      currentPage: pageNum,
+      candidates 
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

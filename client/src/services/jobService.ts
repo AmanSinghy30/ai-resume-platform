@@ -1,7 +1,7 @@
 import api from './api';
 
-export const getJobs = async () => {
-  const res = await api.get('/jobs');
+export const getJobs = async (params?: Record<string, string | number>) => {
+  const res = await api.get('/jobs', { params });
   return res.data;
 };
 

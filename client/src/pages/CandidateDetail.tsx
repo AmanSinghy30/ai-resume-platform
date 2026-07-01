@@ -101,10 +101,10 @@ export default function CandidateDetail() {
 
       {/* Back Button */}
       <button
-        onClick={() => navigate(fromJob ? `/jobs/${fromJob}` : '/candidates')}
+        onClick={() => navigate(-1)}
         className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm mb-6 flex items-center gap-1.5 transition-colors"
       >
-        <ArrowLeft size={16} /> {fromJob ? 'Back to Job' : 'Back to Candidates'}
+        <ArrowLeft size={16} /> Back
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
