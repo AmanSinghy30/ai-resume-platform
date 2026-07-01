@@ -48,6 +48,10 @@ export default function Jobs() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [skills, setSkills] = useState('');
+  const [niceToHaveSkills, setNiceToHaveSkills] = useState('');
+  const [skillWeight, setSkillWeight] = useState(50);
+  const [experienceWeight, setExperienceWeight] = useState(30);
+  const [roleFitWeight, setRoleFitWeight] = useState(20);
   const [experience, setExperience] = useState('');
 
   const { errors, validate, clearError } = useFormValidation({
@@ -92,6 +96,11 @@ export default function Jobs() {
     const isValid = validate({ title, description });
     if (!isValid) return;
 
+    if (skillWeight + experienceWeight + roleFitWeight !== 100) {
+      toast.error('AI Evaluation Weights must sum exactly to 100');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await createJob({
@@ -101,6 +110,13 @@ export default function Jobs() {
           .split(',')
           .map(s => s.trim())
           .filter(Boolean),
+        niceToHaveSkills: niceToHaveSkills
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean),
+        skillWeight,
+        experienceWeight,
+        roleFitWeight,
         experienceRequired: Number(experience) || 0,
       });
       toast.success('Job created!');
@@ -118,6 +134,10 @@ export default function Jobs() {
     setTitle('');
     setDescription('');
     setSkills('');
+    setNiceToHaveSkills('');
+    setSkillWeight(50);
+    setExperienceWeight(30);
+    setRoleFitWeight(20);
     setExperience('');
   };
 
@@ -419,7 +439,7 @@ export default function Jobs() {
               {/* Skills */}
               <div>
                 <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">
-                  Required Skills
+                  Must-Have Skills
                   <span className="text-slate-500 dark:text-slate-600 text-xs ml-1 font-normal">(comma separated)</span>
                 </label>
                 <input
@@ -432,6 +452,32 @@ export default function Jobs() {
                 {skills && (
                   <div className="flex flex-wrap gap-1.5 mt-2.5">
                     {skills.split(',').map(s => s.trim()).filter(Boolean).map(s => (
+                      <span
+                        key={s}
+                        className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Nice to Have Skills */}
+              <div>
+                <label className="text-sm text-slate-700 dark:text-slate-400 mb-1.5 block font-medium">
+                  Good-to-Have Skills
+                  <span className="text-slate-500 dark:text-slate-600 text-xs ml-1 font-normal">(comma separated)</span>
+                </label>
+                <input
+                  value={niceToHaveSkills}
+                  onChange={e => setNiceToHaveSkills(e.target.value)}
+                  className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
+                  placeholder="e.g. Docker, AWS, GraphQL"
+                />
+                {niceToHaveSkills && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {niceToHaveSkills.split(',').map(s => s.trim()).filter(Boolean).map(s => (
                       <span
                         key={s}
                         className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5"
@@ -457,6 +503,54 @@ export default function Jobs() {
                   className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3.5 py-2.5 text-sm placeholder-slate-400 dark:placeholder-slate-500"
                   placeholder="e.g. 2"
                 />
+              </div>
+
+              {/* AI Evaluation Weights */}
+              <div className="pt-2 border-t border-slate-200 dark:border-white/5 mt-2">
+                <label className="text-sm text-slate-700 dark:text-slate-400 mb-3 block font-medium">
+                  AI Evaluation Weights (must sum to 100)
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Skills</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={skillWeight}
+                      onChange={e => setSkillWeight(Number(e.target.value))}
+                      className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm text-center"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Experience</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={experienceWeight}
+                      onChange={e => setExperienceWeight(Number(e.target.value))}
+                      className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm text-center"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Role Fit</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={roleFitWeight}
+                      onChange={e => setRoleFitWeight(Number(e.target.value))}
+                      className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm text-center"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Total: {skillWeight + experienceWeight + roleFitWeight} / 100</span>
+                  {skillWeight + experienceWeight + roleFitWeight !== 100 && (
+                    <span className="text-xs text-red-500">Must equal 100</span>
+                  )}
+                </div>
               </div>
 
               {/* Buttons */}

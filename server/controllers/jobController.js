@@ -3,7 +3,10 @@ const { logActivity } = require('../utils/activityLogger');
 
 const createJob = async (req, res) => {
   try {
-    const { title, description, requiredSkills, experienceRequired } = req.body;
+    const { 
+      title, description, requiredSkills, experienceRequired,
+      niceToHaveSkills, skillWeight, experienceWeight, roleFitWeight
+    } = req.body;
 
     if (!title || !description) {
       return res.status(400).json({ success: false, message: 'Title and description required' });
@@ -13,10 +16,26 @@ const createJob = async (req, res) => {
       ? requiredSkills.split(',').map(s => s.trim()).filter(Boolean)
       : requiredSkills || [];
 
+    const niceToHaveArray = typeof niceToHaveSkills === 'string'
+      ? niceToHaveSkills.split(',').map(s => s.trim()).filter(Boolean)
+      : niceToHaveSkills || [];
+
+    const sw = Number(skillWeight) || 50;
+    const ew = Number(experienceWeight) || 30;
+    const rw = Number(roleFitWeight) || 20;
+
+    if (sw + ew + rw !== 100) {
+      return res.status(400).json({ success: false, message: 'Weights must sum to exactly 100' });
+    }
+
     const job = await Job.create({
       title,
       description,
       requiredSkills: skillsArray,
+      niceToHaveSkills: niceToHaveArray,
+      skillWeight: sw,
+      experienceWeight: ew,
+      roleFitWeight: rw,
       experienceRequired: experienceRequired || 0,
       createdBy: req.user.id,
     });

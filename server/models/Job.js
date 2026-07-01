@@ -14,6 +14,22 @@ const jobSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  niceToHaveSkills: {
+    type: [String],
+    default: [],
+  },
+  skillWeight: {
+    type: Number,
+    default: 50,
+  },
+  experienceWeight: {
+    type: Number,
+    default: 30,
+  },
+  roleFitWeight: {
+    type: Number,
+    default: 20,
+  },
   experienceRequired: {
     type: Number,
     default: 0,

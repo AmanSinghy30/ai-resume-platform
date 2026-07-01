@@ -167,6 +167,15 @@ export default function JobDetail() {
                   {skill}
                 </span>
               ))}
+              {job.niceToHaveSkills && job.niceToHaveSkills.map((skill: string) => (
+                <span
+                  key={`nice-${skill}`}
+                  className="text-xs bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-lg"
+                  title="Good to Have"
+                >
+                  {skill}
+                </span>
+              ))}
             </div>
 
             <div className="flex flex-col gap-3 text-sm">
