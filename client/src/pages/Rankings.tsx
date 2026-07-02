@@ -39,7 +39,7 @@ export default function Rankings() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getJobs()
+    getJobs({ limit: 100 })
       .then(d => setJobs(d.jobs))
       .catch(() => { });
   }, []);

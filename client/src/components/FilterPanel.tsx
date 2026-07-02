@@ -17,14 +17,15 @@ type FilterPanelProps = {
   filters: Filters;
   onChange: (filters: Filters) => void;
   onClear: () => void;
+  hideStatus?: boolean;
 };
 
-export default function FilterPanel({ filters, onChange, onClear }: FilterPanelProps) {
+export default function FilterPanel({ filters, onChange, onClear, hideStatus }: FilterPanelProps) {
   const [jobs, setJobs] = useState<{ _id: string; title: string }[]>([]);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    getJobs().then(d => setJobs(d.jobs)).catch(() => { });
+    getJobs({ limit: 100 }).then(d => setJobs(d.jobs)).catch(() => { });
   }, []);
 
   const update = (key: keyof Filters, value: string) => {
@@ -63,20 +64,22 @@ export default function FilterPanel({ filters, onChange, onClear }: FilterPanelP
           <div className="flex flex-col gap-4">
 
             {/* Status */}
-            <div>
-              <label className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 block font-medium">Status</label>
-              <select
-                value={filters.status}
-                onChange={e => update('status', e.target.value)}
-                className="w-full bg-slate-50 dark:input-glass text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm"
-              >
-                <option value="">All Statuses</option>
-                <option value="new">New</option>
-                <option value="reviewed">Reviewed</option>
-                <option value="shortlisted">Shortlisted</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
+            {!hideStatus && (
+              <div>
+                <label className="text-xs text-slate-500 dark:text-slate-400 mb-1.5 block font-medium">Status</label>
+                <select
+                  value={filters.status}
+                  onChange={e => update('status', e.target.value)}
+                  className="w-full bg-slate-50 dark:input-glass text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2.5 text-sm"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="new">New</option>
+                  <option value="reviewed">Reviewed</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            )}
 
             {/* Job */}
             <div>

@@ -7,6 +7,9 @@ import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import ScoreBar from '../components/ScoreBar';
 import Pagination from '../components/Pagination';
+import SearchBar from '../components/SearchBar';
+import FilterPanel from '../components/FilterPanel';
+import { useDebounce } from 'use-debounce';
 import {
   getCandidates,
   bulkUpdateStatus,
@@ -14,6 +17,8 @@ import {
 } from '../services/candidateService';
 import toast from 'react-hot-toast';
 import { CheckCircle2, Zap, Download, X, Eye } from 'lucide-react';
+
+const EMPTY_FILTERS = { status: '', jobId: '', minScore: '', maxScore: '', sortBy: '', order: 'desc', skills: '', minExperience: '' };
 
 export default function Shortlisted() {
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -26,11 +31,26 @@ export default function Shortlisted() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [debouncedSearch] = useDebounce(search, 300);
   const navigate = useNavigate();
 
   const fetchShortlisted = useCallback((silent = false) => {
     if (!silent) setLoading(true);
-    getCandidates({ status: 'shortlisted', sortBy: 'aiScore', order: 'desc', page: page.toString(), limit: '10' })
+    const params: Record<string, string> = { status: 'shortlisted', page: page.toString(), limit: '10' };
+    
+    params.sortBy = filters.sortBy || 'aiScore';
+    params.order = filters.order || 'desc';
+
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (filters.jobId) params.jobId = filters.jobId;
+    if (filters.minScore) params.minScore = filters.minScore;
+    if (filters.maxScore) params.maxScore = filters.maxScore;
+    if (filters.skills) params.skills = filters.skills;
+    if (filters.minExperience) params.minExperience = filters.minExperience;
+
+    getCandidates(params)
       .then(data => {
         setCandidates(data.candidates);
         setTotalPages(data.totalPages || 1);
@@ -38,7 +58,11 @@ export default function Shortlisted() {
       })
       .catch(() => { if (!silent) toast.error('Failed to load'); })
       .finally(() => { if (!silent) setLoading(false); });
-  }, [page]);
+  }, [page, debouncedSearch, filters]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filters]);
 
   useEffect(() => {
     fetchShortlisted();
@@ -136,6 +160,59 @@ export default function Shortlisted() {
           </Button>
         </div>
       </div>
+
+      {/* Search & Filter Bar */}
+      <div className="flex gap-3 mb-6 animate-fade-in">
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search shortlisted candidates..."
+        />
+        <FilterPanel
+          filters={filters}
+          onChange={setFilters}
+          onClear={() => setFilters(EMPTY_FILTERS)}
+          hideStatus
+        />
+      </div>
+
+      {/* Active Filter Tags */}
+      {(search || filters.jobId || filters.minScore || filters.maxScore || filters.skills || filters.minExperience) && (
+        <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
+          {search && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Search: "{search}"
+              <button onClick={() => setSearch('')} className="text-slate-500 hover:text-slate-900 ml-1">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.jobId && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Job filtered
+              <button onClick={() => setFilters({ ...filters, jobId: '' })} className="text-slate-500 hover:text-slate-900 ml-1">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {(filters.minScore || filters.maxScore) && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Score: {filters.minScore || '0'}–{filters.maxScore || '100'}
+              <button onClick={() => setFilters({ ...filters, minScore: '', maxScore: '' })} className="text-slate-500 hover:text-slate-900 ml-1">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.skills && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Skills: {filters.skills}
+              <button onClick={() => setFilters({ ...filters, skills: '' })} className="text-slate-500 hover:text-slate-900 ml-1">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Bulk Actions Bar */}
       {selected.length > 0 && (

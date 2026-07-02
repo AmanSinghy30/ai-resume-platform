@@ -54,7 +54,7 @@ export default function UploadResume() {
   });
 
   useEffect(() => {
-    getJobs().then(data => setJobs(data.jobs)).catch(() => {});
+    getJobs({ limit: 100 }).then(data => setJobs(data.jobs)).catch(() => {});
   }, []);
 
   // ─── SINGLE MODE ────────────────────────────────────────

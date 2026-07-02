@@ -50,7 +50,7 @@ const createJob = async (req, res) => {
 
 const getJobs = async (req, res) => {
   try {
-    const { page = 1, limit = 9, search } = req.query;
+    const { page = 1, limit = 9, search, minExperience, maxExperience, skills } = req.query;
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.max(1, parseInt(limit, 10) || 9);
     const skip = (pageNum - 1) * limitNum;
@@ -61,6 +61,17 @@ const getJobs = async (req, res) => {
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
+    }
+    
+    if (minExperience || maxExperience) {
+      query.experienceRequired = {};
+      if (minExperience) query.experienceRequired.$gte = Number(minExperience);
+      if (maxExperience) query.experienceRequired.$lte = Number(maxExperience);
+    }
+    
+    if (skills) {
+      const skillsArr = skills.split(',').map(s => s.trim()).map(s => new RegExp(s, 'i'));
+      query.requiredSkills = { $in: skillsArr };
     }
     const totalCount = await Job.countDocuments(query);
     const totalPages = Math.ceil(totalCount / limitNum);

@@ -9,6 +9,7 @@ import SearchBar from '../components/SearchBar';
 import { useFormValidation } from '../hooks/useFormValidation';
 import FormError from '../components/FormError';
 import Pagination from '../components/Pagination';
+import JobFilterPanel, { JobFilters } from '../components/JobFilterPanel';
 import { createJob, getJobs } from '../services/jobService';
 import toast from 'react-hot-toast';
 import {
@@ -43,6 +44,7 @@ export default function Jobs() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [filters, setFilters] = useState<JobFilters>({ skills: '', minExperience: '' });
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -63,11 +65,14 @@ export default function Jobs() {
   const fetchJobs = async () => {
     setLoading(true);
     try {
-      const params = {
+      const params: Record<string, string> = {
         page: page.toString(),
         limit: '9',
-        ...(search && { search })
       };
+      if (search) params.search = search;
+      if (filters.skills) params.skills = filters.skills;
+      if (filters.minExperience) params.minExperience = filters.minExperience;
+
       const data = await getJobs(params);
       setJobs(data.jobs);
       setTotalPages(data.totalPages || 1);
@@ -81,11 +86,11 @@ export default function Jobs() {
 
   useEffect(() => {
     fetchJobs();
-  }, [page, search]);
+  }, [page, search, filters]);
 
   useEffect(() => {
     setPage(1);
-  }, [search]);
+  }, [search, filters]);
 
   // ── Filtered Jobs (client-side search) ────────────────────────────────────
   // ── (Client-side search removed, now handled by server) ─────────────────
@@ -188,27 +193,47 @@ export default function Jobs() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6 animate-fade-in">
+      {/* Search Bar & Filters */}
+      <div className="flex gap-3 mb-6 animate-fade-in">
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Search jobs by title, skill..."
+          placeholder="Search jobs by title, description..."
+        />
+        <JobFilterPanel 
+          filters={filters} 
+          onChange={setFilters} 
+          onClear={() => setFilters({ skills: '', minExperience: '' })} 
         />
       </div>
 
-      {/* Active Search Tag */}
-      {search && (
-        <div className="flex gap-2 mb-4 animate-fade-in">
-          <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
-            Search: "{search}"
-            <button
-              onClick={() => setSearch('')}
-              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors"
-            >
-              <X size={12} />
-            </button>
-          </span>
+      {/* Active Search & Filter Tags */}
+      {(search || filters.skills || filters.minExperience) && (
+        <div className="flex flex-wrap gap-2 mb-4 animate-fade-in">
+          {search && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Search: "{search}"
+              <button onClick={() => setSearch('')} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.skills && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Skills: {filters.skills}
+              <button onClick={() => setFilters({ ...filters, skills: '' })} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
+                <X size={12} />
+              </button>
+            </span>
+          )}
+          {filters.minExperience && (
+            <span className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+              Min Exp: {filters.minExperience} yrs
+              <button onClick={() => setFilters({ ...filters, minExperience: '' })} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white ml-1 transition-colors">
+                <X size={12} />
+              </button>
+            </span>
+          )}
         </div>
       )}
 
