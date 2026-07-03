@@ -77,6 +77,52 @@ const candidateSchema = new mongoose.Schema({
     enum: ['shortlist', 'review', 'reject', null],
     default: null,
   },
+
+  // ── Enhanced AI Analysis Fields ──
+  aiVerdict: {
+    type: String,
+    enum: ['STRONG_YES', 'YES', 'MAYBE', 'NO', 'STRONG_NO', null],
+    default: null,
+  },
+  aiVerdictConfidence: {
+    type: Number,
+    default: null,
+    min: 0,
+    max: 100,
+  },
+  aiVerdictSummary: {
+    type: String,
+    default: '',
+  },
+  aiDimensionScores: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+  },
+  aiRedFlags: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  aiGreenFlags: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  aiSkillGapAnalysis: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  aiInterviewQuestions: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  aiComparativeNotes: {
+    type: String,
+    default: '',
+  },
+  aiCultureFitNotes: {
+    type: String,
+    default: '',
+  },
+
   matchScore: {
     type: Number,
     default: null,

@@ -52,15 +52,27 @@ if (!result.success || !result.text) {
 
     const analysis = parsed.data;
 
-    // Save to candidate
+    // Save core fields
     candidate.aiScore = Math.min(100, Math.max(0, Number(analysis.overallScore) || 0));
     candidate.aiAnalysis = analysis.summary || '';
     candidate.aiRecommendation = analysis.recommendation || null;
 
-    // ✅ NEW — save strengths, weaknesses, reasoning
-candidate.aiStrengths = Array.isArray(analysis.strengths) ? analysis.strengths : [];
-candidate.aiWeaknesses = Array.isArray(analysis.weaknesses) ? analysis.weaknesses : [];
-candidate.aiReasoning = analysis.reasoning || '';
+    // Strengths, weaknesses, reasoning
+    candidate.aiStrengths = Array.isArray(analysis.strengths) ? analysis.strengths : [];
+    candidate.aiWeaknesses = Array.isArray(analysis.weaknesses) ? analysis.weaknesses : [];
+    candidate.aiReasoning = analysis.reasoning || '';
+
+    // ── Enhanced Analysis Fields ──
+    candidate.aiVerdict = analysis.verdict || null;
+    candidate.aiVerdictConfidence = Math.min(100, Math.max(0, Number(analysis.verdictConfidence) || 0));
+    candidate.aiVerdictSummary = analysis.verdictSummary || '';
+    candidate.aiDimensionScores = analysis.dimensionScores || null;
+    candidate.aiRedFlags = Array.isArray(analysis.redFlags) ? analysis.redFlags : [];
+    candidate.aiGreenFlags = Array.isArray(analysis.greenFlags) ? analysis.greenFlags : [];
+    candidate.aiSkillGapAnalysis = Array.isArray(analysis.skillGapAnalysis) ? analysis.skillGapAnalysis : [];
+    candidate.aiInterviewQuestions = Array.isArray(analysis.interviewQuestions) ? analysis.interviewQuestions : [];
+    candidate.aiComparativeNotes = analysis.comparativeNotes || '';
+    candidate.aiCultureFitNotes = analysis.cultureFitNotes || '';
 
     if (analysis.education && analysis.education.length > 5) {
       candidate.education = analysis.education;
