@@ -13,7 +13,8 @@ import ScoreBar from '../components/ScoreBar';
 import {
   ArrowLeft, Briefcase, Mail, Phone, Sparkles, Brain, ShieldCheck, AlertTriangle,
   ChevronDown, ChevronUp, Copy, Check, Target, TrendingUp, GraduationCap, FolderOpen,
-  MessageSquare, Flag, Zap, Users, HelpCircle, CircleDot
+  MessageSquare, Flag, Zap, Users, HelpCircle, CircleDot, AlertOctagon, Lightbulb,
+  BarChart3, Microscope
 } from 'lucide-react';
 
 
@@ -25,8 +26,8 @@ const statusColor: Record<string, 'green' | 'blue' | 'yellow' | 'red'> = {
 };
 const API_BASE = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
-// ── Verdict Helpers ──
-const verdictConfig: Record<string, { label: string; color: string; bg: string; border: string; icon: string; textColor: string }> = {
+// ── Verdict / Signal Helpers ──
+const signalConfig: Record<string, { label: string; color: string; bg: string; border: string; icon: string; textColor: string }> = {
   STRONG_YES: { label: 'Strong Yes', color: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-gradient-to-r from-emerald-500/15 to-teal-500/10', border: 'border-emerald-500/30', icon: '🟢', textColor: 'text-emerald-600 dark:text-emerald-400' },
   YES: { label: 'Yes', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-gradient-to-r from-emerald-500/10 to-green-500/5', border: 'border-emerald-400/25', icon: '✅', textColor: 'text-emerald-500 dark:text-emerald-400' },
   MAYBE: { label: 'Maybe', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-gradient-to-r from-amber-500/10 to-yellow-500/5', border: 'border-amber-400/25', icon: '🟡', textColor: 'text-amber-500 dark:text-amber-400' },
@@ -51,6 +52,32 @@ const areaColors: Record<string, string> = {
 };
 
 // ── Small reusable sub-components ──
+
+function BreakdownBar({ label, score, maxScore, icon }: { label: string; score: number; maxScore: number; icon: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+  const color = pct >= 80 ? 'from-emerald-500 to-teal-400' : pct >= 60 ? 'from-amber-500 to-orange-400' : 'from-red-500 to-rose-400';
+  const textColor = pct >= 80 ? 'text-emerald-600 dark:text-emerald-400' : pct >= 60 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400';
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="text-slate-500 dark:text-slate-400 w-5 flex-shrink-0">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{label}</span>
+          <span className={`text-xs font-bold ${textColor} ml-2`}>{score}/{maxScore}</span>
+        </div>
+        <div className="w-full bg-slate-200 dark:bg-slate-800/80 rounded-full h-1.5 overflow-hidden">
+          <div
+            className={`h-1.5 rounded-full transition-all duration-700 ease-out bg-gradient-to-r ${color}`}
+            style={{ width: mounted ? `${pct}%` : '0%' }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function DimensionBar({ label, score, icon }: { label: string; score: number; icon: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -103,6 +130,50 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function InterviewQuestionsPanel({ questions, defaultExpanded = false }: { questions: any[]; defaultExpanded?: boolean }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  if (!questions?.length) return null;
+
+  return (
+    <Card>
+      <button onClick={() => setExpanded(!expanded)} className="w-full flex items-center justify-between group">
+        <h3 className="text-slate-900 dark:text-white font-semibold flex items-center gap-2">
+          <HelpCircle size={16} className="text-violet-500" /> Interview Questions
+          <span className="text-xs font-normal text-slate-500">({questions.length})</span>
+        </h3>
+        {expanded
+          ? <ChevronUp size={18} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+          : <ChevronDown size={18} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
+        }
+      </button>
+
+      {expanded && (
+        <ul className="flex flex-col gap-3 mt-4">
+          {questions.map((q: any, i: number) => (
+            <li key={i} className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3.5 border border-slate-200 dark:border-slate-700/40">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-relaxed flex-1">
+                  <span className="text-slate-400 dark:text-slate-600 mr-1.5">Q{i + 1}.</span>
+                  {q.question}
+                </p>
+                <CopyButton text={q.question} />
+              </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                {q.area && (
+                  <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border ${areaColors[q.area] || areaColors.technical}`}>
+                    {q.area}
+                  </span>
+                )}
+                <span className="text-xs text-slate-500 dark:text-slate-500 italic">{q.rationale}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
 
 export default function CandidateDetail() {
   const { id } = useParams<{ id: string }>();
@@ -114,7 +185,7 @@ export default function CandidateDetail() {
   const [updating, setUpdating] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
-  const [questionsExpanded, setQuestionsExpanded] = useState(false);
+  const [deepAnalysisExpanded, setDeepAnalysisExpanded] = useState(false);
 
   const fetchCandidate = useCallback(async (silent = false) => {
     if (!id) return;
@@ -149,6 +220,7 @@ export default function CandidateDetail() {
     try {
       const data = await analyzeCandidate(id, selectedModel);
       setCandidate(data.candidate);
+      setDeepAnalysisExpanded(true);
       toast.success(`Analysis complete — Score: ${data.candidate.aiScore}/100`);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Analysis failed');
@@ -178,9 +250,20 @@ export default function CandidateDetail() {
     </Layout>
   );
 
+  const hasMatchData = !!candidate.matchHiringSignal;
   const hasAdvancedAnalysis = !!candidate.aiVerdict;
-  const vConfig = candidate.aiVerdict ? verdictConfig[candidate.aiVerdict] : null;
+  const matchSignal = candidate.matchHiringSignal ? signalConfig[candidate.matchHiringSignal] : null;
+  const aiVConfig = candidate.aiVerdict ? signalConfig[candidate.aiVerdict] : null;
+  const breakdown = candidate.matchScoreBreakdown;
   const dims = candidate.aiDimensionScores;
+  const isReviewed = candidate.status === 'reviewed';
+
+  // Determine job weights for breakdown bar max values
+  const jobWeights = {
+    skillWeight: candidate.jobId?.skillWeight || 50,
+    experienceWeight: candidate.jobId?.experienceWeight || 30,
+    roleFitWeight: candidate.jobId?.roleFitWeight || 20,
+  };
 
   return (
     <Layout title="Candidate Detail">
@@ -220,297 +303,370 @@ export default function CandidateDetail() {
             </div>
           </Card>
 
-          {/* ══════════ VERDICT BANNER ══════════ */}
-          {hasAdvancedAnalysis && vConfig && (
-            <div className={`rounded-2xl border ${vConfig.border} ${vConfig.bg} p-5 transition-all`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <span className="text-2xl">{vConfig.icon}</span>
-                    <h3 className={`text-lg font-bold ${vConfig.color}`}>
-                      Verdict: {vConfig.label}
-                    </h3>
-                  </div>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                    {candidate.aiVerdictSummary}
-                  </p>
-                </div>
-                {/* Confidence meter */}
-                <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                  <div className="relative w-14 h-14">
-                    <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                      <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="4" className="text-slate-200 dark:text-slate-700" />
-                      <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray={`${(candidate.aiVerdictConfidence / 100) * 150.8} 150.8`} strokeLinecap="round" className={vConfig.textColor} />
-                    </svg>
-                    <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${vConfig.textColor}`}>
-                      {candidate.aiVerdictConfidence}%
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-500 uppercase tracking-wider font-medium">Confidence</span>
-                </div>
+          {/* ══════════════════════════════════════════════════════════════════════
+              SECTION 1: N8N MATCH DATA (Primary Decision View)
+              ══════════════════════════════════════════════════════════════════════ */}
+
+          {/* ── Manipulation Warning ── */}
+          {candidate.matchFlaggedManipulation && (
+            <div className="rounded-2xl border border-red-500/40 bg-gradient-to-r from-red-500/15 to-rose-500/10 p-4 flex items-start gap-3">
+              <AlertOctagon size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-bold text-red-700 dark:text-red-300">⚠️ Manipulation Detected</h4>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">This resume contained prompt injection or keyword stuffing attempts. The score reflects genuine content only.</p>
               </div>
             </div>
           )}
 
-          {/* ══════════ AI ANALYSIS / MATCH REASON (fallback) ══════════ */}
-          {!hasAdvancedAnalysis && (
-            <Card>
-              <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                <Sparkles size={16} className="text-primary" />
-                {candidate.aiAnalysis ? 'AI Analysis' : 'Job Match Reason'}
-              </h3>
-
-              {candidate.aiAnalysis ? (
-                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiAnalysis}</p>
-              ) : candidate.reason ? (
-                <div>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-4">
-                    {candidate.reason}
+          {/* ── Match Hiring Signal Banner ── */}
+          {hasMatchData && matchSignal && (
+            <div className={`rounded-2xl border ${matchSignal.border} ${matchSignal.bg} p-5 transition-all`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="text-2xl">{matchSignal.icon}</span>
+                    <h3 className={`text-lg font-bold ${matchSignal.color}`}>
+                      ATS Signal: {matchSignal.label}
+                    </h3>
+                  </div>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                    {candidate.matchOneLineVerdict}
                   </p>
-                  <div className="flex items-center justify-center gap-2 text-slate-600 dark:text-slate-500 text-xs mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                    <Sparkles size={14} className="text-slate-500" />
-                    <span>Click "Run AI Analysis" for a deeper evaluation</span>
-                  </div>
                 </div>
-              ) : (
-                <div className="text-center py-6">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-3 border border-violet-500/15">
-                    <Sparkles size={24} className="text-violet-500 dark:text-violet-400" />
+                {/* Match Score Circle */}
+                {candidate.matchScore != null && (
+                  <div className="flex-shrink-0">
+                    <ScoreCircle score={candidate.matchScore} size="md" />
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">No analysis available</p>
-                  <p className="text-slate-500 dark:text-slate-600 text-xs mt-1">Click "Run AI Analysis" to begin</p>
-                </div>
-              )}
-            </Card>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* ══════════ DIMENSION SCORES ══════════ */}
-          {hasAdvancedAnalysis && dims && (
+          {/* ── Match Score Breakdown ── */}
+          {breakdown && (
             <Card>
               <h3 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
-                <Target size={16} className="text-primary" /> Evaluation Breakdown
+                <BarChart3 size={16} className="text-primary" /> Score Breakdown
               </h3>
               <div className="flex flex-col gap-3.5">
-                <DimensionBar label="Skill Match" score={dims.skillMatch} icon={<Zap size={14} />} />
-                <DimensionBar label="Experience Relevance" score={dims.experienceRelevance} icon={<TrendingUp size={14} />} />
-                <DimensionBar label="Education Fit" score={dims.educationFit} icon={<GraduationCap size={14} />} />
-                <DimensionBar label="Project Quality" score={dims.projectQuality} icon={<FolderOpen size={14} />} />
-                <DimensionBar label="Communication Clarity" score={dims.communicationClarity} icon={<MessageSquare size={14} />} />
+                <BreakdownBar
+                  label="Skill Coverage"
+                  score={breakdown.skillCoverage || 0}
+                  maxScore={jobWeights.skillWeight}
+                  icon={<Zap size={14} />}
+                />
+                <BreakdownBar
+                  label="Experience Relevance"
+                  score={breakdown.experienceRelevance || 0}
+                  maxScore={jobWeights.experienceWeight}
+                  icon={<TrendingUp size={14} />}
+                />
+                <BreakdownBar
+                  label="Role Fit"
+                  score={breakdown.roleFit || 0}
+                  maxScore={jobWeights.roleFitWeight}
+                  icon={<Target size={14} />}
+                />
+              </div>
+              {/* Total */}
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/50 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Total Match Score</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">{candidate.matchScore}/100</span>
               </div>
             </Card>
           )}
 
-          {/* ══════════ RED FLAGS & GREEN FLAGS ══════════ */}
-          {hasAdvancedAnalysis && (candidate.aiRedFlags?.length > 0 || candidate.aiGreenFlags?.length > 0) && (
+          {/* ── Match Strengths & Concerns ── */}
+          {(candidate.matchStrengths?.length > 0 || candidate.matchConcerns?.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Green Flags */}
-              {candidate.aiGreenFlags?.length > 0 && (
+              {candidate.matchStrengths?.length > 0 && (
                 <Card>
                   <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                    <Zap size={16} className="text-emerald-500" /> Green Flags
-                    <span className="text-xs font-normal text-slate-500">({candidate.aiGreenFlags.length})</span>
+                    <ShieldCheck size={16} className="text-emerald-500" /> Strengths
+                    <span className="text-xs font-normal text-slate-500">({candidate.matchStrengths.length})</span>
                   </h3>
-                  <ul className="flex flex-col gap-2.5">
-                    {candidate.aiGreenFlags.map((f: any, i: number) => (
-                      <li key={i} className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/10">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-emerald-500 text-xs">✦</span>
-                          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{f.flag}</span>
-                        </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pl-5">{f.detail}</p>
+                  <ul className="flex flex-col gap-2">
+                    {candidate.matchStrengths.map((s: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                        <span className="text-emerald-500 mt-0.5 text-xs flex-shrink-0">✓</span>
+                        <span className="leading-relaxed">{s}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
               )}
-
-              {/* Red Flags */}
-              {candidate.aiRedFlags?.length > 0 && (
+              {candidate.matchConcerns?.length > 0 && (
                 <Card>
                   <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                    <Flag size={16} className="text-red-500" /> Red Flags
-                    <span className="text-xs font-normal text-slate-500">({candidate.aiRedFlags.length})</span>
+                    <AlertTriangle size={16} className="text-amber-500" /> Concerns
+                    <span className="text-xs font-normal text-slate-500">({candidate.matchConcerns.length})</span>
                   </h3>
-                  <ul className="flex flex-col gap-2.5">
-                    {candidate.aiRedFlags.map((f: any, i: number) => {
-                      const sev = severityConfig[f.severity] || severityConfig.minor;
-                      return (
-                        <li key={i} className="bg-red-500/5 rounded-xl p-3 border border-red-500/10">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`w-2 h-2 rounded-full ${sev.dot} flex-shrink-0`} />
-                            <span className="text-sm font-medium text-red-700 dark:text-red-300 flex-1">{f.flag}</span>
-                            <span className={`text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-md ${sev.bg}`}>{sev.label}</span>
-                          </div>
-                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pl-4">{f.detail}</p>
-                        </li>
-                      );
-                    })}
+                  <ul className="flex flex-col gap-2">
+                    {candidate.matchConcerns.map((c: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                        <span className="text-amber-500 mt-0.5 text-xs flex-shrink-0">⚠</span>
+                        <span className="leading-relaxed">{c}</span>
+                      </li>
+                    ))}
                   </ul>
                 </Card>
               )}
             </div>
           )}
 
-          {/* ══════════ STRENGTHS & WEAKNESSES (fallback for non-advanced) ══════════ */}
-          {!hasAdvancedAnalysis && candidate.aiStrengths?.length > 0 && (
+          {/* ── Match Analysis (reason text) ── */}
+          {candidate.reason && !hasMatchData && (
             <Card>
               <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                <ShieldCheck size={16} className="text-emerald-500 dark:text-emerald-400" /> Strengths
+                <Sparkles size={16} className="text-primary" /> Match Analysis
               </h3>
-              <ul className="flex flex-col gap-2">
-                {candidate.aiStrengths.map((s: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                    <span className="text-emerald-500 dark:text-emerald-400 mt-0.5 text-xs">✓</span>
-                    <span className="leading-relaxed">{s}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.reason}</p>
             </Card>
           )}
 
-          {!hasAdvancedAnalysis && candidate.aiWeaknesses?.length > 0 && (
+          {/* ── Experience Summary ── */}
+          {candidate.matchExperienceSummary && (
             <Card>
-              <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                <AlertTriangle size={16} className="text-amber-500 dark:text-amber-400" /> Areas of Concern
+              <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
+                <Briefcase size={16} className="text-slate-500" /> Experience Summary
               </h3>
-              <ul className="flex flex-col gap-2">
-                {candidate.aiWeaknesses.map((w: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                    <span className="text-red-500 dark:text-red-400 mt-0.5 text-xs">✗</span>
-                    <span className="leading-relaxed">{w}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.matchExperienceSummary}</p>
             </Card>
           )}
 
-          {/* ══════════ SKILL GAP ANALYSIS ══════════ */}
-          {hasAdvancedAnalysis && candidate.aiSkillGapAnalysis?.length > 0 && (
-            <Card>
-              <h3 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
-                <CircleDot size={16} className="text-primary" /> Skill Gap Analysis
-              </h3>
-              <div className="overflow-x-auto -mx-1">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-700/50">
-                      <th className="text-left text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wider py-2 px-2">Skill</th>
-                      <th className="text-center text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wider py-2 px-2">Candidate</th>
-                      <th className="text-center text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wider py-2 px-2">Required</th>
-                      <th className="text-center text-xs font-semibold text-slate-500 dark:text-slate-500 uppercase tracking-wider py-2 px-2">Gap</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {candidate.aiSkillGapAnalysis.map((item: any, i: number) => {
-                      const cVal = levelValue[item.candidateLevel] ?? 0;
-                      const rVal = levelValue[item.requiredLevel] ?? 0;
-                      const gap = cVal - rVal;
-                      const gapColor = gap >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
-                      const gapLabel = gap > 0 ? `+${gap}` : gap === 0 ? '✓' : `${gap}`;
+          {/* ── Match Interview Questions ── */}
+          {candidate.matchInterviewQuestions?.length > 0 && (
+            <InterviewQuestionsPanel questions={candidate.matchInterviewQuestions} defaultExpanded={false} />
+          )}
 
-                      return (
-                        <tr key={i} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0">
-                          <td className="py-2.5 px-2 text-slate-700 dark:text-slate-300 font-medium">{item.skill}</td>
-                          <td className="py-2.5 px-2">
-                            <div className="flex flex-col items-center gap-1">
-                              <SkillLevelDots level={item.candidateLevel} />
-                              <span className="text-[10px] text-slate-500">{levelLabel[item.candidateLevel] || item.candidateLevel}</span>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-2">
-                            <div className="flex flex-col items-center gap-1">
-                              <SkillLevelDots level={item.requiredLevel} />
-                              <span className="text-[10px] text-slate-500">{levelLabel[item.requiredLevel] || item.requiredLevel}</span>
-                            </div>
-                          </td>
-                          <td className={`py-2.5 px-2 text-center font-bold text-xs ${gapColor}`}>
-                            {gapLabel}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          {/* ── Improvement Tips ── */}
+          {(candidate.status === 'reviewed' || candidate.status === 'rejected') && (candidate.matchImprove || candidate.improve) && (
+            <Card>
+              <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
+                <Lightbulb size={16} className="text-amber-500" /> Improvement Tips
+              </h3>
+              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed italic border-l-2 border-amber-400/30 pl-3">
+                {candidate.matchImprove || candidate.improve}
+              </p>
             </Card>
           )}
 
-          {/* ══════════ INTERVIEW QUESTIONS ══════════ */}
-          {hasAdvancedAnalysis && candidate.aiInterviewQuestions?.length > 0 && (
-            <Card>
+          {/* ══════════════════════════════════════════════════════════════════════
+              SECTION 2: DEEP AI ANALYSIS (On-Demand, Collapsible)
+              ══════════════════════════════════════════════════════════════════════ */}
+
+          {/* Deep Analysis Toggle Header */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-slate-200 dark:border-slate-700/50" />
+            </div>
+            <div className="relative flex justify-center">
               <button
-                onClick={() => setQuestionsExpanded(!questionsExpanded)}
-                className="w-full flex items-center justify-between group"
+                onClick={() => setDeepAnalysisExpanded(!deepAnalysisExpanded)}
+                className="bg-white dark:bg-slate-900 px-4 py-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 hover:text-primary transition-colors rounded-lg border border-slate-200 dark:border-slate-700"
               >
-                <h3 className="text-slate-900 dark:text-white font-semibold flex items-center gap-2">
-                  <HelpCircle size={16} className="text-violet-500" /> Suggested Interview Questions
-                  <span className="text-xs font-normal text-slate-500">({candidate.aiInterviewQuestions.length})</span>
-                </h3>
-                {questionsExpanded
-                  ? <ChevronUp size={18} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
-                  : <ChevronDown size={18} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
-                }
+                <Microscope size={14} />
+                Deep AI Analysis {hasAdvancedAnalysis ? '(Complete)' : '(On-Demand)'}
+                {deepAnalysisExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </button>
+            </div>
+          </div>
 
-              {questionsExpanded && (
-                <ul className="flex flex-col gap-3 mt-4">
-                  {candidate.aiInterviewQuestions.map((q: any, i: number) => (
-                    <li key={i} className="bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3.5 border border-slate-200 dark:border-slate-700/40">
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-relaxed flex-1">
-                          <span className="text-slate-400 dark:text-slate-600 mr-1.5">Q{i + 1}.</span>
-                          {q.question}
-                        </p>
-                        <CopyButton text={q.question} />
-                      </div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        {q.area && (
-                          <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md border ${areaColors[q.area] || areaColors.technical}`}>
-                            {q.area}
-                          </span>
-                        )}
-                        <span className="text-xs text-slate-500 dark:text-slate-500 italic">{q.rationale}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+          {deepAnalysisExpanded && (
+            <div className="flex flex-col gap-5">
+              {/* Show prompt to run analysis if not yet done */}
+              {!hasAdvancedAnalysis && !candidate.aiScore && (
+                <div className="text-center py-8 bg-slate-50 dark:bg-white/5 rounded-2xl border border-dashed border-slate-200 dark:border-white/10">
+                  <Microscope size={28} className="mx-auto mb-3 text-slate-400" />
+                  <p className="text-slate-600 dark:text-slate-400 text-sm font-medium">No deep analysis yet</p>
+                  <p className="text-slate-500 dark:text-slate-600 text-xs mt-1 max-w-xs mx-auto">
+                    {isReviewed
+                      ? 'This candidate is borderline — run a deep AI analysis to get detailed insights'
+                      : 'Use the actions panel to run a deep AI analysis if needed'}
+                  </p>
+                </div>
               )}
-            </Card>
-          )}
 
-          {/* ══════════ CULTURE FIT & COMPARATIVE NOTES ══════════ */}
-          {hasAdvancedAnalysis && (candidate.aiCultureFitNotes || candidate.aiComparativeNotes) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {candidate.aiCultureFitNotes && (
+              {/* AI Verdict Banner */}
+              {hasAdvancedAnalysis && aiVConfig && (
+                <div className={`rounded-2xl border ${aiVConfig.border} ${aiVConfig.bg} p-5 transition-all`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <span className="text-2xl">{aiVConfig.icon}</span>
+                        <h3 className={`text-lg font-bold ${aiVConfig.color}`}>
+                          AI Verdict: {aiVConfig.label}
+                        </h3>
+                      </div>
+                      <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiVerdictSummary}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                      <div className="relative w-14 h-14">
+                        <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
+                          <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="4" className="text-slate-200 dark:text-slate-700" />
+                          <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="4" strokeDasharray={`${(candidate.aiVerdictConfidence / 100) * 150.8} 150.8`} strokeLinecap="round" className={aiVConfig.textColor} />
+                        </svg>
+                        <span className={`absolute inset-0 flex items-center justify-center text-xs font-bold ${aiVConfig.textColor}`}>{candidate.aiVerdictConfidence}%</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Confidence</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Dimension Scores */}
+              {hasAdvancedAnalysis && dims && (
                 <Card>
-                  <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
-                    <Users size={16} className="text-cyan-500" /> Culture & Soft Skills
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
+                    <Target size={16} className="text-primary" /> Evaluation Breakdown
                   </h3>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiCultureFitNotes}</p>
+                  <div className="flex flex-col gap-3.5">
+                    <DimensionBar label="Skill Match" score={dims.skillMatch} icon={<Zap size={14} />} />
+                    <DimensionBar label="Experience Relevance" score={dims.experienceRelevance} icon={<TrendingUp size={14} />} />
+                    <DimensionBar label="Education Fit" score={dims.educationFit} icon={<GraduationCap size={14} />} />
+                    <DimensionBar label="Project Quality" score={dims.projectQuality} icon={<FolderOpen size={14} />} />
+                    <DimensionBar label="Communication Clarity" score={dims.communicationClarity} icon={<MessageSquare size={14} />} />
+                  </div>
                 </Card>
               )}
-              {candidate.aiComparativeNotes && (
+
+              {/* AI Red/Green Flags */}
+              {hasAdvancedAnalysis && (candidate.aiRedFlags?.length > 0 || candidate.aiGreenFlags?.length > 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {candidate.aiGreenFlags?.length > 0 && (
+                    <Card>
+                      <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
+                        <Zap size={16} className="text-emerald-500" /> Green Flags
+                      </h3>
+                      <ul className="flex flex-col gap-2.5">
+                        {candidate.aiGreenFlags.map((f: any, i: number) => (
+                          <li key={i} className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/10">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-emerald-500 text-xs">✦</span>
+                              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{f.flag}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pl-5">{f.detail}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </Card>
+                  )}
+                  {candidate.aiRedFlags?.length > 0 && (
+                    <Card>
+                      <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
+                        <Flag size={16} className="text-red-500" /> Red Flags
+                      </h3>
+                      <ul className="flex flex-col gap-2.5">
+                        {candidate.aiRedFlags.map((f: any, i: number) => {
+                          const sev = severityConfig[f.severity] || severityConfig.minor;
+                          return (
+                            <li key={i} className="bg-red-500/5 rounded-xl p-3 border border-red-500/10">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className={`w-2 h-2 rounded-full ${sev.dot} flex-shrink-0`} />
+                                <span className="text-sm font-medium text-red-700 dark:text-red-300 flex-1">{f.flag}</span>
+                                <span className={`text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded-md ${sev.bg}`}>{sev.label}</span>
+                              </div>
+                              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pl-4">{f.detail}</p>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {/* AI Skill Gap Analysis */}
+              {hasAdvancedAnalysis && candidate.aiSkillGapAnalysis?.length > 0 && (
                 <Card>
-                  <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
-                    <TrendingUp size={16} className="text-indigo-500" /> Comparative Assessment
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
+                    <CircleDot size={16} className="text-primary" /> Skill Gap Analysis
                   </h3>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiComparativeNotes}</p>
+                  <div className="overflow-x-auto -mx-1">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-200 dark:border-slate-700/50">
+                          <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider py-2 px-2">Skill</th>
+                          <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider py-2 px-2">Candidate</th>
+                          <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider py-2 px-2">Required</th>
+                          <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider py-2 px-2">Gap</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {candidate.aiSkillGapAnalysis.map((item: any, i: number) => {
+                          const cVal = levelValue[item.candidateLevel] ?? 0;
+                          const rVal = levelValue[item.requiredLevel] ?? 0;
+                          const gap = cVal - rVal;
+                          const gapColor = gap >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400';
+                          const gapLabel = gap > 0 ? `+${gap}` : gap === 0 ? '✓' : `${gap}`;
+                          return (
+                            <tr key={i} className="border-b border-slate-100 dark:border-slate-800/50 last:border-0">
+                              <td className="py-2.5 px-2 text-slate-700 dark:text-slate-300 font-medium">{item.skill}</td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex flex-col items-center gap-1">
+                                  <SkillLevelDots level={item.candidateLevel} />
+                                  <span className="text-[10px] text-slate-500">{levelLabel[item.candidateLevel] || item.candidateLevel}</span>
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-2">
+                                <div className="flex flex-col items-center gap-1">
+                                  <SkillLevelDots level={item.requiredLevel} />
+                                  <span className="text-[10px] text-slate-500">{levelLabel[item.requiredLevel] || item.requiredLevel}</span>
+                                </div>
+                              </td>
+                              <td className={`py-2.5 px-2 text-center font-bold text-xs ${gapColor}`}>{gapLabel}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              )}
+
+              {/* AI Interview Questions */}
+              {hasAdvancedAnalysis && candidate.aiInterviewQuestions?.length > 0 && (
+                <InterviewQuestionsPanel questions={candidate.aiInterviewQuestions} defaultExpanded={true} />
+              )}
+
+              {/* AI Culture Fit & Comparative Notes */}
+              {hasAdvancedAnalysis && (candidate.aiCultureFitNotes || candidate.aiComparativeNotes) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {candidate.aiCultureFitNotes && (
+                    <Card>
+                      <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
+                        <Users size={16} className="text-cyan-500" /> Culture & Soft Skills
+                      </h3>
+                      <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiCultureFitNotes}</p>
+                    </Card>
+                  )}
+                  {candidate.aiComparativeNotes && (
+                    <Card>
+                      <h3 className="text-slate-900 dark:text-white font-semibold mb-2 flex items-center gap-2">
+                        <TrendingUp size={16} className="text-indigo-500" /> Comparative Assessment
+                      </h3>
+                      <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiComparativeNotes}</p>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {/* Legacy: plain AI analysis text (for candidates analyzed before the upgrade) */}
+              {!hasAdvancedAnalysis && candidate.aiAnalysis && (
+                <Card>
+                  <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
+                    <Brain size={16} className="text-blue-500" /> AI Analysis
+                  </h3>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{candidate.aiAnalysis}</p>
                 </Card>
               )}
             </div>
           )}
 
-          {/* ══════════ AI REASONING (fallback) ══════════ */}
-          {!hasAdvancedAnalysis && candidate.aiReasoning && (
-            <Card>
-              <h3 className="text-slate-900 dark:text-white font-semibold mb-3 flex items-center gap-2">
-                <Brain size={16} className="text-blue-500 dark:text-blue-400" /> AI Reasoning
-              </h3>
-              <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed italic border-l-2 border-primary/30 pl-3">
-                {candidate.aiReasoning}
-              </p>
-            </Card>
-          )}
+          {/* ══════════════════════════════════════════════════════════════════════
+              SECTION 3: STATIC INFO
+              ══════════════════════════════════════════════════════════════════════ */}
 
           {/* Education */}
           {candidate.education && (
@@ -538,10 +694,10 @@ export default function CandidateDetail() {
         {/* Right — Score + Skills + Actions */}
         <div className="flex flex-col gap-5">
 
-          {/* Dynamic Score Card: AI Score or Match Score */}
+          {/* Dynamic Score Card */}
           <Card>
             <h3 className="text-slate-900 dark:text-white font-semibold mb-4">
-              {candidate.aiScore != null ? 'AI Score' : 'Match Score'}
+              {candidate.aiScore != null ? 'AI Score' : candidate.matchScore != null ? 'Match Score' : 'Score'}
             </h3>
 
             {candidate.aiScore != null ? (
@@ -558,13 +714,18 @@ export default function CandidateDetail() {
                 </p>
               </>
             ) : candidate.matchScore != null ? (
-              <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-2xl border border-emerald-500/20 shadow-inner">
-                <div className="mb-4">
+              <>
+                <div className="flex items-center justify-center mb-4">
                   <ScoreCircle score={candidate.matchScore} size="lg" />
                 </div>
-                <p className="text-emerald-600 dark:text-emerald-400 font-medium text-sm tracking-wide uppercase">Basic Match</p>
-                <p className="text-slate-500 dark:text-slate-600 text-xs mt-1">(AI Analysis pending)</p>
-              </div>
+                <ScoreBar score={candidate.matchScore} />
+                <p className={`text-center text-sm font-medium mt-3 ${candidate.matchScore >= 90 ? 'text-emerald-600 dark:text-emerald-400'
+                  : candidate.matchScore >= 70 ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-red-600 dark:text-red-400'
+                  }`}>
+                  {candidate.matchScore >= 90 ? 'Shortlisted' : candidate.matchScore >= 70 ? 'Under Review' : 'Below Threshold'}
+                </p>
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/5 border-dashed">
                 <ScoreCircle score={null as any} size="md" />
@@ -579,7 +740,7 @@ export default function CandidateDetail() {
               Skills
               <span className="text-slate-500 dark:text-slate-600 text-xs font-normal ml-2">
                 {(candidate.matchedSkills?.length > 0 || candidate.missingSkills?.length > 0)
-                  ? `(${candidate.matchedSkills?.length || 0} matched and ${candidate.missingSkills?.length || 0} missing)`
+                  ? `(${candidate.matchedSkills?.length || 0} matched, ${candidate.missingSkills?.length || 0} missing)`
                   : `(${candidate.skills?.length || 0} found)`}
               </span>
             </h3>
@@ -613,10 +774,7 @@ export default function CandidateDetail() {
             ) : candidate.skills?.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {candidate.skills.map((skill: string) => (
-                  <span
-                    key={skill}
-                    className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5"
-                  >
+                  <span key={skill} className="text-xs bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">
                     {skill}
                   </span>
                 ))}
@@ -645,16 +803,23 @@ export default function CandidateDetail() {
                 </select>
               </div>
               <Button
-                variant="secondary"
+                variant={isReviewed ? 'primary' : 'ghost'}
                 className="w-full justify-center"
                 disabled={analyzing || !!candidate.aiScore}
                 onClick={handleAnalyze}
               >
-                {analyzing ? '🤖 Analyzing...'
+                {analyzing ? '🔬 Analyzing...'
                   : !candidate.rawText ? '⚠️ No Resume Text'
-                    : candidate.aiScore ? '✅ Already Analyzed'
-                      : '🤖 Run AI Analysis'}
+                    : candidate.aiScore ? '✅ Deep Analysis Done'
+                      : isReviewed ? '🔬 Run Deep AI Analysis'
+                        : '🔬 Run Deep AI Analysis'}
               </Button>
+              {isReviewed && !candidate.aiScore && (
+                <p className="text-xs text-center text-slate-500 dark:text-slate-500 -mt-0.5">
+                  Recommended for borderline candidates
+                </p>
+              )}
+              <div className="border-t border-slate-200 dark:border-slate-700/50 my-1" />
               <Button
                 variant="primary"
                 className="w-full justify-center"

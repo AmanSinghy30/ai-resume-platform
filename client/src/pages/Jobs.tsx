@@ -55,6 +55,8 @@ export default function Jobs() {
   const [experienceWeight, setExperienceWeight] = useState(30);
   const [roleFitWeight, setRoleFitWeight] = useState(20);
   const [experience, setExperience] = useState('');
+  const [minShortlistedScore, setMinShortlistedScore] = useState(90);
+  const [minReviewedScore, setMinReviewedScore] = useState(70);
 
   const { errors, validate, clearError } = useFormValidation({
     title: { required: true },
@@ -106,6 +108,11 @@ export default function Jobs() {
       return;
     }
 
+    if (minReviewedScore >= minShortlistedScore) {
+      toast.error('Shortlisted score threshold must be greater than Reviewed score threshold');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await createJob({
@@ -123,6 +130,8 @@ export default function Jobs() {
         experienceWeight,
         roleFitWeight,
         experienceRequired: Number(experience) || 0,
+        minShortlistedScore,
+        minReviewedScore,
       });
       toast.success('Job created!');
       setShowModal(false);
@@ -144,6 +153,8 @@ export default function Jobs() {
     setExperienceWeight(30);
     setRoleFitWeight(20);
     setExperience('');
+    setMinShortlistedScore(90);
+    setMinReviewedScore(70);
   };
 
   const handleCloseModal = () => {
@@ -574,6 +585,43 @@ export default function Jobs() {
                   <span className="text-xs text-slate-500 dark:text-slate-400">Total: {skillWeight + experienceWeight + roleFitWeight} / 100</span>
                   {skillWeight + experienceWeight + roleFitWeight !== 100 && (
                     <span className="text-xs text-red-500">Must equal 100</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Match Score Thresholds */}
+              <div className="pt-2 border-t border-slate-200 dark:border-white/5 mt-2">
+                <label className="text-sm text-slate-700 dark:text-slate-400 mb-3 block font-medium">
+                  Match Score Thresholds
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Shortlist Score (&ge;)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={minShortlistedScore}
+                      onChange={e => setMinShortlistedScore(Number(e.target.value))}
+                      className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm text-center"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Review Score (&ge;)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={minReviewedScore}
+                      onChange={e => setMinReviewedScore(Number(e.target.value))}
+                      className="w-full input-glass text-slate-900 dark:text-white rounded-xl px-3 py-2 text-sm text-center"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">Rejected &lt; {minReviewedScore}</span>
+                  {minReviewedScore >= minShortlistedScore && (
+                    <span className="text-xs text-red-500">Review must be &lt; Shortlist</span>
                   )}
                 </div>
               </div>

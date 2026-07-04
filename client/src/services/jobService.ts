@@ -19,6 +19,8 @@ export const createJob = async (data: {
   experienceWeight?: number;
   roleFitWeight?: number;
   experienceRequired: number;
+  minShortlistedScore?: number;
+  minReviewedScore?: number;
 }) => {
   const res = await api.post('/jobs', data);
   return res.data;

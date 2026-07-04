@@ -133,6 +133,49 @@ const candidateSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+
+  // ── Enhanced Match Data (from n8n workflow) ──
+  matchScoreBreakdown: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+  },
+  matchExperienceSummary: {
+    type: String,
+    default: '',
+  },
+  matchTotalExperienceYears: {
+    type: Number,
+    default: null,
+  },
+  matchStrengths: {
+    type: [String],
+    default: [],
+  },
+  matchConcerns: {
+    type: [String],
+    default: [],
+  },
+  matchHiringSignal: {
+    type: String,
+    enum: ['STRONG_YES', 'YES', 'MAYBE', 'NO', 'STRONG_NO', '', null],
+    default: null,
+  },
+  matchOneLineVerdict: {
+    type: String,
+    default: '',
+  },
+  matchInterviewQuestions: {
+    type: [mongoose.Schema.Types.Mixed],
+    default: [],
+  },
+  matchImprove: {
+    type: String,
+    default: '',
+  },
+  matchFlaggedManipulation: {
+    type: Boolean,
+    default: false,
+  },
   status: {
     type: String,
     enum: ['new', 'reviewed', 'shortlisted', 'rejected'],

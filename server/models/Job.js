@@ -34,6 +34,14 @@ const jobSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  minShortlistedScore: {
+    type: Number,
+    default: 90,
+  },
+  minReviewedScore: {
+    type: Number,
+    default: 70,
+  },
   createdBy: {
   type: mongoose.Schema.Types.ObjectId,
   ref: 'User',

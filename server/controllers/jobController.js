@@ -5,7 +5,8 @@ const createJob = async (req, res) => {
   try {
     const { 
       title, description, requiredSkills, experienceRequired,
-      niceToHaveSkills, skillWeight, experienceWeight, roleFitWeight
+      niceToHaveSkills, skillWeight, experienceWeight, roleFitWeight,
+      minShortlistedScore, minReviewedScore
     } = req.body;
 
     if (!title || !description) {
@@ -37,6 +38,8 @@ const createJob = async (req, res) => {
       experienceWeight: ew,
       roleFitWeight: rw,
       experienceRequired: experienceRequired || 0,
+      minShortlistedScore: minShortlistedScore || 90,
+      minReviewedScore: minReviewedScore || 70,
       createdBy: req.user.id,
     });
 
