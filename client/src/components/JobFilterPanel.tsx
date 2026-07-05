@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Filter, X, ChevronDown, Check } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import Button from './Button';
 
 export type JobFilters = {

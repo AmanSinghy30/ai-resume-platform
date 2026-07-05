@@ -26,6 +26,11 @@ export const createJob = async (data: {
   return res.data;
 };
 
+export const updateJob = async (id: string, data: any) => {
+  const res = await api.put(`/jobs/${id}`, data);
+  return res.data;
+};
+
 export const deleteJob = async (id: string) => {
   const res = await api.delete(`/jobs/${id}`);
   return res.data;

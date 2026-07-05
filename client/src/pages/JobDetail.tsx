@@ -7,9 +7,10 @@ import Button from '../components/Button';
 import Spinner from '../components/Spinner';
 import ScoreBar from '../components/ScoreBar';
 import ScoreCircle from '../components/ScoreCircle';
-import { getJobById, matchCandidates, scoreAllForJob } from '../services/jobService';
+import { getJobById, matchCandidates, scoreAllForJob, updateJob } from '../services/jobService';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Brain, Users, Trophy, Eye, CheckSquare, Square } from 'lucide-react';
+import { ArrowLeft, Brain, Users, Trophy, Eye, CheckSquare, Square, Edit3 } from 'lucide-react';
+import JobModal from '../components/JobModal';
 
 type RankedCandidate = {
   candidateId: string;
@@ -34,6 +35,7 @@ export default function JobDetail() {
   const [matching, setMatching] = useState(false);
   const [scoring, setScoring] = useState(false);
   const [view, setView] = useState<'candidates' | 'ranked'>('candidates');
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Selected candidate IDs
   const [selected, setSelected] = useState<string[]>([]);
@@ -104,6 +106,18 @@ export default function JobDetail() {
     }
   };
 
+  const handleUpdateJob = async (jobData: any) => {
+    if (!id) return;
+    try {
+      const data = await updateJob(id, jobData);
+      toast.success('Job updated successfully');
+      setJob(data.job);
+      setShowEditModal(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update job');
+    }
+  };
+
   const handleMatch = async () => {
     if (!id) return;
     setMatching(true);
@@ -155,7 +169,16 @@ export default function JobDetail() {
         <div className="flex flex-col gap-5">
 
           <Card>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">{job.title}</h2>
+            <div className="flex items-start justify-between mb-2">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight pr-4">{job.title}</h2>
+              <button 
+                onClick={() => setShowEditModal(true)}
+                className="text-slate-400 hover:text-primary transition-colors flex-shrink-0 mt-1"
+                title="Edit Job"
+              >
+                <Edit3 size={16} />
+              </button>
+            </div>
             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">{job.description}</p>
 
             <div className="flex flex-wrap gap-2 mb-6">
@@ -445,6 +468,15 @@ export default function JobDetail() {
           )}
         </div>
       </div>
+
+      <JobModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleUpdateJob}
+        initialData={job}
+        title="Edit Job"
+        submitLabel="Save Changes"
+      />
     </Layout>
   );
 }

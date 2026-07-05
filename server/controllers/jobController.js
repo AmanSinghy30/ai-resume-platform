@@ -112,10 +112,10 @@ const getJobById = async (req, res) => {
 const updateJob = async (req, res) => {
   try {
     const job = await Job.findOneAndUpdate(
-      { _id: req.params.id, createdBy: req.user.id },  // ✅
+      { _id: req.params.id, createdBy: req.user.id },
       req.body,
       { new: true }
-    );
+    ).populate('candidates');
     if (!job) return res.status(404).json({ success: false, message: 'Job not found' });
 
     await logActivity('job_updated', req.user.id, null, job._id, `Job updated: ${job.title}`);
